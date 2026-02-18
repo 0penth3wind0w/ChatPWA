@@ -1,0 +1,28 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply font-outfit text-base text-text-primary bg-bg-primary;
+  }
+}
+
+@layer components {
+  /* Button component */
+  .btn-primary {
+    @apply bg-forest-green text-white font-semibold rounded-md px-4 py-3 shadow-soft hover:bg-dark-green transition-colors;
+  }
+
+  /* Card component */
+  .card {
+    @apply bg-bg-surface rounded-lg shadow-soft p-5;
+  }
+
+  /* Input field */
+  .input-field {
+    @apply w-full h-12 bg-bg-elevated border border-border-subtle rounded-md px-4 text-base text-text-primary focus:border-forest-green focus:ring-2 focus:ring-forest-green focus:ring-opacity-20 outline-none transition-all;
+  }
+}
