@@ -1,13 +1,13 @@
 <svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <!-- Background with rounded corners for better iOS appearance -->
-  <rect width="512" height="512" rx="110" fill="#3D8A5A"/>
+  <!-- Background - Square with no rounded corners (iOS applies its own) -->
+  <rect width="512" height="512" fill="#3D8A5A"/>
 
-  <!-- Chat bubble icon - White, simplified and centered -->
-  <path d="M256 128C176.471 128 112 182.981 112 250.667C112 286.4 126.933 318.827 151.467 343.36C148.8 364.8 138.667 389.333 138.667 389.333C138.667 389.333 177.6 384 202.667 368C217.6 372.8 233.6 375.467 250.667 375.467C330.196 375.467 394.667 320.485 394.667 252.8C394.667 185.115 330.196 128 256 128Z"
+  <!-- Chat bubble icon - White, with more padding from edges -->
+  <path d="M256 148C186.144 148 129.333 196.294 129.333 254.667C129.333 286.293 142.507 315.093 164.267 336.853C161.92 355.733 152.917 377.067 152.917 377.067C152.917 377.067 187.307 372.053 209.707 358.4C223.147 362.667 237.867 365.067 253.333 365.067C323.189 365.067 380 316.773 380 258.4C380 200.027 323.189 148 256 148Z"
         fill="white"/>
 
-  <!-- Message dots inside bubble -->
-  <circle cx="218" cy="250" r="16" fill="#3D8A5A"/>
-  <circle cx="256" cy="250" r="16" fill="#3D8A5A"/>
-  <circle cx="294" cy="250" r="16" fill="#3D8A5A"/>
+  <!-- Message dots inside bubble - Larger and more visible -->
+  <circle cx="224" cy="256" r="18" fill="#3D8A5A"/>
+  <circle cx="256" cy="256" r="18" fill="#3D8A5A"/>
+  <circle cx="288" cy="256" r="18" fill="#3D8A5A"/>
 </svg>

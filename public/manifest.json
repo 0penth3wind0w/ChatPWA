@@ -5,8 +5,8 @@
   "theme_color": "#3D8A5A",
   "background_color": "#F5F4F1",
   "display": "standalone",
-  "start_url": "./",
-  "scope": "./",
+  "start_url": "/ChatPWA/",
+  "scope": "/ChatPWA/",
   "icons": [
     {
       "src": "./icons/icon-192.png",
