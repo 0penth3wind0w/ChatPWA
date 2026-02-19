@@ -16,6 +16,7 @@ const enableStreaming = ref(config.value.enableStreaming || false)
 const imageModel = ref(config.value.imageModel || 'dall-e-3')
 const imageSize = ref(config.value.imageSize || '1024x1024')
 const imageQuality = ref(config.value.imageQuality || 'standard')
+const systemPrompt = ref(config.value.systemPrompt || '')
 const errors = ref({})
 const testing = ref(false)
 
@@ -27,6 +28,7 @@ onMounted(() => {
   provider.value = config.value.provider || 'openai'
   chatPath.value = config.value.chatPath || '/chat/completions'
   enableStreaming.value = config.value.enableStreaming || false
+  systemPrompt.value = config.value.systemPrompt || ''
   imageModel.value = config.value.imageModel || 'dall-e-3'
   imageSize.value = config.value.imageSize || '1024x1024'
   imageQuality.value = config.value.imageQuality || 'standard'
@@ -43,6 +45,7 @@ const autoSave = () => {
       provider: provider.value,
       chatPath: chatPath.value,
       enableStreaming: enableStreaming.value,
+      systemPrompt: systemPrompt.value,
       imageModel: imageModel.value,
       imageSize: imageSize.value,
       imageQuality: imageQuality.value
@@ -51,7 +54,7 @@ const autoSave = () => {
 }
 
 // Watch all fields for changes
-watch([endpoint, model, token, provider, chatPath, enableStreaming, imageModel, imageSize, imageQuality], autoSave)
+watch([endpoint, model, token, provider, chatPath, enableStreaming, systemPrompt, imageModel, imageSize, imageQuality], autoSave)
 
 const isValid = computed(() => {
   return endpoint.value.trim() && model.value.trim() && token.value.trim()
@@ -221,6 +224,22 @@ const handleTest = async () => {
         />
         <p class="text-xs text-text-tertiary">
           /chat/completions for OpenAI, /messages for Anthropic, /models/{model}:generateContent for Gemini
+        </p>
+      </div>
+
+      <!-- System Prompt -->
+      <div class="w-full space-y-2">
+        <label class="text-xs font-medium text-text-tertiary">
+          System Prompt (Optional)
+        </label>
+        <textarea
+          v-model="systemPrompt"
+          placeholder="You are a helpful assistant..."
+          rows="3"
+          class="input-field text-sm resize-none py-3"
+        ></textarea>
+        <p class="text-xs text-text-tertiary">
+          Customize AI behavior and personality
         </p>
       </div>
 

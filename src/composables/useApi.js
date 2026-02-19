@@ -207,6 +207,20 @@ export function useApi() {
         provider = 'gemini'
       }
 
+      // Add system prompt if configured
+      let messagesWithSystem = [...messages]
+      if (config.systemPrompt && config.systemPrompt.trim()) {
+        // Check if there's already a system message
+        const hasSystemMessage = messages.some(m => m.role === 'system')
+        if (!hasSystemMessage) {
+          // Add system prompt as first message
+          messagesWithSystem = [
+            { role: 'system', content: config.systemPrompt.trim() },
+            ...messages
+          ]
+        }
+      }
+
       // Build endpoint - Gemini uses model name in path
       let endpoint
       if (provider === 'gemini') {
@@ -222,11 +236,11 @@ export function useApi() {
       // Build request body based on provider
       let requestBody
       if (provider === 'anthropic') {
-        requestBody = buildAnthropicRequest(messages, config)
+        requestBody = buildAnthropicRequest(messagesWithSystem, config)
       } else if (provider === 'gemini') {
-        requestBody = buildGeminiRequest(messages, config)
+        requestBody = buildGeminiRequest(messagesWithSystem, config)
       } else {
-        requestBody = buildOpenAIRequest(messages, config)
+        requestBody = buildOpenAIRequest(messagesWithSystem, config)
       }
 
       const response = await fetch(endpoint, {

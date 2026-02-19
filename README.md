@@ -250,4 +250,4 @@ MIT
 ## Acknowledgments
 
 Built with Vue 3, Vite, and Tailwind CSS.
-Co-Authored-By: Claude Opus 4.5
+Co-Authored-By: Claude Sonnet 4.5
