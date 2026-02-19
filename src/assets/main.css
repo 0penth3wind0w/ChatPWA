@@ -1,8 +1,53 @@
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap');
+@import "tailwindcss";
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@theme {
+  /* Colors - Backgrounds */
+  --color-bg-primary: #F5F4F1;
+  --color-bg-surface: #FFFFFF;
+  --color-bg-elevated: #FAFAF8;
+  --color-bg-muted: #EDECEA;
+
+  /* Colors - Text */
+  --color-text-primary: #1A1918;
+  --color-text-secondary: #6D6C6A;
+  --color-text-tertiary: #9C9B99;
+
+  /* Colors - Borders */
+  --color-border-subtle: #E5E4E1;
+  --color-border-strong: #D1D0CD;
+
+  /* Colors - Accents */
+  --color-forest-green: #3D8A5A;
+  --color-light-green: #C8F0D8;
+  --color-dark-green: #4D9B6A;
+  --color-warm-coral: #D89575;
+  --color-warm-red: #D08068;
+
+  /* Font Family */
+  --font-family-outfit: 'Outfit', sans-serif;
+
+  /* Font Sizes */
+  --font-size-xs: 12px;
+  --font-size-sm: 13px;
+  --font-size-base: 15px;
+  --font-size-lg: 18px;
+  --font-size-xl: 22px;
+  --font-size-2xl: 26px;
+  --font-size-3xl: 32px;
+
+  /* Border Radius */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --radius-full: 100px;
+
+  /* Shadows */
+  --shadow-soft: 0 2px 12px rgba(26, 25, 24, 0.08);
+  --shadow-elevated: 0 2px 8px rgba(26, 25, 24, 0.08);
+  --shadow-subtle: 0 1px 6px rgba(26, 25, 24, 0.08);
+}
 
 @layer base {
   body {
