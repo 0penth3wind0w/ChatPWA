@@ -8,22 +8,6 @@ const handleGetStarted = () => {
 
 <template>
   <div class="min-h-screen w-full flex flex-col bg-bg-primary">
-    <!-- Status Bar (iOS-style) -->
-    <div class="flex items-center justify-between w-full h-[62px] px-6">
-      <span class="text-[17px] font-semibold">9:41</span>
-      <div class="flex items-center gap-1.5">
-        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-          <path d="M2 11h5v2H2zm15 0h5v2h-5zm-6 6h2v5h-2zm0-13h2v5h-2zM4.222 5.636l1.414-1.414 3.536 3.536-1.414 1.414zm15.556 12.728l-1.414 1.414-3.536-3.536 1.414-1.414zm-12.02-1.414l-3.536 3.536-1.414-1.414 3.536-3.536zM19.778 7.05l-1.414-1.414-3.536 3.536 1.414 1.414z"/>
-        </svg>
-        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-          <path d="M1 9l2 2c4.97-4.97 13.03-4.97 18 0l2-2C16.93 2.93 7.08 2.93 1 9zm8 8l3 3 3-3c-1.65-1.66-4.34-1.66-6 0zm-4-4l2 2c2.76-2.76 7.24-2.76 10 0l2-2C15.14 9.14 8.87 9.14 5 13z"/>
-        </svg>
-        <svg class="w-6 h-4" fill="currentColor" viewBox="0 0 24 24">
-          <path d="M15.67 4H14V2h-4v2H8.33C7.6 4 7 4.6 7 5.33v15.33C7 21.4 7.6 22 8.33 22h7.33c.74 0 1.34-.6 1.34-1.33V5.33C17 4.6 16.4 4 15.67 4z"/>
-        </svg>
-      </div>
-    </div>
-
     <!-- Content Wrapper -->
     <div class="flex-1 flex flex-col items-center px-6 pt-15 gap-10">
       <!-- Logo -->
