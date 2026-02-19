@@ -234,6 +234,113 @@ Body: { prompt, model, size, quality, response_format: 'b64_json' }
 
 **Note:** This PWA is installable but does not work offline (no service worker by design).
 
+## Deploy to GitHub Pages
+
+### Option 1: Using GitHub Actions (Recommended)
+
+1. **Create deployment workflow file:**
+
+Create `.github/workflows/deploy.yml`:
+
+```yaml
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+        env:
+          NODE_ENV: production
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: './dist'
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+```
+
+2. **Enable GitHub Pages in repository settings:**
+   - Go to **Settings** → **Pages**
+   - Under **Source**, select **GitHub Actions**
+
+3. **Update base path in `vite.config.js`:**
+   - Change `/ChatPWA/` to match your repository name
+   - Format: `'/<repository-name>/'`
+
+4. **Push to main branch:**
+   ```bash
+   git add .
+   git commit -m "Add GitHub Pages deployment"
+   git push origin main
+   ```
+
+5. **Access your app:**
+   - Visit `https://<username>.github.io/<repository-name>/`
+   - Example: `https://0penth3wind0w.github.io/ChatPWA/`
+
+### Option 2: Manual Deployment
+
+1. **Build the app:**
+   ```bash
+   npm run build
+   ```
+
+2. **Deploy dist folder:**
+   ```bash
+   cd dist
+   git init
+   git add -A
+   git commit -m "Deploy to GitHub Pages"
+   git push -f git@github.com:<username>/<repository>.git main:gh-pages
+   ```
+
+3. **Enable GitHub Pages:**
+   - Go to **Settings** → **Pages**
+   - Under **Source**, select branch `gh-pages` and folder `/ (root)`
+
+4. **Access your app:**
+   - Visit `https://<username>.github.io/<repository-name>/`
+
+### Troubleshooting
+
+- **404 errors:** Check that `base` in `vite.config.js` matches your repository name
+- **Blank page:** Verify GitHub Pages is enabled and the correct branch is selected
+- **CSS not loading:** Ensure `base` path includes the repository name with slashes: `'/repo-name/'`
+
 ## Contributing
 
 1. Use `<script setup>` syntax for all components
