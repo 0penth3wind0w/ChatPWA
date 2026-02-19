@@ -116,58 +116,63 @@ const handleInput = () => {
     <!-- Command Menu -->
     <div
       v-if="showCommandMenu"
-      class="absolute bottom-full left-6 right-6 mb-2 bg-bg-surface rounded-md shadow-elevated border border-border-subtle overflow-hidden"
+      class="absolute bottom-full left-6 right-6 mb-3 bg-bg-surface rounded-2xl shadow-elevated border border-border-subtle overflow-hidden animate-fade-in"
     >
-      <div class="p-2 bg-bg-elevated border-b border-border-subtle">
-        <p class="text-xs font-semibold text-text-tertiary">Available Commands</p>
+      <div class="px-4 py-3 bg-bg-elevated border-b border-border-subtle">
+        <p class="text-xs font-semibold text-text-secondary">Slash Commands</p>
       </div>
       <div class="max-h-64 overflow-y-auto">
         <button
           v-for="(cmd, index) in filteredCommands"
           :key="cmd.command"
           @click="selectCommand(cmd)"
-          class="w-full px-4 py-3 text-left hover:bg-bg-elevated transition-colors"
-          :class="{ 'bg-bg-elevated': index === selectedCommandIndex }"
+          class="w-full px-4 py-3 text-left hover:bg-light-green/30 transition-all"
+          :class="{ 'bg-light-green/30': index === selectedCommandIndex }"
         >
           <div class="flex items-start gap-3">
+            <div class="w-8 h-8 bg-light-green rounded-lg flex items-center justify-center flex-shrink-0">
+              <svg class="w-4 h-4 text-forest-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+              </svg>
+            </div>
             <div class="flex-1">
               <div class="flex items-center gap-2">
                 <code class="text-sm font-semibold text-forest-green">{{ cmd.command }}</code>
                 <span v-if="cmd.alias" class="text-xs text-text-tertiary">or {{ cmd.alias }}</span>
               </div>
               <p class="text-xs text-text-secondary mt-1">{{ cmd.description }}</p>
-              <p class="text-xs text-text-tertiary mt-1 font-mono">{{ cmd.example }}</p>
+              <p class="text-xs text-text-tertiary mt-1.5 font-mono bg-bg-elevated px-2 py-1 rounded inline-block">{{ cmd.example }}</p>
             </div>
           </div>
         </button>
       </div>
-      <div class="p-2 bg-bg-elevated border-t border-border-subtle">
+      <div class="px-4 py-2.5 bg-bg-elevated border-t border-border-subtle">
         <p class="text-xs text-text-tertiary">
-          <kbd class="text-forest-green">↑↓</kbd> navigate •
-          <kbd class="text-forest-green">Tab</kbd> or <kbd class="text-forest-green">Enter</kbd> select •
-          <kbd class="text-forest-green">Esc</kbd> close
+          <kbd class="px-1.5 py-0.5 bg-bg-surface rounded text-forest-green font-medium">↑↓</kbd> navigate •
+          <kbd class="px-1.5 py-0.5 bg-bg-surface rounded text-forest-green font-medium">Tab</kbd> select •
+          <kbd class="px-1.5 py-0.5 bg-bg-surface rounded text-forest-green font-medium">Esc</kbd> close
         </p>
       </div>
     </div>
 
     <!-- Input Area -->
-    <div class="flex items-end gap-3 w-full bg-bg-surface rounded-md shadow-soft px-4 py-3">
+    <div class="flex items-center gap-3 w-full bg-bg-surface rounded-2xl shadow-elevated border border-border-subtle px-4 py-3">
       <textarea
         ref="textarea"
         v-model="message"
         placeholder="Type your message..."
         rows="1"
-        class="flex-1 bg-transparent text-base text-text-primary outline-none placeholder:text-text-tertiary resize-none max-h-32 overflow-y-auto"
+        class="flex-1 bg-transparent text-base text-text-primary outline-none placeholder:text-text-tertiary resize-none max-h-32 overflow-y-auto leading-relaxed"
         @keydown="handleKeydown"
         @input="handleInput"
       ></textarea>
       <button
         @click="handleSend"
         :disabled="!message.trim()"
-        class="w-9 h-9 bg-forest-green rounded-full flex items-center justify-center flex-shrink-0 hover:bg-dark-green transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        class="w-10 h-10 bg-forest-green rounded-full flex items-center justify-center flex-shrink-0 hover:bg-dark-green hover:scale-105 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
       >
-        <svg class="w-[18px] h-[18px] text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
+        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/>
         </svg>
       </button>
     </div>
