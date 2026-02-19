@@ -51,10 +51,9 @@ const handleBack = () => {
 </script>
 
 <template>
-  <div class="min-h-screen w-full flex flex-col bg-bg-primary">
-    <!-- Content Wrapper -->
-    <div class="flex-1 flex flex-col px-6 pt-6 gap-6 pb-6">
-      <!-- Header -->
+  <div class="h-screen w-full flex flex-col bg-bg-primary">
+    <!-- Fixed Header -->
+    <div class="flex-shrink-0 px-6 pt-6 pb-4">
       <div class="flex items-center justify-between w-full">
         <button
           @click="handleBack"
@@ -69,51 +68,56 @@ const handleBack = () => {
         </h1>
         <div class="w-11 h-11"></div>
       </div>
+    </div>
 
-      <!-- Settings Card -->
-      <div class="card">
-        <h2 class="text-lg font-semibold text-text-primary -tracking-tight mb-5">
-          API Configuration
-        </h2>
-        <SettingsForm
-          @test="handleTest"
-        />
+    <!-- Scrollable Content -->
+    <div class="flex-1 overflow-y-auto px-6 min-h-0">
+      <div class="flex flex-col gap-6 pb-6">
+        <!-- Settings Card -->
+        <div class="card">
+          <h2 class="text-lg font-semibold text-text-primary -tracking-tight mb-5">
+            API Configuration
+          </h2>
+          <SettingsForm
+            @test="handleTest"
+          />
 
-        <!-- Test Status Message -->
-        <div v-if="testMessage" class="mt-4 p-3 rounded-md" :class="{
-          'bg-sage-green text-forest-green': testStatus === 'success',
-          'bg-red-50 text-warm-red': testStatus === 'error',
-          'bg-bg-elevated text-text-secondary': !testStatus
-        }">
-          <p class="text-sm font-medium">{{ testMessage }}</p>
-        </div>
-      </div>
-
-      <!-- Back to Chat Button -->
-      <button
-        @click="emit('navigate', 'chat')"
-        class="btn-primary w-full h-13 shadow-elevated"
-      >
-        Back to Chat
-      </button>
-
-      <!-- Clear Chat History Card -->
-      <div class="card">
-        <div class="flex items-center justify-between w-full">
-          <div class="flex flex-col gap-1">
-            <p class="text-base font-medium text-text-primary">
-              Clear Chat History
-            </p>
-            <p class="text-sm text-text-tertiary">
-              Remove all conversation messages
-            </p>
+          <!-- Test Status Message -->
+          <div v-if="testMessage" class="mt-4 p-3 rounded-md" :class="{
+            'bg-sage-green text-forest-green': testStatus === 'success',
+            'bg-red-50 text-warm-red': testStatus === 'error',
+            'bg-bg-elevated text-text-secondary': !testStatus
+          }">
+            <p class="text-sm font-medium">{{ testMessage }}</p>
           </div>
-          <button
-            @click="handleClearHistory"
-            class="h-9 px-4 bg-bg-muted text-text-secondary text-sm font-semibold rounded-md hover:bg-border-subtle transition-colors"
-          >
-            Clear
-          </button>
+        </div>
+
+        <!-- Back to Chat Button -->
+        <button
+          @click="emit('navigate', 'chat')"
+          class="btn-primary w-full h-13 shadow-elevated"
+        >
+          Back to Chat
+        </button>
+
+        <!-- Clear Chat History Card -->
+        <div class="card">
+          <div class="flex items-center justify-between w-full">
+            <div class="flex flex-col gap-1">
+              <p class="text-base font-medium text-text-primary">
+                Clear Chat History
+              </p>
+              <p class="text-sm text-text-tertiary">
+                Remove all conversation messages
+              </p>
+            </div>
+            <button
+              @click="handleClearHistory"
+              class="h-9 px-4 bg-bg-muted text-text-secondary text-sm font-semibold rounded-md hover:bg-border-subtle transition-colors"
+            >
+              Clear
+            </button>
+          </div>
         </div>
       </div>
     </div>

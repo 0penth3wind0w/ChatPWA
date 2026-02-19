@@ -3,6 +3,7 @@ import { ref, watch } from 'vue'
 import ChatMessage from '../components/ChatMessage.vue'
 import MessageInput from '../components/MessageInput.vue'
 import EmptyState from '../components/EmptyState.vue'
+import TypingIndicator from '../components/TypingIndicator.vue'
 import { useChat } from '../composables/useChat.js'
 import { useStorage } from '../composables/useStorage.js'
 import { useApi } from '../composables/useApi.js'
@@ -13,6 +14,7 @@ const { messages, hasMessages, addUserMessage, addAssistantMessage, updateLastAs
 const { config } = useStorage()
 const { sendChatMessage, generateImage, isLoading, error } = useApi()
 const messagesContainer = ref(null)
+const isTyping = ref(false)
 
 
 const handleSettings = () => {
@@ -33,9 +35,12 @@ const handleSendMessage = async (content) => {
     if (imageCommandMatch) {
       // Handle image generation
       const prompt = imageCommandMatch[2]
-      addAssistantMessage('Generating image...')
+      isTyping.value = true
+      scrollToBottom(messagesContainer)
 
       const images = await generateImage(prompt, config.value)
+
+      isTyping.value = false
 
       if (images && images.length > 0) {
         // Create markdown with image
@@ -43,9 +48,9 @@ const handleSendMessage = async (content) => {
           `![${prompt}](${img.url})\n\n*Generated image: ${prompt}*`
         ).join('\n\n')
 
-        updateLastAssistantMessage(imageMarkdown)
+        addAssistantMessage(imageMarkdown, config.value.imageModel)
       } else {
-        updateLastAssistantMessage('Failed to generate image. No images returned.')
+        addAssistantMessage('Failed to generate image. No images returned.', config.value.imageModel)
       }
       scrollToBottom(messagesContainer)
     } else {
@@ -59,22 +64,37 @@ const handleSendMessage = async (content) => {
       if (config.value.enableStreaming) {
         // Handle streaming response
         let streamedContent = ''
-        addAssistantMessage('') // Add empty assistant message
+        isTyping.value = true
+        scrollToBottom(messagesContainer)
 
         await sendChatMessage(apiMessages, config.value, (chunk) => {
+          if (isTyping.value) {
+            isTyping.value = false
+            addAssistantMessage('', config.value.model)
+          }
           streamedContent += chunk
           updateLastAssistantMessage(streamedContent)
           scrollToBottom(messagesContainer)
         })
+
+        if (isTyping.value) {
+          isTyping.value = false
+        }
       } else {
         // Handle standard response
+        isTyping.value = true
+        scrollToBottom(messagesContainer)
+
         const response = await sendChatMessage(apiMessages, config.value)
-        addAssistantMessage(response)
+
+        isTyping.value = false
+        addAssistantMessage(response, config.value.model)
         scrollToBottom(messagesContainer)
       }
     }
   } catch (err) {
     console.error('Failed to send message:', err)
+    isTyping.value = false
     addAssistantMessage(`Error: ${err.message || 'Failed to get response from AI'}`)
     scrollToBottom(messagesContainer)
   }
@@ -84,13 +104,17 @@ const handleSendMessage = async (content) => {
 watch(messages, () => {
   scrollToBottom(messagesContainer)
 }, { deep: true })
+
+// Watch for typing indicator changes and auto-scroll
+watch(isTyping, () => {
+  scrollToBottom(messagesContainer)
+})
 </script>
 
 <template>
-  <div class="min-h-screen w-full flex flex-col bg-bg-primary">
-    <!-- Content Wrapper -->
-    <div class="flex-1 flex flex-col px-6 pt-6 gap-5">
-      <!-- Header -->
+  <div class="h-screen w-full flex flex-col bg-bg-primary">
+    <!-- Fixed Header -->
+    <div class="flex-shrink-0 px-6 pt-6 pb-4">
       <div class="flex items-center justify-between w-full">
         <div class="flex flex-col gap-1">
           <h1 class="text-2xl font-semibold text-text-primary -tracking-tight">
@@ -107,14 +131,16 @@ watch(messages, () => {
           </svg>
         </button>
       </div>
+    </div>
 
-      <!-- Messages Container -->
-      <div
-        ref="messagesContainer"
-        class="flex-1 flex flex-col gap-4 overflow-y-auto pb-4"
-      >
+    <!-- Scrollable Messages Container -->
+    <div
+      ref="messagesContainer"
+      class="flex-1 overflow-y-auto px-6 min-h-0"
+    >
+      <div class="flex flex-col gap-4 pb-4">
         <!-- Empty State -->
-        <EmptyState v-if="!hasMessages" />
+        <EmptyState v-if="!hasMessages && !isTyping" />
 
         <!-- Messages List -->
         <ChatMessage
@@ -122,10 +148,15 @@ watch(messages, () => {
           :key="message.id"
           :message="message"
         />
+
+        <!-- Typing Indicator -->
+        <TypingIndicator v-if="isTyping" :model="config.model || 'AI Assistant'" />
       </div>
     </div>
 
-    <!-- Message Input (fixed at bottom) -->
-    <MessageInput @send="handleSendMessage" />
+    <!-- Fixed Message Input at Bottom -->
+    <div class="flex-shrink-0">
+      <MessageInput @send="handleSendMessage" />
+    </div>
   </div>
 </template>

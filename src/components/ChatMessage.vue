@@ -72,6 +72,11 @@ const renderedContent = computed(() => {
           class="markdown-content text-base text-text-primary"
           v-html="renderedContent"
         />
+        <div v-if="message.model" class="mt-3 pt-3 border-t border-border-subtle">
+          <p class="text-xs text-text-tertiary">
+            <span class="font-medium text-text-secondary">Model:</span> {{ message.model }}
+          </p>
+        </div>
       </div>
     </div>
 

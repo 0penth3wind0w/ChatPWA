@@ -4,7 +4,7 @@ import Dexie from 'dexie'
 // Initialize Dexie database
 const db = new Dexie('ChatPWA')
 db.version(1).stores({
-  messages: '++id, timestamp, role, content'
+  messages: '++id, timestamp, role, content, model'
 })
 
 // Shared state (singleton)
@@ -35,7 +35,8 @@ watch(messages, async (newMessages) => {
         id: msg.id,
         role: msg.role,
         content: msg.content,
-        timestamp: msg.timestamp
+        timestamp: msg.timestamp,
+        model: msg.model
       }))
       await db.messages.bulkAdd(plainMessages)
     }
@@ -48,12 +49,13 @@ export function useChat() {
   /**
    * Add a message to the chat
    */
-  const addMessage = (role, content) => {
+  const addMessage = (role, content, model = null) => {
     const message = {
       id: Date.now().toString(),
       role, // 'user' or 'assistant'
       content,
-      timestamp: Date.now()
+      timestamp: Date.now(),
+      model // Model name for assistant messages
     }
     messages.value.push(message)
     return message
@@ -63,14 +65,14 @@ export function useChat() {
    * Add user message
    */
   const addUserMessage = (content) => {
-    return addMessage('user', content)
+    return addMessage('user', content, null)
   }
 
   /**
    * Add assistant message
    */
-  const addAssistantMessage = (content) => {
-    return addMessage('assistant', content)
+  const addAssistantMessage = (content, model = null) => {
+    return addMessage('assistant', content, model)
   }
 
   /**
@@ -116,9 +118,15 @@ export function useChat() {
    */
   const scrollToBottom = async (containerRef) => {
     await nextTick()
-    if (containerRef && containerRef.value) {
-      containerRef.value.scrollTop = containerRef.value.scrollHeight
-    }
+    // Use requestAnimationFrame for smoother scrolling
+    requestAnimationFrame(() => {
+      if (containerRef && containerRef.value) {
+        containerRef.value.scrollTo({
+          top: containerRef.value.scrollHeight,
+          behavior: 'smooth'
+        })
+      }
+    })
   }
 
   return {
