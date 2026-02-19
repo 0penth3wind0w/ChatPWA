@@ -6,10 +6,10 @@ import SettingsView from './views/SettingsView.vue'
 import { useStorage } from './composables/useStorage.js'
 
 const currentView = ref('welcome')
-const { isConfigured, loadConfig } = useStorage()
+const { isConfigured } = useStorage()
 
 onMounted(() => {
-  loadConfig()
+  // Config is already loaded on module init
   // If already configured, go directly to chat
   if (isConfigured()) {
     currentView.value = 'chat'

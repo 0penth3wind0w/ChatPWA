@@ -33,6 +33,16 @@ export function useChat() {
   }
 
   /**
+   * Update the last assistant message (for streaming)
+   */
+  const updateLastAssistantMessage = (content) => {
+    const lastMessage = messages.value[messages.value.length - 1]
+    if (lastMessage && lastMessage.role === 'assistant') {
+      lastMessage.content = content
+    }
+  }
+
+  /**
    * Clear all messages
    */
   const clearMessages = () => {
@@ -72,6 +82,7 @@ export function useChat() {
     addMessage,
     addUserMessage,
     addAssistantMessage,
+    updateLastAssistantMessage,
     clearMessages,
     getConversationHistory,
     scrollToBottom

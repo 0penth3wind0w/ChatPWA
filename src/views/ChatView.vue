@@ -4,28 +4,56 @@ import ChatMessage from '../components/ChatMessage.vue'
 import MessageInput from '../components/MessageInput.vue'
 import EmptyState from '../components/EmptyState.vue'
 import { useChat } from '../composables/useChat.js'
+import { useStorage } from '../composables/useStorage.js'
+import { useApi } from '../composables/useApi.js'
 
 const emit = defineEmits(['navigate'])
 
-const { messages, hasMessages, addUserMessage, addAssistantMessage, scrollToBottom } = useChat()
+const { messages, hasMessages, addUserMessage, addAssistantMessage, updateLastAssistantMessage, scrollToBottom } = useChat()
+const { config } = useStorage()
+const { sendChatMessage, isLoading, error } = useApi()
 const messagesContainer = ref(null)
+
 
 const handleSettings = () => {
   emit('navigate', 'settings')
 }
 
-const handleSendMessage = (content) => {
+const handleSendMessage = async (content) => {
   // Add user message
   addUserMessage(content)
 
   // Scroll to bottom after user message
   scrollToBottom(messagesContainer)
 
-  // Simulate AI response (will be replaced with actual API call in Phase 4)
-  setTimeout(() => {
-    addAssistantMessage('This is a placeholder response. API integration will be implemented in Phase 4.')
+  try {
+    // Prepare messages for API (convert to OpenAI/Anthropic format)
+    const apiMessages = messages.value.map(msg => ({
+      role: msg.role,
+      content: msg.content
+    }))
+
+    if (config.value.enableStreaming) {
+      // Handle streaming response
+      let streamedContent = ''
+      addAssistantMessage('') // Add empty assistant message
+
+      await sendChatMessage(apiMessages, config.value, (chunk) => {
+        streamedContent += chunk
+        updateLastAssistantMessage(streamedContent)
+        scrollToBottom(messagesContainer)
+      })
+    } else {
+      // Handle standard response
+      const response = await sendChatMessage(apiMessages, config.value)
+      addAssistantMessage(response)
+      scrollToBottom(messagesContainer)
+    }
+  } catch (err) {
+    console.error('Failed to send message:', err)
+    addAssistantMessage(`Error: ${err.message || 'Failed to get response from AI'}`)
     scrollToBottom(messagesContainer)
-  }, 500)
+  }
 }
 
 // Watch for new messages and auto-scroll

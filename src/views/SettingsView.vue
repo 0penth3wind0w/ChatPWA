@@ -1,35 +1,40 @@
 <script setup>
-import { onMounted } from 'vue'
+import { ref } from 'vue'
 import SettingsForm from '../components/SettingsForm.vue'
 import { useStorage } from '../composables/useStorage.js'
+import { useApi } from '../composables/useApi.js'
 
 const emit = defineEmits(['navigate'])
 
-const { config, loadConfig, saveConfig, clearConfig } = useStorage()
-
-onMounted(() => {
-  loadConfig()
-})
-
-const handleSave = (newConfig) => {
-  const success = saveConfig(newConfig)
-  if (success) {
-    // Show success feedback (could be a toast notification in the future)
-    console.log('Configuration saved successfully')
-    // Navigate back to chat or welcome
-    emit('navigate', 'chat')
-  }
-}
+const { clearConfig } = useStorage()
+const { testConnection } = useApi()
+const testStatus = ref(null) // null, 'success', or 'error'
+const testMessage = ref('')
 
 const handleTest = async (testConfig) => {
-  // This would make a test request to the API
-  // For now, just log it
-  console.log('Testing connection with:', {
-    endpoint: testConfig.endpoint,
-    model: testConfig.model,
-    token: '***' // Don't log the actual token
-  })
-  // TODO: Implement actual API test in Phase 4
+  testStatus.value = null
+  testMessage.value = 'Testing connection...'
+
+  try {
+    await testConnection(testConfig)
+    testStatus.value = 'success'
+    testMessage.value = 'Connection successful!'
+
+    // Clear success message after 3 seconds
+    setTimeout(() => {
+      testStatus.value = null
+      testMessage.value = ''
+    }, 3000)
+  } catch (err) {
+    testStatus.value = 'error'
+    testMessage.value = err.message || 'Connection failed'
+
+    // Clear error message after 5 seconds
+    setTimeout(() => {
+      testStatus.value = null
+      testMessage.value = ''
+    }, 5000)
+  }
 }
 
 const handleClearHistory = () => {
@@ -70,18 +75,25 @@ const handleBack = () => {
           API Configuration
         </h2>
         <SettingsForm
-          :initial-config="config"
-          @save="handleSave"
           @test="handleTest"
         />
+
+        <!-- Test Status Message -->
+        <div v-if="testMessage" class="mt-4 p-3 rounded-md" :class="{
+          'bg-sage-green text-forest-green': testStatus === 'success',
+          'bg-red-50 text-warm-red': testStatus === 'error',
+          'bg-bg-elevated text-text-secondary': !testStatus
+        }">
+          <p class="text-sm font-medium">{{ testMessage }}</p>
+        </div>
       </div>
 
-      <!-- Save Button -->
+      <!-- Back to Chat Button -->
       <button
-        @click="handleSave(config)"
+        @click="emit('navigate', 'chat')"
         class="btn-primary w-full h-13 shadow-elevated"
       >
-        Save Configuration
+        Back to Chat
       </button>
 
       <!-- Clear Chat History Card -->
