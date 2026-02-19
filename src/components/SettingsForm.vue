@@ -17,6 +17,9 @@ const imageModel = ref(config.value.imageModel || 'dall-e-3')
 const imageSize = ref(config.value.imageSize || '1024x1024')
 const imageQuality = ref(config.value.imageQuality || 'standard')
 const systemPrompt = ref(config.value.systemPrompt || '')
+const searchProvider = ref(config.value.searchProvider || 'brave')
+const searchApiKey = ref(config.value.searchApiKey || '')
+const fetchMethod = ref(config.value.fetchMethod || 'jina')
 const errors = ref({})
 const testing = ref(false)
 
@@ -32,6 +35,9 @@ onMounted(() => {
   imageModel.value = config.value.imageModel || 'dall-e-3'
   imageSize.value = config.value.imageSize || '1024x1024'
   imageQuality.value = config.value.imageQuality || 'standard'
+  searchProvider.value = config.value.searchProvider || 'brave'
+  searchApiKey.value = config.value.searchApiKey || ''
+  fetchMethod.value = config.value.fetchMethod || 'jina'
 })
 
 // Auto-save settings when any field changes (immediately)
@@ -48,13 +54,16 @@ const autoSave = () => {
       systemPrompt: systemPrompt.value,
       imageModel: imageModel.value,
       imageSize: imageSize.value,
-      imageQuality: imageQuality.value
+      imageQuality: imageQuality.value,
+      searchProvider: searchProvider.value,
+      searchApiKey: searchApiKey.value,
+      fetchMethod: fetchMethod.value
     })
   }
 }
 
 // Watch all fields for changes
-watch([endpoint, model, token, provider, chatPath, enableStreaming, systemPrompt, imageModel, imageSize, imageQuality], autoSave)
+watch([endpoint, model, token, provider, chatPath, enableStreaming, systemPrompt, imageModel, imageSize, imageQuality, searchProvider, searchApiKey, fetchMethod], autoSave)
 
 const isValid = computed(() => {
   return endpoint.value.trim() && model.value.trim() && token.value.trim()
@@ -254,6 +263,56 @@ const handleTest = async () => {
         <label for="streaming" class="text-xs text-text-secondary">
           Enable streaming responses (experimental)
         </label>
+      </div>
+
+      <!-- Divider -->
+      <div class="w-full h-px bg-border-subtle my-2"></div>
+      <p class="text-xs font-medium text-text-tertiary mb-2">Web Tools Settings</p>
+
+      <!-- Search Provider -->
+      <div class="w-full space-y-2">
+        <label class="text-xs font-medium text-text-tertiary">
+          Search Provider
+        </label>
+        <select v-model="searchProvider" class="input-field text-sm h-10">
+          <option value="brave">Brave Search</option>
+          <option value="tavily">Tavily AI</option>
+          <option value="custom">Custom</option>
+        </select>
+        <p class="text-xs text-text-tertiary">
+          Provider for /search command
+        </p>
+      </div>
+
+      <!-- Search API Key -->
+      <div class="w-full space-y-2">
+        <label class="text-xs font-medium text-text-tertiary">
+          Search API Key
+        </label>
+        <input
+          v-model="searchApiKey"
+          type="password"
+          placeholder="Enter API key for search provider"
+          class="input-field text-sm h-10"
+        />
+        <p class="text-xs text-text-tertiary">
+          Required for Brave or Tavily search
+        </p>
+      </div>
+
+      <!-- Fetch Method -->
+      <div class="w-full space-y-2">
+        <label class="text-xs font-medium text-text-tertiary">
+          Fetch Method
+        </label>
+        <select v-model="fetchMethod" class="input-field text-sm h-10">
+          <option value="jina">Jina AI Reader (Free)</option>
+          <option value="cors-proxy">CORS Proxy</option>
+          <option value="custom">Custom</option>
+        </select>
+        <p class="text-xs text-text-tertiary">
+          Method for /fetch command to retrieve web content
+        </p>
       </div>
 
       <!-- Divider -->

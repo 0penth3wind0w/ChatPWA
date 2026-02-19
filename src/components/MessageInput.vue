@@ -14,13 +14,29 @@ const availableCommands = [
     command: '/image',
     alias: '/img',
     description: 'Generate an image from text description',
-    example: '/image a sunset over mountains'
+    example: '/image a sunset over mountains',
+    icon: 'image'
   },
   {
     command: '/img',
     alias: null,
     description: 'Short alias for /image',
-    example: '/img a cute cat'
+    example: '/img a cute cat',
+    icon: 'image'
+  },
+  {
+    command: '/search',
+    alias: null,
+    description: 'Search the web for information',
+    example: '/search latest Vue 3 features',
+    icon: 'search'
+  },
+  {
+    command: '/fetch',
+    alias: null,
+    description: 'Fetch and read web page content',
+    example: '/fetch https://example.com',
+    icon: 'globe'
   }
 ]
 
@@ -131,8 +147,17 @@ const handleInput = () => {
         >
           <div class="flex items-start gap-3">
             <div class="w-8 h-8 bg-light-green rounded-lg flex items-center justify-center flex-shrink-0">
-              <svg class="w-4 h-4 text-forest-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <!-- Image icon -->
+              <svg v-if="cmd.icon === 'image'" class="w-4 h-4 text-forest-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+              </svg>
+              <!-- Search icon -->
+              <svg v-else-if="cmd.icon === 'search'" class="w-4 h-4 text-forest-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+              </svg>
+              <!-- Globe/Fetch icon -->
+              <svg v-else-if="cmd.icon === 'globe'" class="w-4 h-4 text-forest-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"/>
               </svg>
             </div>
             <div class="flex-1">

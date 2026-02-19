@@ -21,7 +21,14 @@ const DEFAULT_CONFIG = {
   imageSize: '1024x1024',
   imageQuality: 'standard',
   imageStyle: 'vivid',
-  imageCount: 1
+  imageCount: 1,
+  // Web Tools Configuration
+  searchProvider: 'brave', // 'brave', 'tavily', or 'custom'
+  searchApiKey: '',
+  searchEndpoint: '', // For custom search provider
+  fetchMethod: 'jina', // 'jina', 'cors-proxy', or 'custom'
+  corsProxyUrl: 'https://api.allorigins.win/raw?url=',
+  fetchEndpoint: '' // For custom fetch method
 }
 
 // Shared config state (singleton)

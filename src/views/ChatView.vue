@@ -7,12 +7,14 @@ import TypingIndicator from '../components/TypingIndicator.vue'
 import { useChat } from '../composables/useChat.js'
 import { useStorage } from '../composables/useStorage.js'
 import { useApi } from '../composables/useApi.js'
+import { useWebTools } from '../composables/useWebTools.js'
 
 const emit = defineEmits(['navigate'])
 
 const { messages, hasMessages, addUserMessage, addAssistantMessage, updateLastAssistantMessage, scrollToBottom } = useChat()
 const { config } = useStorage()
 const { sendChatMessage, generateImage, isLoading, error } = useApi()
+const { searchWeb, fetchWebContent } = useWebTools()
 const messagesContainer = ref(null)
 const isTyping = ref(false)
 
@@ -29,10 +31,48 @@ const handleSendMessage = async (content) => {
   scrollToBottom(messagesContainer)
 
   try {
-    // Check if this is an image generation request
+    // Check for slash commands
     const imageCommandMatch = content.match(/^\/(image|img)\s+(.+)/i)
+    const searchCommandMatch = content.match(/^\/search\s+(.+)/i)
+    const fetchCommandMatch = content.match(/^\/fetch\s+(.+)/i)
 
-    if (imageCommandMatch) {
+    if (searchCommandMatch) {
+      // Handle web search
+      const query = searchCommandMatch[1]
+      isTyping.value = true
+      scrollToBottom(messagesContainer)
+
+      try {
+        const searchResults = await searchWeb(query, config.value)
+        isTyping.value = false
+
+        // Add search results as assistant message
+        addAssistantMessage(searchResults, config.value.model)
+        scrollToBottom(messagesContainer)
+      } catch (err) {
+        isTyping.value = false
+        addAssistantMessage(`Error searching: ${err.message}`, config.value.model)
+        scrollToBottom(messagesContainer)
+      }
+    } else if (fetchCommandMatch) {
+      // Handle web fetch
+      const url = fetchCommandMatch[1].trim()
+      isTyping.value = true
+      scrollToBottom(messagesContainer)
+
+      try {
+        const webContent = await fetchWebContent(url, config.value)
+        isTyping.value = false
+
+        // Add fetched content as assistant message
+        addAssistantMessage(webContent, config.value.model)
+        scrollToBottom(messagesContainer)
+      } catch (err) {
+        isTyping.value = false
+        addAssistantMessage(`Error fetching: ${err.message}`, config.value.model)
+        scrollToBottom(messagesContainer)
+      }
+    } else if (imageCommandMatch) {
       // Handle image generation
       const prompt = imageCommandMatch[2]
       isTyping.value = true
