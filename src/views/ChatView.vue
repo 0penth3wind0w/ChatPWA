@@ -11,7 +11,7 @@ const emit = defineEmits(['navigate'])
 
 const { messages, hasMessages, addUserMessage, addAssistantMessage, updateLastAssistantMessage, scrollToBottom } = useChat()
 const { config } = useStorage()
-const { sendChatMessage, isLoading, error } = useApi()
+const { sendChatMessage, generateImage, isLoading, error } = useApi()
 const messagesContainer = ref(null)
 
 
@@ -27,27 +27,51 @@ const handleSendMessage = async (content) => {
   scrollToBottom(messagesContainer)
 
   try {
-    // Prepare messages for API (convert to OpenAI/Anthropic format)
-    const apiMessages = messages.value.map(msg => ({
-      role: msg.role,
-      content: msg.content
-    }))
+    // Check if this is an image generation request
+    const imageCommandMatch = content.match(/^\/(image|img)\s+(.+)/i)
 
-    if (config.value.enableStreaming) {
-      // Handle streaming response
-      let streamedContent = ''
-      addAssistantMessage('') // Add empty assistant message
+    if (imageCommandMatch) {
+      // Handle image generation
+      const prompt = imageCommandMatch[2]
+      addAssistantMessage('Generating image...')
 
-      await sendChatMessage(apiMessages, config.value, (chunk) => {
-        streamedContent += chunk
-        updateLastAssistantMessage(streamedContent)
-        scrollToBottom(messagesContainer)
-      })
-    } else {
-      // Handle standard response
-      const response = await sendChatMessage(apiMessages, config.value)
-      addAssistantMessage(response)
+      const images = await generateImage(prompt, config.value)
+
+      if (images && images.length > 0) {
+        // Create markdown with image
+        const imageMarkdown = images.map(img =>
+          `![${prompt}](${img.url})\n\n*Generated image: ${prompt}*`
+        ).join('\n\n')
+
+        updateLastAssistantMessage(imageMarkdown)
+      } else {
+        updateLastAssistantMessage('Failed to generate image. No images returned.')
+      }
       scrollToBottom(messagesContainer)
+    } else {
+      // Handle regular chat message
+      // Prepare messages for API (convert to OpenAI/Anthropic format)
+      const apiMessages = messages.value.map(msg => ({
+        role: msg.role,
+        content: msg.content
+      }))
+
+      if (config.value.enableStreaming) {
+        // Handle streaming response
+        let streamedContent = ''
+        addAssistantMessage('') // Add empty assistant message
+
+        await sendChatMessage(apiMessages, config.value, (chunk) => {
+          streamedContent += chunk
+          updateLastAssistantMessage(streamedContent)
+          scrollToBottom(messagesContainer)
+        })
+      } else {
+        // Handle standard response
+        const response = await sendChatMessage(apiMessages, config.value)
+        addAssistantMessage(response)
+        scrollToBottom(messagesContainer)
+      }
     }
   } catch (err) {
     console.error('Failed to send message:', err)

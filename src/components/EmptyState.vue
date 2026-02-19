@@ -18,9 +18,18 @@
       </h3>
 
       <!-- Description -->
-      <p class="text-sm text-text-secondary leading-relaxed max-w-[240px]">
+      <p class="text-sm text-text-secondary leading-relaxed max-w-[280px]">
         Type a message below to begin chatting with your AI assistant
       </p>
+
+      <!-- Tips -->
+      <div class="mt-4 p-3 bg-bg-elevated rounded-md max-w-[280px]">
+        <p class="text-xs text-text-tertiary text-left">
+          <span class="font-semibold text-text-secondary">Tip:</span> Use <code class="bg-bg-surface px-1 py-0.5 rounded text-forest-green">/image</code> to generate images
+          <br />
+          <span class="text-text-tertiary mt-1 inline-block">Example: /image a sunset over mountains</span>
+        </p>
+      </div>
     </div>
   </div>
 </template>
