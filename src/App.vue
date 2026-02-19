@@ -22,18 +22,16 @@ const handleNavigate = (view) => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-bg-primary">
-    <WelcomeView
-      v-if="currentView === 'welcome'"
-      @navigate="handleNavigate"
-    />
-    <ChatView
-      v-else-if="currentView === 'chat'"
-      @navigate="handleNavigate"
-    />
-    <SettingsView
-      v-else-if="currentView === 'settings'"
-      @navigate="handleNavigate"
-    />
-  </div>
+  <WelcomeView
+    v-if="currentView === 'welcome'"
+    @navigate="handleNavigate"
+  />
+  <ChatView
+    v-else-if="currentView === 'chat'"
+    @navigate="handleNavigate"
+  />
+  <SettingsView
+    v-else-if="currentView === 'settings'"
+    @navigate="handleNavigate"
+  />
 </template>
