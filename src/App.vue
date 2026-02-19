@@ -11,9 +11,10 @@ const { isConfigured } = useStorage()
 onMounted(() => {
   // Config is already loaded on module init
   // If already configured, go directly to chat
-  if (isConfigured()) {
-    currentView.value = 'chat'
-  }
+  // DEV: Commented out to show welcome page
+  // if (isConfigured()) {
+  //   currentView.value = 'chat'
+  // }
 })
 
 const handleNavigate = (view) => {
