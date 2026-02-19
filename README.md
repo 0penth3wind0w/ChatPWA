@@ -1,23 +1,26 @@
 # ChatPWA
 
-A Progressive Web App for AI chat with custom API endpoints. Connect to any AI model by configuring your own endpoint URL, model name, and authentication token.
+An elegant Progressive Web App for AI chat with custom API endpoints. Connect to OpenAI, Anthropic, Google Gemini, or any compatible API by configuring your endpoint URL, model name, and authentication token.
 
-![ChatPWA](UI.pen)
+![ChatPWA Screenshot](UI.pen)
 
 ## Features
 
-✨ **Custom API Endpoints** - Use any AI provider or self-hosted model
-🔒 **Secure & Private** - All data stays on your device
-📱 **Progressive Web App** - Install on mobile devices for offline access
-💬 **Clean Chat Interface** - Soft, comfortable design for extended conversations
-⚡ **Fast & Lightweight** - Built with Vue 3 + Vite + Tailwind CSS
+✨ **Multi-Provider Support** - Works with OpenAI, Anthropic (Claude), and Google Gemini APIs
+🎨 **Elegant Bubble Chat** - Left-aligned AI messages, right-aligned user messages with smooth animations
+💬 **Slash Commands** - `/image` command for AI image generation with autocomplete
+📝 **Markdown Support** - Full markdown rendering with code syntax highlighting
+🎯 **Smart Typing Indicator** - Animated dots show when AI is responding
+💾 **Auto-Save Everything** - Messages and settings persist automatically (IndexedDB + localStorage)
+🔒 **Privacy First** - All data stays on your device, no external tracking
+📱 **Install as App** - Add to home screen for native-like experience
+⚡ **Fast & Lightweight** - Built with Vue 3 + Vite + Tailwind CSS v4
 
 ## Tech Stack
 
 - **Vue 3.5.28** - Composition API with `<script setup>` syntax
 - **Vite 7.3.1** - Lightning-fast development and optimized builds
-- **Tailwind CSS 4.2.0** - Custom design system (warm cream palette, soft shadows)
-- **PWA Support** - Service worker with Workbox for offline functionality
+- **Tailwind CSS 4.2.0** - Custom design system via `@tailwindcss/vite` plugin
 - **Dexie 4.3.0** - IndexedDB wrapper for chat history persistence
 - **Marked 17.0.3** - Markdown rendering in AI responses
 - **Highlight.js 11.11.1** - Code syntax highlighting
@@ -55,154 +58,190 @@ npm run build
 npm run preview
 ```
 
-**Note:** PWA features (service worker, install prompt) only work in production builds or over HTTPS.
-
 ## Usage
 
 ### First Time Setup
 
 1. Launch the app - you'll see the Welcome screen
-2. Click "Get Started" to configure your API
-3. Enter your API endpoint URL (e.g., `https://api.example.com/v1/chat`)
-4. Enter your model name (e.g., `gpt-4`)
-5. Enter your authentication token
-6. Click "Save Configuration"
+2. Click "Get Started"
+3. Configure your API:
+   - **API Endpoint URL**: e.g., `https://api.openai.com/v1`
+   - **Model Name**: e.g., `gpt-4`, `claude-opus-4`, `gemini-pro`
+   - **Authentication Token**: Your API key (without "Bearer " prefix)
+4. Settings auto-save as you type
+
+### Supported Providers
+
+**OpenAI (Default):**
+- Endpoint: `https://api.openai.com/v1`
+- Models: `gpt-4`, `gpt-3.5-turbo`, etc.
+- Chat path: `/chat/completions`
+
+**Anthropic (Claude):**
+- Endpoint: `https://api.anthropic.com/v1`
+- Models: `claude-opus-4`, `claude-sonnet-4`, etc.
+- Chat path: `/messages`
+
+**Google Gemini:**
+- Endpoint: `https://generativelanguage.googleapis.com/v1beta`
+- Models: `gemini-pro`, `gemini-1.5-pro`, etc.
+- Chat path: `/models/{model}:generateContent`
 
 ### Chatting
 
-1. Once configured, you'll be taken to the chat screen
-2. Type your message in the input field at the bottom
-3. Press Enter to send (or Shift+Enter for new line)
-4. Your messages appear in green, AI responses in white
+1. Type your message in the input field
+2. Press **Enter** to send (or **Shift+Enter** for new line)
+3. User messages appear on the right (green background)
+4. AI responses appear on the left with model name footer
+5. Typing indicator shows bouncing dots while waiting
+
+### Slash Commands
+
+Type `/` to see available commands:
+- `/image [prompt]` - Generate an image using DALL-E
+- `/img [prompt]` - Short alias for `/image`
+
+Example: `/image a sunset over mountains`
+
+### Image Generation
+
+1. Go to Settings → Advanced Options → Image Generation Settings
+2. Configure:
+   - **Image Model**: e.g., `dall-e-3`, `dall-e-2`
+   - **Image Size**: 256x256, 512x512, 1024x1024, etc.
+   - **Image Quality**: Standard or HD
+3. Use `/image` command in chat
+4. Images display directly in chat as base64
 
 ### Settings
 
-- Click the settings icon (⚙️) in the chat header to modify your configuration
-- You can update endpoint, model, or token at any time
-- Use "Clear Chat History" to delete all conversation messages
+- Click the ⚙️ icon in the chat header
+- All settings auto-save on change
+- **Connection Test**: Verify your API configuration
+- **Clear Chat History**: Delete all messages (cannot be undone)
 
 ## Project Structure
 
 ```
 ChatPWA/
 ├── src/
-│   ├── components/          # Reusable UI components
-│   │   ├── AppHeader.vue    # Header with navigation
-│   │   ├── ChatMessage.vue  # Message bubble (AI/user)
-│   │   ├── EmptyState.vue   # Empty conversation placeholder
-│   │   ├── MessageInput.vue # Input field with send button
-│   │   └── SettingsForm.vue # API configuration form
-│   ├── composables/         # Business logic
-│   │   ├── useApi.js        # API client (to be implemented)
-│   │   ├── useChat.js       # Chat state management
-│   │   └── useStorage.js    # localStorage/IndexedDB utilities
-│   ├── views/               # Page-level components
-│   │   ├── ChatView.vue     # Main chat interface
-│   │   ├── SettingsView.vue # Settings screen
-│   │   └── WelcomeView.vue  # Welcome/onboarding screen
-│   ├── assets/
-│   │   └── main.css         # Tailwind + custom styles
-│   ├── App.vue              # Root component with routing
-│   └── main.js              # Application entry point
+│   ├── components/
+│   │   ├── ChatMessage.vue      # Bubble-style message with markdown
+│   │   ├── MessageInput.vue     # Input with slash command menu
+│   │   ├── TypingIndicator.vue  # Animated typing dots
+│   │   ├── EmptyState.vue       # Empty chat placeholder
+│   │   └── SettingsForm.vue     # API configuration form
+│   ├── composables/
+│   │   ├── useApi.js            # Multi-provider API client
+│   │   ├── useChat.js           # Message state + IndexedDB
+│   │   └── useStorage.js        # Config persistence (singleton)
+│   ├── views/
+│   │   ├── WelcomeView.vue      # Onboarding screen
+│   │   ├── ChatView.vue         # Main chat with fixed header
+│   │   └── SettingsView.vue     # Settings with fixed header
+│   ├── style.css                # Tailwind v4 theme + animations
+│   ├── App.vue                  # Root component with routing
+│   └── main.js                  # Application entry point
 ├── public/
-│   └── icons/               # PWA icons (192x192, 512x512)
-├── CLAUDE.md                # Guidance for Claude Code
-├── IMPLEMENTATION_PLAN.md   # Full development roadmap
-└── UI.pen                   # UI design mockup
+│   ├── manifest.json            # PWA manifest
+│   └── icons/                   # App icons (192x192, 512x512)
+└── CLAUDE.md                    # Development guidance
 ```
 
-## Development
+## Design System
 
-### Design System
-
-The app uses a custom Tailwind configuration with a warm, minimal aesthetic:
-
-**Colors:**
+**Color Palette:**
 - Background: `#F5F4F1` (warm cream)
+- Surface: `#FFFFFF` (white cards)
 - Primary: `#3D8A5A` (forest green)
-- Text: `#1A1918`, `#6D6C6A`, `#9C9B99` (hierarchy)
+- Accent: `#C8F0D8` (light green)
+- Text hierarchy: `#1A1918`, `#6D6C6A`, `#9C9B99`
 
 **Typography:**
-- Font: Outfit (400, 500, 600, 700)
-- Sizes: 12px - 32px
+- Font: Outfit (Google Fonts)
+- Weights: 400, 500, 600, 700
 
-**Shadows:**
-- Soft shadows with 8% opacity for comfortable viewing
+**Design Principles:**
+- Bubble-style chat layout
+- Rounded corners: `rounded-2xl` with cut corners
+- Soft shadows (8% opacity)
+- Smooth fade-in animations
+- Fixed headers (always visible)
+- Auto-scroll to bottom
 
-See `tailwind.config.js` and `UI.pen` for complete design reference.
+## Architecture
 
-### Architecture
-
-The app follows a three-layer architecture:
-
-1. **Views** - Page-level components (Welcome, Chat, Settings)
+**Three-Layer Pattern:**
+1. **Views** - Full-screen pages with fixed headers
 2. **Components** - Reusable UI elements
-3. **Composables** - Business logic and state management
+3. **Composables** - Business logic (singleton pattern)
 
-Data flows from user input → Views → Composables → Storage/API
+**Data Flow:**
+```
+User Input → Views → Composables → API/Storage
+                ↓         ↓
+            Components   Auto-Save
+```
 
-### Current Implementation Status
-
-- ✅ **Phase 1:** Project Setup & Basic Structure
-- ✅ **Phase 2:** Configuration Module
-- ✅ **Phase 3:** Chat Interface
-- 🔜 **Phase 4:** API Integration (next)
-- 📋 **Phase 5:** Message Persistence
-- 📋 **Phase 6:** PWA Features
-- 📋 **Phase 7:** Enhanced Features
-- 📋 **Phase 8:** Testing & Optimization
-- 📋 **Phase 9:** Documentation & Deployment
-
-See `IMPLEMENTATION_PLAN.md` for detailed roadmap.
+**Key Patterns:**
+- Singleton composables (module-level refs)
+- Auto-save with Vue `watch()`
+- No manual save buttons
+- Fixed header layouts (`h-screen` + `flex-shrink-0`)
 
 ## API Integration
 
-The app expects OpenAI-compatible APIs:
+The app supports three providers with automatic detection:
 
-```http
-POST {your-endpoint}
-Authorization: Bearer {your-token}
-Content-Type: application/json
+**Request Format:**
+```javascript
+// OpenAI
+POST {endpoint}/chat/completions
+Authorization: Bearer {token}
+Body: { model, messages, stream }
 
-{
-  "model": "{your-model}",
-  "messages": [
-    {"role": "user", "content": "Hello"},
-    {"role": "assistant", "content": "Hi there!"}
-  ]
-}
+// Anthropic
+POST {endpoint}/messages
+Authorization: Bearer {token}
+anthropic-version: 2023-06-01
+Body: { model, max_tokens, messages, system, stream }
+
+// Gemini
+POST {endpoint}/models/{model}:generateContent
+Authorization: Bearer {token}
+Body: { contents, systemInstruction, generationConfig }
+
+// Image Generation
+POST {endpoint}/images/generations
+Authorization: Bearer {token}
+Body: { prompt, model, size, quality, response_format: 'b64_json' }
 ```
 
-Currently using simulated responses. Actual API integration will be implemented in Phase 4.
-
-## PWA Installation
-
-1. Build the app: `npm run build`
-2. Preview: `npm run preview`
-3. On mobile, tap "Add to Home Screen"
-4. App will work offline with cached assets
+**Provider Detection:** Automatically determined by `chatPath` pattern.
 
 ## Storage
 
-- **localStorage** - API configuration (endpoint, model, token)
-- **IndexedDB** - Chat history (to be implemented)
-- **Service Worker Cache** - Static assets, Google Fonts
+- **localStorage** - API configuration (endpoint, model, token, provider, image settings)
+- **IndexedDB (Dexie)** - Chat messages with model names (auto-save on change)
+- **No Service Worker** - PWA uses plain manifest.json for installability only
+
+## PWA Installation
+
+1. Build: `npm run build`
+2. Preview: `npm run preview`
+3. On mobile: tap "Add to Home Screen"
+4. App icon appears on home screen
+
+**Note:** This PWA is installable but does not work offline (no service worker by design).
 
 ## Contributing
 
-1. Follow the Vue 3 Composition API conventions
-2. Use `<script setup>` syntax for all components
-3. Follow Tailwind utility-first approach
-4. Match the design system in `tailwind.config.js`
-5. Make incremental commits with clear messages
-
-## Documentation
-
-- `CLAUDE.md` - Guidance for Claude Code
-- `IMPLEMENTATION_PLAN.md` - Complete development plan
-- `SETUP_COMMANDS.md` - Detailed setup instructions
-- `SETUP_SUMMARY.md` - Quick overview
-- `UI.pen` - UI design mockup
+1. Use `<script setup>` syntax for all components
+2. Use Composition API (not Options API)
+3. Follow singleton pattern for shared state
+4. Use auto-save instead of manual save buttons
+5. Follow Tailwind utility-first approach
+6. Match the warm, minimal design system
 
 ## License
 
@@ -211,4 +250,4 @@ MIT
 ## Acknowledgments
 
 Built with Vue 3, Vite, and Tailwind CSS.
-Co-Authored-By: Claude Sonnet 4.5
+Co-Authored-By: Claude Opus 4.5
