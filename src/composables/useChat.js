@@ -1,9 +1,43 @@
-import { ref, computed, nextTick } from 'vue'
+import { ref, computed, nextTick, watch } from 'vue'
+import Dexie from 'dexie'
+
+// Initialize Dexie database
+const db = new Dexie('ChatPWA')
+db.version(1).stores({
+  messages: '++id, timestamp, role, content'
+})
+
+// Shared state (singleton)
+const messages = ref([])
+const isLoading = ref(false)
+
+// Load messages from IndexedDB on module initialization
+const initMessages = async () => {
+  try {
+    const storedMessages = await db.messages.orderBy('timestamp').toArray()
+    messages.value = storedMessages
+  } catch (error) {
+    console.error('Failed to load messages from IndexedDB:', error)
+  }
+}
+
+// Initialize messages immediately
+initMessages()
+
+// Watch messages and save to IndexedDB
+watch(messages, async (newMessages) => {
+  try {
+    // Clear and re-add all messages (simple approach)
+    await db.messages.clear()
+    if (newMessages.length > 0) {
+      await db.messages.bulkAdd(newMessages)
+    }
+  } catch (error) {
+    console.error('Failed to save messages to IndexedDB:', error)
+  }
+}, { deep: true })
 
 export function useChat() {
-  const messages = ref([])
-  const isLoading = ref(false)
-
   /**
    * Add a message to the chat
    */
@@ -45,8 +79,13 @@ export function useChat() {
   /**
    * Clear all messages
    */
-  const clearMessages = () => {
+  const clearMessages = async () => {
     messages.value = []
+    try {
+      await db.messages.clear()
+    } catch (error) {
+      console.error('Failed to clear messages from IndexedDB:', error)
+    }
   }
 
   /**

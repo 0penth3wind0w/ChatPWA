@@ -3,11 +3,13 @@ import { ref } from 'vue'
 import SettingsForm from '../components/SettingsForm.vue'
 import { useStorage } from '../composables/useStorage.js'
 import { useApi } from '../composables/useApi.js'
+import { useChat } from '../composables/useChat.js'
 
 const emit = defineEmits(['navigate'])
 
 const { clearConfig } = useStorage()
 const { testConnection } = useApi()
+const { clearMessages } = useChat()
 const testStatus = ref(null) // null, 'success', or 'error'
 const testMessage = ref('')
 
@@ -37,10 +39,9 @@ const handleTest = async (testConfig) => {
   }
 }
 
-const handleClearHistory = () => {
+const handleClearHistory = async () => {
   if (confirm('Are you sure you want to clear all chat history? This cannot be undone.')) {
-    // TODO: Implement clear chat history in Phase 5
-    console.log('Clear chat history')
+    await clearMessages()
   }
 }
 

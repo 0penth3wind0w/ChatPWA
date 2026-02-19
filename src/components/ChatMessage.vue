@@ -1,5 +1,23 @@
 <script setup>
 import { computed } from 'vue'
+import { marked } from 'marked'
+import hljs from 'highlight.js'
+
+// Configure marked to use highlight.js for code blocks
+marked.setOptions({
+  highlight: function(code, lang) {
+    if (lang && hljs.getLanguage(lang)) {
+      try {
+        return hljs.highlight(code, { language: lang }).value
+      } catch (err) {
+        console.error('Highlight error:', err)
+      }
+    }
+    return hljs.highlightAuto(code).value
+  },
+  breaks: true,
+  gfm: true
+})
 
 const props = defineProps({
   message: {
@@ -19,6 +37,14 @@ const formatTime = (timestamp) => {
   const date = new Date(timestamp)
   return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
 }
+
+// Render markdown for assistant messages
+const renderedContent = computed(() => {
+  if (isAssistant.value) {
+    return marked.parse(props.message.content)
+  }
+  return props.message.content
+})
 </script>
 
 <template>
@@ -31,9 +57,10 @@ const formatTime = (timestamp) => {
       <p class="text-xs font-semibold text-forest-green mb-2">
         AI Assistant
       </p>
-      <p class="text-base text-text-primary leading-relaxed whitespace-pre-wrap">
-        {{ message.content }}
-      </p>
+      <div
+        class="markdown-content text-base text-text-primary"
+        v-html="renderedContent"
+      />
       <p v-if="message.timestamp" class="text-xs text-text-tertiary mt-2">
         {{ formatTime(message.timestamp) }}
       </p>
