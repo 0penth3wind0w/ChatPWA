@@ -121,7 +121,7 @@ export function useApi() {
       size: config.imageSize || '1024x1024',
       quality: config.imageQuality || 'standard',
       style: config.imageStyle || 'vivid',
-      response_format: 'url'
+      response_format: 'b64_json'
     }
   }
 
@@ -149,6 +149,7 @@ export function useApi() {
 
             try {
               const parsed = JSON.parse(data)
+              console.log('[DEBUG] Streaming chunk:', parsed)
 
               // Handle different provider formats
               if (provider === 'openai') {
@@ -177,6 +178,7 @@ export function useApi() {
    */
   const handleStandardResponse = async (response, provider = 'openai') => {
     const data = await response.json()
+    console.log('[DEBUG] Standard response data:', data)
 
     if (provider === 'openai') {
       return data.choices?.[0]?.message?.content || ''
@@ -237,8 +239,17 @@ export function useApi() {
         body: JSON.stringify(requestBody)
       })
 
+      console.log('[DEBUG] Chat API Response:', {
+        status: response.status,
+        statusText: response.statusText,
+        headers: Object.fromEntries(response.headers.entries()),
+        provider,
+        endpoint
+      })
+
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}))
+        console.log('[DEBUG] Chat API Error Response:', errorData)
         throw new Error(errorData.error?.message || errorData.message || `API Error: ${response.status} ${response.statusText}`)
       }
 
@@ -247,7 +258,9 @@ export function useApi() {
         await handleStreamingResponse(response, onChunk, provider)
         return null
       } else {
-        return await handleStandardResponse(response, provider)
+        const result = await handleStandardResponse(response, provider)
+        console.log('[DEBUG] Chat API Success Response:', result)
+        return result
       }
     } catch (err) {
       error.value = err.message
@@ -277,13 +290,33 @@ export function useApi() {
         body: JSON.stringify(requestBody)
       })
 
+      console.log('[DEBUG] Image API Response:', {
+        status: response.status,
+        statusText: response.statusText,
+        headers: Object.fromEntries(response.headers.entries()),
+        endpoint
+      })
+
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}))
+        console.log('[DEBUG] Image API Error Response:', errorData)
         throw new Error(errorData.error?.message || errorData.message || `API Error: ${response.status} ${response.statusText}`)
       }
 
       const data = await response.json()
-      return data.data || []
+      console.log('[DEBUG] Image API Success Response:', data)
+
+      // Convert base64 responses to data URLs if needed
+      const images = data.data || []
+      return images.map(img => {
+        if (img.b64_json) {
+          return {
+            ...img,
+            url: `data:image/png;base64,${img.b64_json}`
+          }
+        }
+        return img
+      })
     } catch (err) {
       error.value = err.message
       throw err

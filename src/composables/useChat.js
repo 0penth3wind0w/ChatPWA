@@ -30,7 +30,14 @@ watch(messages, async (newMessages) => {
     // Clear and re-add all messages (simple approach)
     await db.messages.clear()
     if (newMessages.length > 0) {
-      await db.messages.bulkAdd(newMessages)
+      // Convert to plain objects to avoid DataCloneError
+      const plainMessages = newMessages.map(msg => ({
+        id: msg.id,
+        role: msg.role,
+        content: msg.content,
+        timestamp: msg.timestamp
+      }))
+      await db.messages.bulkAdd(plainMessages)
     }
   } catch (error) {
     console.error('Failed to save messages to IndexedDB:', error)

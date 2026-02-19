@@ -53,7 +53,7 @@ const handleBack = () => {
 <template>
   <div class="min-h-screen w-full flex flex-col bg-bg-primary">
     <!-- Content Wrapper -->
-    <div class="flex-1 flex flex-col px-6 gap-6 pb-6">
+    <div class="flex-1 flex flex-col px-6 pt-6 gap-6 pb-6">
       <!-- Header -->
       <div class="flex items-center justify-between w-full">
         <button

@@ -13,6 +13,9 @@ const token = ref(config.value.token || '')
 const provider = ref(config.value.provider || 'openai')
 const chatPath = ref(config.value.chatPath || '/chat/completions')
 const enableStreaming = ref(config.value.enableStreaming || false)
+const imageModel = ref(config.value.imageModel || 'dall-e-3')
+const imageSize = ref(config.value.imageSize || '1024x1024')
+const imageQuality = ref(config.value.imageQuality || 'standard')
 const errors = ref({})
 const testing = ref(false)
 
@@ -24,6 +27,9 @@ onMounted(() => {
   provider.value = config.value.provider || 'openai'
   chatPath.value = config.value.chatPath || '/chat/completions'
   enableStreaming.value = config.value.enableStreaming || false
+  imageModel.value = config.value.imageModel || 'dall-e-3'
+  imageSize.value = config.value.imageSize || '1024x1024'
+  imageQuality.value = config.value.imageQuality || 'standard'
 })
 
 // Auto-save settings when any field changes (immediately)
@@ -36,13 +42,16 @@ const autoSave = () => {
       token: token.value.trim(),
       provider: provider.value,
       chatPath: chatPath.value,
-      enableStreaming: enableStreaming.value
+      enableStreaming: enableStreaming.value,
+      imageModel: imageModel.value,
+      imageSize: imageSize.value,
+      imageQuality: imageQuality.value
     })
   }
 }
 
 // Watch all fields for changes
-watch([endpoint, model, token, provider, chatPath, enableStreaming], autoSave)
+watch([endpoint, model, token, provider, chatPath, enableStreaming, imageModel, imageSize, imageQuality], autoSave)
 
 const isValid = computed(() => {
   return endpoint.value.trim() && model.value.trim() && token.value.trim()
@@ -226,6 +235,54 @@ const handleTest = async () => {
         <label for="streaming" class="text-xs text-text-secondary">
           Enable streaming responses (experimental)
         </label>
+      </div>
+
+      <!-- Divider -->
+      <div class="w-full h-px bg-border-subtle my-2"></div>
+      <p class="text-xs font-medium text-text-tertiary mb-2">Image Generation Settings</p>
+
+      <!-- Image Model -->
+      <div class="w-full space-y-2">
+        <label class="text-xs font-medium text-text-tertiary">
+          Image Model
+        </label>
+        <input
+          v-model="imageModel"
+          type="text"
+          placeholder="dall-e-3"
+          class="input-field text-sm h-10"
+        />
+        <p class="text-xs text-text-tertiary">
+          e.g., dall-e-2, dall-e-3, or your custom image model
+        </p>
+      </div>
+
+      <!-- Image Size -->
+      <div class="w-full space-y-2">
+        <label class="text-xs font-medium text-text-tertiary">
+          Image Size
+        </label>
+        <select v-model="imageSize" class="input-field text-sm h-10">
+          <option value="256x256">256x256</option>
+          <option value="512x512">512x512</option>
+          <option value="1024x1024">1024x1024</option>
+          <option value="1792x1024">1792x1024 (landscape)</option>
+          <option value="1024x1792">1024x1792 (portrait)</option>
+        </select>
+        <p class="text-xs text-text-tertiary">
+          Larger sizes only available with DALL-E 3
+        </p>
+      </div>
+
+      <!-- Image Quality -->
+      <div class="w-full space-y-2">
+        <label class="text-xs font-medium text-text-tertiary">
+          Image Quality
+        </label>
+        <select v-model="imageQuality" class="input-field text-sm h-10">
+          <option value="standard">Standard</option>
+          <option value="hd">HD (DALL-E 3 only)</option>
+        </select>
       </div>
     </div>
 

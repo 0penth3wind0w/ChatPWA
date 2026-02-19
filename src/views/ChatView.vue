@@ -89,16 +89,13 @@ watch(messages, () => {
 <template>
   <div class="min-h-screen w-full flex flex-col bg-bg-primary">
     <!-- Content Wrapper -->
-    <div class="flex-1 flex flex-col px-6 gap-5">
+    <div class="flex-1 flex flex-col px-6 pt-6 gap-5">
       <!-- Header -->
       <div class="flex items-center justify-between w-full">
         <div class="flex flex-col gap-1">
           <h1 class="text-2xl font-semibold text-text-primary -tracking-tight">
             AI Chat
           </h1>
-          <p class="text-sm font-medium text-forest-green">
-            Connected
-          </p>
         </div>
         <button
           @click="handleSettings"

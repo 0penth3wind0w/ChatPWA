@@ -9,7 +9,7 @@ const handleGetStarted = () => {
 <template>
   <div class="min-h-screen w-full flex flex-col bg-bg-primary">
     <!-- Content Wrapper -->
-    <div class="flex-1 flex flex-col items-center px-6 pt-15 gap-10">
+    <div class="flex-1 flex flex-col items-center px-6 pt-20 gap-10">
       <!-- Logo -->
       <div class="w-20 h-20 bg-forest-green rounded-full flex items-center justify-center shadow-[0_4px_16px_rgba(61,138,90,0.25)]">
         <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
