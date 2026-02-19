@@ -2,9 +2,7 @@
 
 An elegant Progressive Web App for AI chat with custom API endpoints. Connect to OpenAI, Anthropic, Google Gemini, or any compatible API by configuring your endpoint URL, model name, and authentication token.
 
-🚀 **Live Demo:** [https://0penth3wind0w.github.io/ChatPWA/](https://0penth3wind0w.github.io/ChatPWA/)
-
-![ChatPWA Screenshot](UI.pen)
+🚀 **Live:** [https://0penth3wind0w.github.io/ChatPWA/](https://0penth3wind0w.github.io/ChatPWA/)
 
 ## Features
 
