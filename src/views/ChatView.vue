@@ -1,9 +1,37 @@
 <script setup>
+import { ref, watch } from 'vue'
+import ChatMessage from '../components/ChatMessage.vue'
+import MessageInput from '../components/MessageInput.vue'
+import EmptyState from '../components/EmptyState.vue'
+import { useChat } from '../composables/useChat.js'
+
 const emit = defineEmits(['navigate'])
+
+const { messages, hasMessages, addUserMessage, addAssistantMessage, scrollToBottom } = useChat()
+const messagesContainer = ref(null)
 
 const handleSettings = () => {
   emit('navigate', 'settings')
 }
+
+const handleSendMessage = (content) => {
+  // Add user message
+  addUserMessage(content)
+
+  // Scroll to bottom after user message
+  scrollToBottom(messagesContainer)
+
+  // Simulate AI response (will be replaced with actual API call in Phase 4)
+  setTimeout(() => {
+    addAssistantMessage('This is a placeholder response. API integration will be implemented in Phase 4.')
+    scrollToBottom(messagesContainer)
+  }, 500)
+}
+
+// Watch for new messages and auto-scroll
+watch(messages, () => {
+  scrollToBottom(messagesContainer)
+}, { deep: true })
 </script>
 
 <template>
@@ -47,22 +75,24 @@ const handleSettings = () => {
         </button>
       </div>
 
-      <!-- Placeholder - Chat interface will be implemented in Phase 3 -->
-      <div class="flex-1 flex items-center justify-center">
-        <div class="card text-center max-w-sm">
-          <div class="w-14 h-14 bg-light-green rounded-full flex items-center justify-center mx-auto mb-4">
-            <svg class="w-6 h-6 text-forest-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/>
-            </svg>
-          </div>
-          <p class="text-base font-semibold text-text-primary mb-2">
-            Chat Interface Coming Soon
-          </p>
-          <p class="text-sm text-text-tertiary leading-relaxed">
-            The chat interface will be implemented in Phase 3
-          </p>
-        </div>
+      <!-- Messages Container -->
+      <div
+        ref="messagesContainer"
+        class="flex-1 flex flex-col gap-4 overflow-y-auto pb-4"
+      >
+        <!-- Empty State -->
+        <EmptyState v-if="!hasMessages" />
+
+        <!-- Messages List -->
+        <ChatMessage
+          v-for="message in messages"
+          :key="message.id"
+          :message="message"
+        />
       </div>
     </div>
+
+    <!-- Message Input (fixed at bottom) -->
+    <MessageInput @send="handleSendMessage" />
   </div>
 </template>
