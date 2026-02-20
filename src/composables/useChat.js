@@ -1,15 +1,18 @@
-import { ref, computed, nextTick, watch } from 'vue'
+import { ref, computed, nextTick } from 'vue'
 import Dexie from 'dexie'
 
 // Initialize Dexie database
 const db = new Dexie('ChatPWA')
 db.version(1).stores({
-  messages: '++id, timestamp, role, content, model'
+  messages: 'id, timestamp, role, content, model'
 })
 
 // Shared state (singleton)
 const messages = ref([])
 const isLoading = ref(false)
+
+// Track pending database operations to avoid race conditions
+let pendingDbOperations = Promise.resolve()
 
 // Load messages from IndexedDB on module initialization
 const initMessages = async () => {
@@ -24,26 +27,38 @@ const initMessages = async () => {
 // Initialize messages immediately
 initMessages()
 
-// Watch messages and save to IndexedDB
-watch(messages, async (newMessages) => {
-  try {
-    // Clear and re-add all messages (simple approach)
-    await db.messages.clear()
-    if (newMessages.length > 0) {
-      // Convert to plain objects to avoid DataCloneError
-      const plainMessages = newMessages.map(msg => ({
-        id: msg.id,
-        role: msg.role,
-        content: msg.content,
-        timestamp: msg.timestamp,
-        model: msg.model
-      }))
-      await db.messages.bulkAdd(plainMessages)
+// Helper to save a single message to IndexedDB
+const saveMessageToDb = async (message) => {
+  // Queue the operation to prevent race conditions
+  pendingDbOperations = pendingDbOperations.then(async () => {
+    try {
+      const plainMessage = {
+        id: message.id,
+        role: message.role,
+        content: message.content,
+        timestamp: message.timestamp,
+        model: message.model
+      }
+      await db.messages.put(plainMessage)
+    } catch (error) {
+      console.error('Failed to save message to IndexedDB:', error)
     }
-  } catch (error) {
-    console.error('Failed to save messages to IndexedDB:', error)
-  }
-}, { deep: true })
+  })
+  return pendingDbOperations
+}
+
+// Helper to update an existing message in IndexedDB
+const updateMessageInDb = async (messageId, updates) => {
+  // Queue the operation to prevent race conditions
+  pendingDbOperations = pendingDbOperations.then(async () => {
+    try {
+      await db.messages.update(messageId, updates)
+    } catch (error) {
+      console.error('Failed to update message in IndexedDB:', error)
+    }
+  })
+  return pendingDbOperations
+}
 
 export function useChat() {
   /**
@@ -51,13 +66,15 @@ export function useChat() {
    */
   const addMessage = (role, content, model = null) => {
     const message = {
-      id: Date.now().toString(),
+      id: Date.now().toString() + Math.random().toString(36).substr(2, 9), // More unique ID
       role, // 'user' or 'assistant'
       content,
       timestamp: Date.now(),
       model // Model name for assistant messages
     }
     messages.value.push(message)
+    // Save to IndexedDB incrementally
+    saveMessageToDb(message)
     return message
   }
 
@@ -75,6 +92,9 @@ export function useChat() {
     return addMessage('assistant', content, model)
   }
 
+  // Debounce streaming updates to avoid excessive DB writes
+  let updateDebounceTimer = null
+
   /**
    * Update the last assistant message (for streaming)
    */
@@ -82,6 +102,12 @@ export function useChat() {
     const lastMessage = messages.value[messages.value.length - 1]
     if (lastMessage && lastMessage.role === 'assistant') {
       lastMessage.content = content
+
+      // Debounce DB updates during streaming (300ms)
+      clearTimeout(updateDebounceTimer)
+      updateDebounceTimer = setTimeout(() => {
+        updateMessageInDb(lastMessage.id, { content })
+      }, 300)
     }
   }
 
