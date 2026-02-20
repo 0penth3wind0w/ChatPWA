@@ -59,6 +59,11 @@ const autoSave = () => {
   }
 }
 
+// Clear search API key when search provider changes
+watch(searchProvider, () => {
+  searchApiKey.value = ''
+})
+
 // Watch all fields for changes
 watch([endpoint, model, token, provider, chatPath, enableStreaming, systemPrompt, imageModel, imageSize, imageQuality, searchProvider, searchApiKey], autoSave)
 
