@@ -7,7 +7,6 @@ import { useChat } from '../composables/useChat.js'
 
 const emit = defineEmits(['navigate'])
 
-const { clearConfig } = useStorage()
 const { testConnection } = useApi()
 const { clearMessages } = useChat()
 const testStatus = ref(null) // null, 'success', or 'error'

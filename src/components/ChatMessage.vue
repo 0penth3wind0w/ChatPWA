@@ -2,6 +2,7 @@
 import { computed } from 'vue'
 import { marked } from 'marked'
 import hljs from 'highlight.js'
+import DOMPurify from 'dompurify'
 
 // Configure marked to use highlight.js for code blocks
 marked.setOptions({
@@ -38,10 +39,11 @@ const formatTime = (timestamp) => {
   return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
 }
 
-// Render markdown for assistant messages
+// Render and sanitize markdown for assistant messages
 const renderedContent = computed(() => {
   if (isAssistant.value) {
-    return marked.parse(props.message.content)
+    const rawHtml = marked.parse(props.message.content)
+    return DOMPurify.sanitize(rawHtml)
   }
   return props.message.content
 })

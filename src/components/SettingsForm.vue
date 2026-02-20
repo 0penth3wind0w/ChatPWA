@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, watch, onMounted } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { useStorage } from '../composables/useStorage.js'
 
 const emit = defineEmits(['test'])
@@ -22,41 +22,29 @@ const searchApiKey = ref(config.value.searchApiKey || '')
 const errors = ref({})
 const testing = ref(false)
 
-onMounted(() => {
-  // Update local refs from shared config in case it loaded after component creation
-  endpoint.value = config.value.endpoint || ''
-  model.value = config.value.model || ''
-  token.value = config.value.token || ''
-  provider.value = config.value.provider || 'openai'
-  chatPath.value = config.value.chatPath || '/chat/completions'
-  enableStreaming.value = config.value.enableStreaming || false
-  systemPrompt.value = config.value.systemPrompt || ''
-  imageModel.value = config.value.imageModel || 'dall-e-3'
-  imageSize.value = config.value.imageSize || '1024x1024'
-  imageQuality.value = config.value.imageQuality || 'standard'
-  searchProvider.value = config.value.searchProvider || 'brave'
-  searchApiKey.value = config.value.searchApiKey || ''
-})
-
-// Auto-save settings when any field changes (immediately)
-const autoSave = () => {
-  // Only auto-save if basic fields are filled
-  if (endpoint.value.trim() && model.value.trim() && token.value.trim()) {
-    saveConfig({
-      endpoint: endpoint.value.trim(),
-      model: model.value.trim(),
-      token: token.value.trim(),
-      provider: provider.value,
-      chatPath: chatPath.value,
-      enableStreaming: enableStreaming.value,
-      systemPrompt: systemPrompt.value,
-      imageModel: imageModel.value,
-      imageSize: imageSize.value,
-      imageQuality: imageQuality.value,
-      searchProvider: searchProvider.value,
-      searchApiKey: searchApiKey.value
-    })
-  }
+// Debounce helper
+let saveTimeout = null
+const debouncedAutoSave = () => {
+  clearTimeout(saveTimeout)
+  saveTimeout = setTimeout(() => {
+    // Only auto-save if basic fields are filled
+    if (endpoint.value.trim() && model.value.trim() && token.value.trim()) {
+      saveConfig({
+        endpoint: endpoint.value.trim(),
+        model: model.value.trim(),
+        token: token.value.trim(),
+        provider: provider.value,
+        chatPath: chatPath.value,
+        enableStreaming: enableStreaming.value,
+        systemPrompt: systemPrompt.value,
+        imageModel: imageModel.value,
+        imageSize: imageSize.value,
+        imageQuality: imageQuality.value,
+        searchProvider: searchProvider.value,
+        searchApiKey: searchApiKey.value
+      })
+    }
+  }, 500)
 }
 
 // Clear search API key when search provider changes
@@ -64,8 +52,8 @@ watch(searchProvider, () => {
   searchApiKey.value = ''
 })
 
-// Watch all fields for changes
-watch([endpoint, model, token, provider, chatPath, enableStreaming, systemPrompt, imageModel, imageSize, imageQuality, searchProvider, searchApiKey], autoSave)
+// Watch all fields for changes with debounce
+watch([endpoint, model, token, provider, chatPath, enableStreaming, systemPrompt, imageModel, imageSize, imageQuality, searchProvider, searchApiKey], debouncedAutoSave)
 
 const isValid = computed(() => {
   return endpoint.value.trim() && model.value.trim() && token.value.trim()
@@ -104,20 +92,13 @@ const validateToken = () => {
     return false
   }
 
-  // Check if token starts with 'Bearer ' and remove it
+  // Check if token starts with 'Bearer ' and warn user to remove it
   if (trimmedToken.toLowerCase().startsWith('bearer ')) {
     errors.value.token = 'Remove "Bearer " prefix from token'
     return false
   }
 
-  // JWT tokens should have 3 segments separated by dots
-  const segments = trimmedToken.split('.')
-  if (segments.length !== 3) {
-    errors.value.token = `Invalid token format (found ${segments.length} segments, expected 3)`
-    return false
-  }
-
-  // Check for whitespace
+  // Check for whitespace (common copy-paste error)
   if (/\s/.test(trimmedToken)) {
     errors.value.token = 'Token contains whitespace - please check for line breaks or spaces'
     return false

@@ -90,28 +90,10 @@ export function useStorage() {
     return !!(config.value.endpoint && config.value.model && config.value.token)
   }
 
-  /**
-   * Get preset configurations (can be customized per deployment)
-   */
-  const getPresets = () => {
-    return {
-      // Add your custom presets here
-      // Example:
-      // 'openai-gpt4': {
-      //   name: 'OpenAI GPT-4',
-      //   endpoint: 'https://api.openai.com/v1',
-      //   model: 'gpt-4',
-      //   chatPath: '/chat/completions',
-      //   provider: 'openai'
-      // }
-    }
-  }
-
   return {
     config,
     saveConfig,
     clearConfig,
-    isConfigured,
-    getPresets
+    isConfigured
   }
 }

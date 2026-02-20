@@ -13,7 +13,7 @@ const emit = defineEmits(['navigate'])
 
 const { messages, hasMessages, addUserMessage, addAssistantMessage, updateLastAssistantMessage, scrollToBottom } = useChat()
 const { config } = useStorage()
-const { sendChatMessage, generateImage, isLoading, error } = useApi()
+const { sendChatMessage, generateImage } = useApi()
 const { searchWeb, fetchWebContent } = useWebTools()
 const messagesContainer = ref(null)
 const isTyping = ref(false)
@@ -109,12 +109,24 @@ const handleSendMessage = async (content) => {
         scrollToBottom(messagesContainer)
 
         try {
-          // Fetch content from all URLs
+          // Fetch content from all URLs (use allSettled to handle partial failures)
           const fetchPromises = urls.map(url => fetchWebContent(url.trim()))
-          const fetchedContents = await Promise.all(fetchPromises)
+          const results = await Promise.allSettled(fetchPromises)
 
-          // Enhance the user message with fetched content
-          enhancedContent = content + '\n\n' + fetchedContents.join('\n\n---\n\n')
+          // Extract successful fetches, log failures
+          const fetchedContents = results
+            .filter(result => result.status === 'fulfilled')
+            .map(result => result.value)
+
+          const failedCount = results.filter(r => r.status === 'rejected').length
+          if (failedCount > 0) {
+            console.warn(`Failed to fetch ${failedCount} of ${urls.length} URLs`)
+          }
+
+          // Enhance the user message with successfully fetched content
+          if (fetchedContents.length > 0) {
+            enhancedContent = content + '\n\n' + fetchedContents.join('\n\n---\n\n')
+          }
 
           fetchingStatus.value = ''
           isTyping.value = false
