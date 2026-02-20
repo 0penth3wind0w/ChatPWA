@@ -24,6 +24,30 @@ const handleSettings = () => {
   emit('navigate', 'settings')
 }
 
+const detectImageIntent = (message) => {
+  // Keywords that strongly indicate image generation intent
+  const imageKeywords = [
+    'generate image', 'create image', 'make image', 'draw',
+    'generate picture', 'create picture', 'make picture',
+    'generate photo', 'create photo', 'make photo',
+    'show me', 'visualize', 'illustrate',
+    'paint', 'sketch', 'render'
+  ]
+
+  const lowerMessage = message.toLowerCase()
+
+  // Check for explicit image keywords
+  const hasImageKeyword = imageKeywords.some(keyword => lowerMessage.includes(keyword))
+
+  // Common patterns: "a photo of", "an image of", "picture of"
+  const hasImagePattern = /\b(a |an )?(image|picture|photo|drawing|illustration|painting) of\b/i.test(message)
+
+  // Pattern: "what would X look like"
+  const hasVisualizationPattern = /what (would|does|will) .+ look like/i.test(message)
+
+  return hasImageKeyword || hasImagePattern || hasVisualizationPattern
+}
+
 const handleSendMessage = async (content) => {
   // Add user message
   addUserMessage(content)
@@ -36,6 +60,9 @@ const handleSendMessage = async (content) => {
     const imageCommandMatch = content.match(/^\/img\s+(.+)/i)
     const searchCommandMatch = content.match(/^\/search\s+(.+)/i)
     const fetchCommandMatch = content.match(/^\/fetch\s+(.+)/i)
+
+    // Detect image generation intent even without /img command
+    const hasImageIntent = !imageCommandMatch && detectImageIntent(content)
 
     if (searchCommandMatch) {
       // Handle web search
@@ -73,9 +100,26 @@ const handleSendMessage = async (content) => {
         addAssistantMessage(`Error fetching: ${err.message}`, config.value.model)
         scrollToBottom(messagesContainer)
       }
-    } else if (imageCommandMatch) {
-      // Handle image generation
-      const prompt = imageCommandMatch[1]
+    } else if (imageCommandMatch || hasImageIntent) {
+      // Handle image generation (explicit /img or detected intent)
+      let prompt
+
+      if (imageCommandMatch) {
+        // Explicit /img command
+        prompt = imageCommandMatch[1]
+      } else {
+        // Detected intent - extract the description
+        prompt = content
+          .replace(/^(generate|create|make|draw|show me|visualize|illustrate|paint|sketch|render)\s+(an?\s+)?(image|picture|photo|drawing|illustration|painting)\s+(of\s+)?/i, '')
+          .replace(/^what (would|does|will)\s+(.+)\s+look like/i, '$2')
+          .trim()
+
+        // If extraction failed, use the whole message
+        if (!prompt || prompt === content) {
+          prompt = content
+        }
+      }
+
       isTyping.value = true
       scrollToBottom(messagesContainer)
 
