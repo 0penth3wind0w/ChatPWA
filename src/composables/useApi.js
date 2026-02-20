@@ -1,4 +1,8 @@
+import { ref } from 'vue'
+
 export function useApi() {
+  const isLoading = ref(false)
+  const error = ref(null)
 
   /**
    * Build OpenAI-compatible request body
