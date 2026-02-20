@@ -96,58 +96,26 @@ export function useWebTools() {
   }
 
   /**
-   * Fetch web page content
+   * Fetch web page content using Jina AI Reader
    */
-  const fetchWebContent = async (url, config) => {
+  const fetchWebContent = async (url) => {
     isLoading.value = true
     error.value = null
 
     try {
-      let content = ''
-
-      if (config.fetchMethod === 'jina') {
-        // Jina AI Reader - converts web pages to clean markdown
-        const jinaUrl = `https://r.jina.ai/${url}`
-        const response = await fetch(jinaUrl, {
-          headers: {
-            'Accept': 'text/plain'
-          }
-        })
-
-        if (!response.ok) {
-          throw new Error(`Jina Reader error: ${response.status}`)
+      // Jina AI Reader - converts web pages to clean markdown
+      const jinaUrl = `https://r.jina.ai/${url}`
+      const response = await fetch(jinaUrl, {
+        headers: {
+          'Accept': 'text/plain'
         }
+      })
 
-        content = await response.text()
-        console.log('[DEBUG] Jina Reader Response:', content.substring(0, 500))
-
-      } else if (config.fetchMethod === 'cors-proxy') {
-        // CORS proxy
-        const proxyUrl = config.corsProxyUrl + encodeURIComponent(url)
-        const response = await fetch(proxyUrl)
-
-        if (!response.ok) {
-          throw new Error(`CORS proxy error: ${response.status}`)
-        }
-
-        const html = await response.text()
-        // Basic HTML to text conversion
-        content = htmlToText(html)
-        console.log('[DEBUG] CORS Proxy Response:', content.substring(0, 500))
-
-      } else if (config.fetchMethod === 'custom' && config.fetchEndpoint) {
-        // Custom fetch endpoint
-        const response = await fetch(`${config.fetchEndpoint}?url=${encodeURIComponent(url)}`)
-
-        if (!response.ok) {
-          throw new Error(`Custom fetch error: ${response.status}`)
-        }
-
-        content = await response.text()
-
-      } else {
-        throw new Error('No fetch method configured')
+      if (!response.ok) {
+        throw new Error(`Failed to fetch web content: ${response.status}`)
       }
+
+      const content = await response.text()
 
       // Add metadata header
       const result = `# Web Content: ${url}\n\n${content}`
@@ -181,31 +149,6 @@ export function useWebTools() {
     })
 
     return markdown
-  }
-
-  /**
-   * Basic HTML to text conversion
-   */
-  const htmlToText = (html) => {
-    // Remove scripts and styles
-    let text = html.replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')
-    text = text.replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')
-
-    // Remove HTML tags
-    text = text.replace(/<[^>]+>/g, ' ')
-
-    // Decode HTML entities
-    text = text.replace(/&nbsp;/g, ' ')
-    text = text.replace(/&amp;/g, '&')
-    text = text.replace(/&lt;/g, '<')
-    text = text.replace(/&gt;/g, '>')
-    text = text.replace(/&quot;/g, '"')
-
-    // Clean up whitespace
-    text = text.replace(/\s+/g, ' ').trim()
-
-    // Limit length
-    return text.substring(0, 10000)
   }
 
   return {

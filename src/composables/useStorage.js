@@ -25,10 +25,7 @@ const DEFAULT_CONFIG = {
   // Web Tools Configuration
   searchProvider: 'brave', // 'brave', 'tavily', or 'custom'
   searchApiKey: '',
-  searchEndpoint: '', // For custom search provider
-  fetchMethod: 'jina', // 'jina', 'cors-proxy', or 'custom'
-  corsProxyUrl: 'https://api.allorigins.win/raw?url=',
-  fetchEndpoint: '' // For custom fetch method
+  searchEndpoint: '' // For custom search provider
 }
 
 // Shared config state (singleton)

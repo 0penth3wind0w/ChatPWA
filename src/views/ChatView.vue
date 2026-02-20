@@ -62,7 +62,7 @@ const handleSendMessage = async (content) => {
       scrollToBottom(messagesContainer)
 
       try {
-        const webContent = await fetchWebContent(url, config.value)
+        const webContent = await fetchWebContent(url)
         isTyping.value = false
 
         // Add fetched content as assistant message
@@ -110,7 +110,7 @@ const handleSendMessage = async (content) => {
 
         try {
           // Fetch content from all URLs
-          const fetchPromises = urls.map(url => fetchWebContent(url.trim(), config.value))
+          const fetchPromises = urls.map(url => fetchWebContent(url.trim()))
           const fetchedContents = await Promise.all(fetchPromises)
 
           // Enhance the user message with fetched content

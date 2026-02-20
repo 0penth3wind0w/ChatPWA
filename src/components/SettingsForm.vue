@@ -19,7 +19,6 @@ const imageQuality = ref(config.value.imageQuality || 'standard')
 const systemPrompt = ref(config.value.systemPrompt || '')
 const searchProvider = ref(config.value.searchProvider || 'brave')
 const searchApiKey = ref(config.value.searchApiKey || '')
-const fetchMethod = ref(config.value.fetchMethod || 'jina')
 const errors = ref({})
 const testing = ref(false)
 
@@ -37,7 +36,6 @@ onMounted(() => {
   imageQuality.value = config.value.imageQuality || 'standard'
   searchProvider.value = config.value.searchProvider || 'brave'
   searchApiKey.value = config.value.searchApiKey || ''
-  fetchMethod.value = config.value.fetchMethod || 'jina'
 })
 
 // Auto-save settings when any field changes (immediately)
@@ -56,14 +54,13 @@ const autoSave = () => {
       imageSize: imageSize.value,
       imageQuality: imageQuality.value,
       searchProvider: searchProvider.value,
-      searchApiKey: searchApiKey.value,
-      fetchMethod: fetchMethod.value
+      searchApiKey: searchApiKey.value
     })
   }
 }
 
 // Watch all fields for changes
-watch([endpoint, model, token, provider, chatPath, enableStreaming, systemPrompt, imageModel, imageSize, imageQuality, searchProvider, searchApiKey, fetchMethod], autoSave)
+watch([endpoint, model, token, provider, chatPath, enableStreaming, systemPrompt, imageModel, imageSize, imageQuality, searchProvider, searchApiKey], autoSave)
 
 const isValid = computed(() => {
   return endpoint.value.trim() && model.value.trim() && token.value.trim()
@@ -297,21 +294,6 @@ const handleTest = async () => {
         />
         <p class="text-xs text-text-tertiary">
           Required for Brave or Tavily search
-        </p>
-      </div>
-
-      <!-- Fetch Method -->
-      <div class="w-full space-y-2">
-        <label class="text-xs font-medium text-text-tertiary">
-          Fetch Method
-        </label>
-        <select v-model="fetchMethod" class="input-field text-sm h-10">
-          <option value="jina">Jina AI Reader (Free)</option>
-          <option value="cors-proxy">CORS Proxy</option>
-          <option value="custom">Custom</option>
-        </select>
-        <p class="text-xs text-text-tertiary">
-          Method for /fetch command to retrieve web content
         </p>
       </div>
 
