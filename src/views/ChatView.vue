@@ -17,6 +17,7 @@ const { sendChatMessage, generateImage, isLoading, error } = useApi()
 const { searchWeb, fetchWebContent } = useWebTools()
 const messagesContainer = ref(null)
 const isTyping = ref(false)
+const fetchingStatus = ref('')
 
 
 const handleSettings = () => {
@@ -95,11 +96,47 @@ const handleSendMessage = async (content) => {
       scrollToBottom(messagesContainer)
     } else {
       // Handle regular chat message
+      // Detect URLs in the message and fetch their content
+      const urlRegex = /(https?:\/\/[^\s]+)/gi
+      const urls = content.match(urlRegex)
+
+      let enhancedContent = content
+
+      // If URLs are detected, fetch their content
+      if (urls && urls.length > 0) {
+        isTyping.value = true
+        fetchingStatus.value = `Fetching content from ${urls.length} URL${urls.length > 1 ? 's' : ''}...`
+        scrollToBottom(messagesContainer)
+
+        try {
+          // Fetch content from all URLs
+          const fetchPromises = urls.map(url => fetchWebContent(url.trim(), config.value))
+          const fetchedContents = await Promise.all(fetchPromises)
+
+          // Enhance the user message with fetched content
+          enhancedContent = content + '\n\n' + fetchedContents.join('\n\n---\n\n')
+
+          fetchingStatus.value = ''
+          isTyping.value = false
+        } catch (err) {
+          console.error('Error fetching URLs:', err)
+          fetchingStatus.value = ''
+          // Continue with original message if fetch fails
+          isTyping.value = false
+        }
+      }
+
       // Prepare messages for API (convert to OpenAI/Anthropic format)
-      const apiMessages = messages.value.map(msg => ({
+      const apiMessages = messages.value.slice(0, -1).map(msg => ({
         role: msg.role,
         content: msg.content
       }))
+
+      // Add the current message with enhanced content (if URLs were fetched)
+      apiMessages.push({
+        role: 'user',
+        content: enhancedContent
+      })
 
       if (config.value.enableStreaming) {
         // Handle streaming response
@@ -189,8 +226,18 @@ watch(isTyping, () => {
           :message="message"
         />
 
+        <!-- Fetching Status -->
+        <div v-if="fetchingStatus" class="flex items-center gap-2 px-4 py-3 bg-light-green/30 rounded-2xl w-fit">
+          <div class="flex gap-1">
+            <div class="w-2 h-2 bg-forest-green rounded-full typing-dot"></div>
+            <div class="w-2 h-2 bg-forest-green rounded-full typing-dot"></div>
+            <div class="w-2 h-2 bg-forest-green rounded-full typing-dot"></div>
+          </div>
+          <p class="text-sm text-forest-green">{{ fetchingStatus }}</p>
+        </div>
+
         <!-- Typing Indicator -->
-        <TypingIndicator v-if="isTyping" :model="config.model || 'AI Assistant'" />
+        <TypingIndicator v-if="isTyping && !fetchingStatus" :model="config.model || 'AI Assistant'" />
       </div>
     </div>
 
