@@ -11,17 +11,10 @@ const selectedCommandIndex = ref(0)
 // Available slash commands
 const availableCommands = [
   {
-    command: '/image',
-    alias: '/img',
-    description: 'Generate an image from text description',
-    example: '/image a sunset over mountains',
-    icon: 'image'
-  },
-  {
     command: '/img',
     alias: null,
-    description: 'Short alias for /image',
-    example: '/img a cute cat',
+    description: 'Generate an image from text description',
+    example: '/img a sunset over mountains',
     icon: 'image'
   },
   {

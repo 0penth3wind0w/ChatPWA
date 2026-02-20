@@ -33,7 +33,7 @@ const handleSendMessage = async (content) => {
 
   try {
     // Check for slash commands
-    const imageCommandMatch = content.match(/^\/(image|img)\s+(.+)/i)
+    const imageCommandMatch = content.match(/^\/img\s+(.+)/i)
     const searchCommandMatch = content.match(/^\/search\s+(.+)/i)
     const fetchCommandMatch = content.match(/^\/fetch\s+(.+)/i)
 
@@ -75,7 +75,7 @@ const handleSendMessage = async (content) => {
       }
     } else if (imageCommandMatch) {
       // Handle image generation
-      const prompt = imageCommandMatch[2]
+      const prompt = imageCommandMatch[1]
       isTyping.value = true
       scrollToBottom(messagesContainer)
 
