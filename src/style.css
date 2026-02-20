@@ -42,8 +42,14 @@
   box-sizing: border-box;
 }
 
-body {
+html, body {
   margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
   font-family: var(--font-family-sans);
   font-size: 15px;
   line-height: 1.5;
@@ -94,7 +100,8 @@ body {
 }
 
 #app {
-  min-height: 100vh;
+  height: 100vh;
+  overflow: hidden;
 }
 
 /* Button component */
