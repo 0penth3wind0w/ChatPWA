@@ -249,7 +249,7 @@ watch(isTyping, () => {
         </div>
 
         <!-- Typing Indicator -->
-        <TypingIndicator v-if="isTyping && !fetchingStatus" :model="config.model || 'AI Assistant'" />
+        <TypingIndicator v-if="isTyping && !fetchingStatus" />
       </div>
     </div>
 
