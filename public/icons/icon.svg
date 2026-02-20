@@ -6,8 +6,8 @@
   <path d="M256 148C186.144 148 129.333 196.294 129.333 254.667C129.333 286.293 142.507 315.093 164.267 336.853C161.92 355.733 152.917 377.067 152.917 377.067C152.917 377.067 187.307 372.053 209.707 358.4C223.147 362.667 237.867 365.067 253.333 365.067C323.189 365.067 380 316.773 380 258.4C380 200.027 323.189 148 256 148Z"
         fill="white"/>
 
-  <!-- Message dots inside bubble - Larger and more visible -->
-  <circle cx="224" cy="256" r="18" fill="#3D8A5A"/>
+  <!-- Message dots inside bubble - More separated -->
+  <circle cx="210" cy="256" r="18" fill="#3D8A5A"/>
   <circle cx="256" cy="256" r="18" fill="#3D8A5A"/>
-  <circle cx="288" cy="256" r="18" fill="#3D8A5A"/>
+  <circle cx="302" cy="256" r="18" fill="#3D8A5A"/>
 </svg>
