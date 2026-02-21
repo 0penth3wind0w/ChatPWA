@@ -11,7 +11,7 @@ import { useWebTools } from '../composables/useWebTools.js'
 
 const emit = defineEmits(['navigate'])
 
-const { messages, hasMessages, addUserMessage, addAssistantMessage, updateLastAssistantMessage, scrollToBottom } = useChat()
+const { messages, hasMessages, addUserMessage, addAssistantMessage, scrollToBottom } = useChat()
 const { config } = useStorage()
 const { sendChatMessage, generateImage } = useApi()
 const { searchWeb, fetchWebContent } = useWebTools()
