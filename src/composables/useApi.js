@@ -1,9 +1,6 @@
 import { ref } from 'vue'
 
 export function useApi() {
-  const isLoading = ref(false)
-  const error = ref(null)
-
   /**
    * Build OpenAI-compatible request body
    */
@@ -177,9 +174,6 @@ export function useApi() {
    * Send chat message to API
    */
   const sendChatMessage = async (messages, config) => {
-    isLoading.value = true
-    error.value = null
-
     try {
       // Use provider from config
       const provider = config.provider || 'openai'
@@ -252,10 +246,7 @@ export function useApi() {
 
       return await handleStandardResponse(response, provider)
     } catch (err) {
-      error.value = err.message
       throw err
-    } finally {
-      isLoading.value = false
     }
   }
 
@@ -263,9 +254,6 @@ export function useApi() {
    * Generate image from prompt
    */
   const generateImage = async (prompt, config) => {
-    isLoading.value = true
-    error.value = null
-
     try {
       // Build endpoint - replace {model} placeholder if present
       let imagePath = config.imagePath || '/images/generations'
@@ -343,10 +331,7 @@ export function useApi() {
         })
       }
     } catch (err) {
-      error.value = err.message
       throw err
-    } finally {
-      isLoading.value = false
     }
   }
 

@@ -1,16 +1,8 @@
-import { ref } from 'vue'
-
 export function useWebTools() {
-  const isLoading = ref(false)
-  const error = ref(null)
-
   /**
    * Search the web using configured search provider
    */
   const searchWeb = async (query, config) => {
-    isLoading.value = true
-    error.value = null
-
     try {
       let results = []
 
@@ -86,10 +78,7 @@ export function useWebTools() {
 
     } catch (err) {
       console.error('Search error:', err)
-      error.value = err.message
       throw err
-    } finally {
-      isLoading.value = false
     }
   }
 
@@ -97,9 +86,6 @@ export function useWebTools() {
    * Fetch web page content using Jina AI Reader
    */
   const fetchWebContent = async (url) => {
-    isLoading.value = true
-    error.value = null
-
     try {
       // Jina AI Reader - converts web pages to clean markdown
       const jinaUrl = `https://r.jina.ai/${url}`
@@ -121,10 +107,7 @@ export function useWebTools() {
 
     } catch (err) {
       console.error('Fetch error:', err)
-      error.value = err.message
       throw err
-    } finally {
-      isLoading.value = false
     }
   }
 
@@ -150,8 +133,6 @@ export function useWebTools() {
   }
 
   return {
-    isLoading,
-    error,
     searchWeb,
     fetchWebContent
   }
