@@ -113,15 +113,56 @@ export function useApi() {
   /**
    * Build image generation request body
    */
-  const buildImageRequest = (prompt, config) => {
-    return {
-      prompt: prompt,
-      model: config.imageModel || 'dall-e-3',
-      n: config.imageCount || 1,
-      size: config.imageSize || '1024x1024',
-      quality: config.imageQuality || 'standard',
-      style: config.imageStyle || 'vivid',
-      response_format: 'b64_json'
+  const buildImageRequest = (prompt, config, provider) => {
+    if (provider === 'gemini') {
+      // Gemini image generation format
+      const request = {
+        contents: [{
+          role: "user",
+          parts: [{
+            text: prompt
+          }]
+        }]
+      }
+
+      // Add generation config for image generation
+      const generationConfig = {
+        responseModalities: ["IMAGE"]
+      }
+
+      // Use Gemini-specific aspect ratio and resolution settings
+      const imageConfig = {}
+
+      if (config.imageAspectRatio) {
+        imageConfig.aspectRatio = config.imageAspectRatio
+      }
+
+      if (config.imageResolution) {
+        imageConfig.imageSize = config.imageResolution
+      }
+
+      if (Object.keys(imageConfig).length > 0) {
+        generationConfig.imageConfig = imageConfig
+      }
+
+      request.generationConfig = generationConfig
+      return request
+    } else {
+      // OpenAI DALL-E format (default)
+      const requestBody = {
+        prompt: prompt,
+        model: config.imageModel || 'dall-e-3',
+        size: config.imageSize || '1024x1024',
+        quality: config.imageQuality || 'standard',
+        response_format: 'b64_json'
+      }
+
+      // Only add n parameter for DALL-E 2 (DALL-E 3 only supports n=1)
+      if (config.imageModel === 'dall-e-2') {
+        requestBody.n = config.imageCount || 1
+      }
+
+      return requestBody
     }
   }
 
@@ -199,13 +240,8 @@ export function useApi() {
     error.value = null
 
     try {
-      // Determine provider based on chatPath
-      let provider = 'openai'
-      if (config.chatPath?.includes('/messages')) {
-        provider = 'anthropic'
-      } else if (config.chatPath?.includes('generateContent')) {
-        provider = 'gemini'
-      }
+      // Use provider from config
+      const provider = config.provider || 'openai'
 
       // Add system prompt if configured
       let messagesWithSystem = [...messages]
@@ -221,21 +257,27 @@ export function useApi() {
         }
       }
 
-      // Build endpoint - Gemini uses model name in path
-      let endpoint
-      if (provider === 'gemini') {
-        const streamSuffix = config.enableStreaming ? 'streamGenerateContent' : 'generateContent'
-        endpoint = `${config.endpoint}/models/${config.model}:${streamSuffix}`
-      } else {
-        endpoint = `${config.endpoint}${config.chatPath || '/chat/completions'}`
+      // Build endpoint - replace {model} placeholder for Gemini
+      let chatPath = config.chatPath || '/chat/completions'
+      if (chatPath.includes('{model}')) {
+        chatPath = chatPath.replace('{model}', config.model)
       }
+      // Handle streaming suffix for Gemini
+      if (provider === 'gemini' && chatPath.includes(':generateContent')) {
+        const streamSuffix = config.enableStreaming ? 'streamGenerateContent' : 'generateContent'
+        chatPath = chatPath.replace(':generateContent', `:${streamSuffix}`)
+      }
+      const endpoint = `${config.endpoint}${chatPath}`
 
       // Validate and clean token
       const token = (config.token || '').trim()
 
-      // Build request body based on provider
+      // Build request body based on provider and endpoint
       let requestBody
-      if (provider === 'anthropic') {
+      // If using OpenAI-compatible endpoint (like LiteLLM proxy), always use OpenAI format
+      if (config.chatPath?.includes('/chat/completions')) {
+        requestBody = buildOpenAIRequest(messagesWithSystem, config)
+      } else if (provider === 'anthropic') {
         requestBody = buildAnthropicRequest(messagesWithSystem, config)
       } else if (provider === 'gemini') {
         requestBody = buildGeminiRequest(messagesWithSystem, config)
@@ -243,13 +285,27 @@ export function useApi() {
         requestBody = buildOpenAIRequest(messagesWithSystem, config)
       }
 
+      // Build headers based on provider and endpoint
+      const headers = {
+        'Content-Type': 'application/json'
+      }
+
+      // Use appropriate authentication header
+      if (provider === 'gemini' && !config.chatPath?.includes('/chat/completions')) {
+        // Native Gemini API uses x-goog-api-key
+        headers['x-goog-api-key'] = token
+      } else {
+        // OpenAI, Anthropic, and LiteLLM proxy use Authorization Bearer
+        headers['Authorization'] = `Bearer ${token}`
+      }
+
+      if (provider === 'anthropic') {
+        headers['anthropic-version'] = '2023-06-01'
+      }
+
       const response = await fetch(endpoint, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-          ...(provider === 'anthropic' && { 'anthropic-version': '2023-06-01' })
-        },
+        headers,
         body: JSON.stringify(requestBody)
       })
 
@@ -292,15 +348,35 @@ export function useApi() {
     error.value = null
 
     try {
-      const endpoint = `${config.endpoint}${config.imagePath || '/images/generations'}`
-      const requestBody = buildImageRequest(prompt, config)
+      // Build endpoint - replace {model} placeholder if present
+      let imagePath = config.imagePath || '/images/generations'
+      if (imagePath.includes('{model}')) {
+        imagePath = imagePath.replace('{model}', config.imageModel || config.model)
+      }
+      const endpoint = `${config.endpoint}${imagePath}`
+
+      // Determine provider from imagePath or config
+      const provider = config.provider || 'openai'
+
+      const requestBody = buildImageRequest(prompt, config, provider)
+
+      // Build headers based on provider
+      const headers = {
+        'Content-Type': 'application/json'
+      }
+
+      // Use appropriate authentication header
+      if (provider === 'gemini' && imagePath.includes('generateContent')) {
+        // Native Gemini API uses x-goog-api-key
+        headers['x-goog-api-key'] = config.token
+      } else {
+        // OpenAI and LiteLLM proxy use Authorization Bearer
+        headers['Authorization'] = `Bearer ${config.token}`
+      }
 
       const response = await fetch(endpoint, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${config.token}`
-        },
+        headers,
         body: JSON.stringify(requestBody)
       })
 
@@ -320,17 +396,42 @@ export function useApi() {
       const data = await response.json()
       console.log('[DEBUG] Image API Success Response:', data)
 
-      // Convert base64 responses to data URLs if needed
-      const images = data.data || []
-      return images.map(img => {
-        if (img.b64_json) {
-          return {
-            ...img,
-            url: `data:image/png;base64,${img.b64_json}`
+      // Handle different response formats
+      if (provider === 'gemini') {
+        // Gemini response format: candidates[].content.parts[].inlineData
+        const candidates = data.candidates || []
+        const images = []
+
+        for (const candidate of candidates) {
+          const parts = candidate.content?.parts || []
+
+          for (const part of parts) {
+            // Check both camelCase (actual API) and snake_case (documentation)
+            const inlineData = part.inlineData || part.inline_data
+            if (inlineData) {
+              // Convert Gemini's inlineData to data URL
+              const mimeType = inlineData.mimeType || inlineData.mime_type || 'image/png'
+              images.push({
+                url: `data:${mimeType};base64,${inlineData.data}`
+              })
+            }
           }
         }
-        return img
-      })
+
+        return images
+      } else {
+        // OpenAI DALL-E format
+        const images = data.data || []
+        return images.map(img => {
+          if (img.b64_json) {
+            return {
+              ...img,
+              url: `data:image/png;base64,${img.b64_json}`
+            }
+          }
+          return img
+        })
+      }
     } catch (err) {
       error.value = err.message
       throw err

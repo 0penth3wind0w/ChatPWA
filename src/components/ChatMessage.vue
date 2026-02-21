@@ -42,8 +42,18 @@ const formatTime = (timestamp) => {
 // Render and sanitize markdown for assistant messages
 const renderedContent = computed(() => {
   if (isAssistant.value) {
-    const rawHtml = marked.parse(props.message.content)
-    return DOMPurify.sanitize(rawHtml)
+    try {
+      const rawHtml = marked.parse(props.message.content)
+      // Allow data URLs for images (needed for base64 image display)
+      return DOMPurify.sanitize(rawHtml, {
+        ADD_TAGS: ['img'],
+        ADD_ATTR: ['src', 'alt'],
+        ALLOWED_URI_REGEXP: /^(?:(?:(?:f|ht)tps?|mailto|tel|callto|sms|cid|xmpp|data):|[^a-z]|[a-z+.\-]+(?:[^a-z+.\-:]|$))/i
+      })
+    } catch (error) {
+      console.error('Error rendering message:', error)
+      return props.message.content
+    }
   }
   return props.message.content
 })
