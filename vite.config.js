@@ -48,6 +48,8 @@ export default defineConfig({
       workbox: {
         // Minimal caching - only for update mechanism, not offline use
         globPatterns: ['**/*.{js,css,html}'],
+        // Clean up old caches
+        cleanupOutdatedCaches: true,
         // Network-first strategy - always try network, no offline support
         runtimeCaching: [
           {
@@ -55,7 +57,11 @@ export default defineConfig({
             handler: 'NetworkFirst',
             options: {
               cacheName: 'google-fonts-cache',
-              networkTimeoutSeconds: 10
+              networkTimeoutSeconds: 10,
+              expiration: {
+                maxEntries: 10,
+                maxAgeSeconds: 60 * 60 * 24 * 7 // 1 week
+              }
             }
           },
           {
@@ -63,13 +69,19 @@ export default defineConfig({
             handler: 'NetworkFirst',
             options: {
               cacheName: 'gstatic-fonts-cache',
-              networkTimeoutSeconds: 10
+              networkTimeoutSeconds: 10,
+              expiration: {
+                maxEntries: 10,
+                maxAgeSeconds: 60 * 60 * 24 * 7 // 1 week
+              }
             }
           }
         ],
         // Skip waiting to activate new service worker immediately
         skipWaiting: true,
-        clientsClaim: true
+        clientsClaim: true,
+        // iOS specific: Force navigation preload for faster updates
+        navigationPreload: true
       },
       devOptions: {
         enabled: false

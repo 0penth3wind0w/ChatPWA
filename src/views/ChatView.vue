@@ -21,11 +21,20 @@ const fetchingStatus = ref('')
 
 // Handle viewport resize and orientation change
 const handleResize = () => {
+  // Fix iOS vh issue by setting CSS custom property
+  const vh = window.innerHeight * 0.01
+  document.documentElement.style.setProperty('--vh', `${vh}px`)
+
   // Scroll to bottom after resize/rotation to maintain chat context
-  scrollToBottom(messagesContainer)
+  setTimeout(() => {
+    scrollToBottom(messagesContainer)
+  }, 100)
 }
 
 onMounted(() => {
+  // Set initial viewport height
+  handleResize()
+
   // Listen for resize events (includes orientation change)
   window.addEventListener('resize', handleResize)
   // Also listen for orientation change specifically
@@ -206,7 +215,7 @@ watch(isTyping, () => {
 </script>
 
 <template>
-  <div class="h-screen w-full flex flex-col bg-bg-primary">
+  <div class="w-full flex flex-col bg-bg-primary" style="height: calc(var(--vh, 1vh) * 100)">
     <!-- Fixed Header -->
     <header role="banner" class="flex-shrink-0 px-6 pt-6 pb-4">
       <div class="flex items-center justify-between w-full">

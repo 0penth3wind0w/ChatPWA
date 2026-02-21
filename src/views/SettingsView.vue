@@ -50,7 +50,7 @@ const handleBack = () => {
 </script>
 
 <template>
-  <div class="h-screen w-full flex flex-col bg-bg-primary">
+  <div class="w-full flex flex-col bg-bg-primary" style="height: calc(var(--vh, 1vh) * 100)">
     <!-- Fixed Header -->
     <header role="banner" class="flex-shrink-0 px-6 pt-6 pb-4">
       <div class="flex items-center justify-between w-full">

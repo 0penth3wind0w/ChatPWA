@@ -7,7 +7,7 @@ const handleGetStarted = () => {
 </script>
 
 <template>
-  <div class="min-h-screen w-full flex flex-col bg-bg-primary">
+  <div class="w-full flex flex-col bg-bg-primary" style="min-height: calc(var(--vh, 1vh) * 100)">
     <!-- Content Wrapper -->
     <main id="main-content" role="main" class="flex-1 flex flex-col items-center px-6 pt-20 gap-10" aria-label="Welcome to ChatPWA">
       <!-- Logo -->

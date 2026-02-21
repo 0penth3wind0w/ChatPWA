@@ -1,7 +1,39 @@
 <script setup>
 import { useRegisterSW } from 'virtual:pwa-register/vue'
 
-const { needRefresh, updateServiceWorker } = useRegisterSW()
+const { needRefresh, updateServiceWorker } = useRegisterSW({
+  onRegisteredSW(swUrl, r) {
+    // Check for updates only on app launch/focus
+    if (r) {
+      const checkForUpdate = async () => {
+        if (!(!r.installing && navigator)) return
+        if ('connection' in navigator && !navigator.onLine) return
+
+        const resp = await fetch(swUrl, {
+          cache: 'no-store',
+          headers: {
+            'cache': 'no-store',
+            'cache-control': 'no-cache',
+          }
+        })
+
+        if (resp?.status === 200) {
+          await r.update()
+        }
+      }
+
+      // Check immediately on registration (app launch)
+      checkForUpdate()
+
+      // Check when app becomes visible again (user returns to PWA)
+      document.addEventListener('visibilitychange', () => {
+        if (!document.hidden) {
+          checkForUpdate()
+        }
+      })
+    }
+  }
+})
 
 const close = () => {
   needRefresh.value = false
