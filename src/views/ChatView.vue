@@ -19,12 +19,8 @@ const messagesContainer = ref(null)
 const isTyping = ref(false)
 const fetchingStatus = ref('')
 
-// Handle viewport resize and orientation change
+// Handle scroll to bottom on resize/orientation change
 const handleResize = () => {
-  // Fix iOS vh issue by setting CSS custom property
-  const vh = window.innerHeight * 0.01
-  document.documentElement.style.setProperty('--vh', `${vh}px`)
-
   // Scroll to bottom after resize/rotation to maintain chat context
   setTimeout(() => {
     scrollToBottom(messagesContainer)
@@ -32,12 +28,8 @@ const handleResize = () => {
 }
 
 onMounted(() => {
-  // Set initial viewport height
-  handleResize()
-
   // Listen for resize events (includes orientation change)
   window.addEventListener('resize', handleResize)
-  // Also listen for orientation change specifically
   window.addEventListener('orientationchange', handleResize)
 
   // Initial scroll to bottom on mount

@@ -121,7 +121,7 @@ const handleInput = () => {
 </script>
 
 <template>
-  <div class="w-full px-6 pb-5 relative">
+  <div class="w-full px-6 pb-8 relative">
     <!-- Command Menu -->
     <div
       v-if="showCommandMenu"

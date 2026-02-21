@@ -72,7 +72,7 @@ const handleBack = () => {
 
     <!-- Scrollable Content -->
     <main id="main-content" role="main" class="flex-1 overflow-y-auto px-6 min-h-0" aria-label="Settings configuration">
-      <div class="flex flex-col gap-6 pb-8 pt-2">
+      <div class="flex flex-col gap-6 pb-24 pt-2">
         <!-- Settings Card -->
         <div class="card">
           <h2 class="text-lg font-semibold text-text-primary -tracking-tight mb-6">
