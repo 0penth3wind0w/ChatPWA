@@ -1,5 +1,5 @@
 <script setup>
-import { ref, watch } from 'vue'
+import { ref, watch, onMounted, onUnmounted } from 'vue'
 import ChatMessage from '../components/ChatMessage.vue'
 import MessageInput from '../components/MessageInput.vue'
 import EmptyState from '../components/EmptyState.vue'
@@ -18,6 +18,27 @@ const { searchWeb, fetchWebContent } = useWebTools()
 const messagesContainer = ref(null)
 const isTyping = ref(false)
 const fetchingStatus = ref('')
+
+// Handle viewport resize and orientation change
+const handleResize = () => {
+  // Scroll to bottom after resize/rotation to maintain chat context
+  scrollToBottom(messagesContainer)
+}
+
+onMounted(() => {
+  // Listen for resize events (includes orientation change)
+  window.addEventListener('resize', handleResize)
+  // Also listen for orientation change specifically
+  window.addEventListener('orientationchange', handleResize)
+
+  // Initial scroll to bottom on mount
+  scrollToBottom(messagesContainer)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('resize', handleResize)
+  window.removeEventListener('orientationchange', handleResize)
+})
 
 
 const handleSettings = () => {

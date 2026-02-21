@@ -195,7 +195,7 @@ const handleInput = () => {
         role="combobox"
         aria-controls="command-menu"
         aria-autocomplete="list"
-        class="flex-1 bg-transparent text-base text-text-primary outline-none placeholder:text-text-tertiary resize-none max-h-32 overflow-y-auto leading-relaxed"
+        class="flex-1 bg-transparent text-base text-text-primary outline-none placeholder:text-text-tertiary resize-none max-h-32 overflow-y-auto leading-relaxed focus-visible:!outline-none"
         @keydown="handleKeydown"
         @input="handleInput"
       ></textarea>

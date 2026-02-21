@@ -294,8 +294,7 @@ button:focus-visible,
 }
 
 .input-field:focus-visible {
-  outline: 3px solid var(--color-forest-green);
-  outline-offset: 2px;
+  outline: none;
 }
 
 /* Skip link */
