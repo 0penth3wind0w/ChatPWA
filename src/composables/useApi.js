@@ -152,11 +152,6 @@ export function useApi() {
         response_format: 'b64_json'
       }
 
-      // Only add n parameter for DALL-E 2 (DALL-E 3 only supports n=1)
-      if (config.imageModel === 'dall-e-2') {
-        requestBody.n = config.imageCount || 1
-      }
-
       return requestBody
     }
   }
@@ -166,7 +161,6 @@ export function useApi() {
    */
   const handleStandardResponse = async (response, provider = 'openai') => {
     const data = await response.json()
-    console.log('[DEBUG] Standard response data:', data)
 
     if (provider === 'openai') {
       return data.choices?.[0]?.message?.content || ''
@@ -251,23 +245,12 @@ export function useApi() {
         body: JSON.stringify(requestBody)
       })
 
-      console.log('[DEBUG] Chat API Response:', {
-        status: response.status,
-        statusText: response.statusText,
-        headers: Object.fromEntries(response.headers.entries()),
-        provider,
-        endpoint
-      })
-
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}))
-        console.log('[DEBUG] Chat API Error Response:', errorData)
         throw new Error(errorData.error?.message || errorData.message || `API Error: ${response.status} ${response.statusText}`)
       }
 
-      const result = await handleStandardResponse(response, provider)
-      console.log('[DEBUG] Chat API Success Response:', result)
-      return result
+      return await handleStandardResponse(response, provider)
     } catch (err) {
       error.value = err.message
       throw err
@@ -316,21 +299,12 @@ export function useApi() {
         body: JSON.stringify(requestBody)
       })
 
-      console.log('[DEBUG] Image API Response:', {
-        status: response.status,
-        statusText: response.statusText,
-        headers: Object.fromEntries(response.headers.entries()),
-        endpoint
-      })
-
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}))
-        console.log('[DEBUG] Image API Error Response:', errorData)
         throw new Error(errorData.error?.message || errorData.message || `API Error: ${response.status} ${response.statusText}`)
       }
 
       const data = await response.json()
-      console.log('[DEBUG] Image API Success Response:', data)
 
       // Handle different response formats
       if (provider === 'gemini') {

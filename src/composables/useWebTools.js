@@ -28,7 +28,6 @@ export function useWebTools() {
         }
 
         const data = await response.json()
-        console.log('[DEBUG] Brave Search Response:', data)
 
         // Extract web results
         results = (data.web?.results || []).slice(0, 5).map(result => ({
@@ -58,7 +57,6 @@ export function useWebTools() {
         }
 
         const data = await response.json()
-        console.log('[DEBUG] Tavily Search Response:', data)
 
         results = (data.results || []).map(result => ({
           title: result.title,

@@ -92,25 +92,6 @@ export function useChat() {
     return addMessage('assistant', content, model)
   }
 
-  // Debounce streaming updates to avoid excessive DB writes
-  let updateDebounceTimer = null
-
-  /**
-   * Update the last assistant message (for streaming)
-   */
-  const updateLastAssistantMessage = (content) => {
-    const lastMessage = messages.value[messages.value.length - 1]
-    if (lastMessage && lastMessage.role === 'assistant') {
-      lastMessage.content = content
-
-      // Debounce DB updates during streaming (300ms)
-      clearTimeout(updateDebounceTimer)
-      updateDebounceTimer = setTimeout(() => {
-        updateMessageInDb(lastMessage.id, { content })
-      }, 300)
-    }
-  }
-
   /**
    * Clear all messages
    */
@@ -162,7 +143,6 @@ export function useChat() {
     addMessage,
     addUserMessage,
     addAssistantMessage,
-    updateLastAssistantMessage,
     clearMessages,
     getConversationHistory,
     scrollToBottom

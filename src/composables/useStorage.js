@@ -19,8 +19,6 @@ const DEFAULT_CONFIG = {
   imageModel: 'dall-e-3',
   imageSize: '1024x1024',
   imageQuality: 'standard',
-  imageStyle: 'vivid',
-  imageCount: 1,
   imageAspectRatio: '1:1', // For Gemini
   imageResolution: '2K', // For Gemini
   // Chat Configuration
