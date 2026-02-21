@@ -149,52 +149,55 @@ const handleTest = async () => {
 </script>
 
 <template>
-  <div class="w-full space-y-5">
+  <form class="w-full space-y-5" @submit.prevent="handleTest">
     <!-- ===== SYSTEM PROMPT ===== -->
-    <div class="w-full space-y-4">
-      <h3 class="text-base font-semibold text-text-primary">System Prompt</h3>
+    <fieldset class="w-full space-y-4">
+      <legend class="text-base font-semibold text-text-primary">System Prompt</legend>
 
       <div class="w-full space-y-2">
+        <label for="system-prompt" class="sr-only">System Prompt</label>
         <textarea
+          id="system-prompt"
           v-model="systemPrompt"
           placeholder="You are a helpful assistant..."
           rows="3"
           class="input-field resize-none py-3"
+          aria-describedby="system-prompt-help"
         ></textarea>
-        <p class="text-xs text-text-tertiary">
+        <p id="system-prompt-help" class="text-xs text-text-tertiary">
           Customize AI behavior and personality
         </p>
       </div>
 
       <!-- History Limit -->
       <div class="w-full space-y-2">
-        <label class="text-sm font-medium text-text-secondary">
+        <label for="history-limit" class="text-sm font-medium text-text-secondary">
           Message History Limit
         </label>
-        <select v-model.number="maxHistoryMessages" class="input-field">
+        <select id="history-limit" v-model.number="maxHistoryMessages" class="input-field" aria-describedby="history-limit-help">
           <option :value="0">Unlimited (all messages)</option>
           <option :value="6">6 messages (3 exchanges)</option>
           <option :value="10">10 messages (5 exchanges)</option>
           <option :value="20">20 messages (10 exchanges)</option>
           <option :value="40">40 messages (20 exchanges)</option>
         </select>
-        <p class="text-xs text-text-tertiary">
+        <p id="history-limit-help" class="text-xs text-text-tertiary">
           Limit messages sent to API to reduce token usage and costs
         </p>
       </div>
-    </div>
+    </fieldset>
 
     <!-- ===== CHAT PROVIDER ===== -->
-    <div class="w-full h-px bg-border-subtle"></div>
-    <div class="w-full space-y-4">
-      <h3 class="text-base font-semibold text-text-primary">Chat Provider</h3>
+    <div class="w-full h-px bg-border-subtle" role="separator"></div>
+    <fieldset class="w-full space-y-4">
+      <legend class="text-base font-semibold text-text-primary">Chat Provider</legend>
 
       <!-- Provider Selection -->
       <div class="w-full space-y-2">
-        <label class="text-sm font-medium text-text-secondary">
+        <label for="provider" class="text-sm font-medium text-text-secondary">
           Provider
         </label>
-        <select v-model="provider" class="input-field">
+        <select id="provider" v-model="provider" class="input-field">
           <option value="openai">OpenAI (GPT models)</option>
           <option value="anthropic">Anthropic (Claude models)</option>
           <option value="gemini">Google (Gemini models)</option>
@@ -203,111 +206,126 @@ const handleTest = async () => {
 
       <!-- API Endpoint URL -->
       <div class="w-full space-y-2">
-        <label class="text-sm font-medium text-text-secondary">
+        <label for="endpoint" class="text-sm font-medium text-text-secondary">
           API Endpoint
         </label>
         <input
+          id="endpoint"
           v-model="endpoint"
           type="url"
           placeholder="https://api.openai.com/v1"
           class="input-field"
           :class="{ 'border-warm-red': errors.endpoint }"
+          :aria-invalid="!!errors.endpoint"
+          :aria-describedby="errors.endpoint ? 'endpoint-error' : undefined"
           @blur="validateEndpoint"
         />
-        <p v-if="errors.endpoint" class="text-xs text-warm-red">
+        <p v-if="errors.endpoint" id="endpoint-error" class="text-xs text-warm-red" role="alert">
           {{ errors.endpoint }}
         </p>
       </div>
 
       <!-- Model Name -->
       <div class="w-full space-y-2">
-        <label class="text-sm font-medium text-text-secondary">
+        <label for="model" class="text-sm font-medium text-text-secondary">
           Model
         </label>
         <input
+          id="model"
           v-model="model"
           type="text"
           placeholder="gpt-4"
           class="input-field"
           :class="{ 'border-warm-red': errors.model }"
+          :aria-invalid="!!errors.model"
+          :aria-describedby="errors.model ? 'model-error' : undefined"
           @blur="validateModel"
         />
-        <p v-if="errors.model" class="text-xs text-warm-red">
+        <p v-if="errors.model" id="model-error" class="text-xs text-warm-red" role="alert">
           {{ errors.model }}
         </p>
       </div>
 
       <!-- Authentication Token -->
       <div class="w-full space-y-2">
-        <label class="text-sm font-medium text-text-secondary">
+        <label for="api-key" class="text-sm font-medium text-text-secondary">
           API Key
         </label>
         <input
+          id="api-key"
           v-model="token"
           type="password"
           placeholder="Enter your API key"
           class="input-field"
           :class="{ 'border-warm-red': errors.token }"
+          :aria-invalid="!!errors.token"
+          :aria-describedby="errors.token ? 'api-key-error api-key-help' : 'api-key-help'"
           @blur="validateToken"
         />
-        <p v-if="errors.token" class="text-xs text-warm-red">
+        <p v-if="errors.token" id="api-key-error" class="text-xs text-warm-red" role="alert">
           {{ errors.token }}
         </p>
-        <p class="text-xs text-text-tertiary">
+        <p id="api-key-help" class="text-xs text-text-tertiary">
           No "Bearer " prefix needed
         </p>
       </div>
 
       <!-- Chat Path -->
       <div class="w-full space-y-2">
-        <label class="text-sm font-medium text-text-secondary">
+        <label for="chat-path" class="text-sm font-medium text-text-secondary">
           Chat Endpoint Path
         </label>
         <input
+          id="chat-path"
           v-model="chatPath"
           type="text"
           class="input-field"
           placeholder="/chat/completions"
+          aria-describedby="chat-path-help"
         />
-        <p class="text-xs text-text-tertiary">
+        <p id="chat-path-help" class="text-xs text-text-tertiary">
           Auto-updates when provider changes
         </p>
       </div>
-    </div>
+    </fieldset>
 
     <!-- ===== IMAGE GENERATION ===== -->
-    <div class="w-full h-px bg-border-subtle"></div>
-    <div class="w-full space-y-4">
-      <h3 class="text-base font-semibold text-text-primary">Image Generation</h3>
+    <div class="w-full h-px bg-border-subtle" role="separator"></div>
+    <fieldset class="w-full space-y-4">
+      <legend class="text-base font-semibold text-text-primary">Image Generation</legend>
 
       <!-- Image Endpoint Path -->
       <div class="w-full space-y-2">
-        <label class="text-sm font-medium text-text-secondary">
+        <label for="image-path" class="text-sm font-medium text-text-secondary">
           Image Endpoint Path
         </label>
         <input
+          id="image-path"
           v-model="imagePath"
           type="text"
           class="input-field"
           placeholder="/images/generations"
+          aria-describedby="image-path-help"
         />
-        <p class="text-xs text-text-tertiary">
+        <p id="image-path-help" class="text-xs text-text-tertiary">
           Auto-updates when provider changes
         </p>
       </div>
 
       <!-- Image Model -->
       <div class="w-full space-y-2">
-        <label class="text-sm font-medium text-text-secondary">
+        <label for="image-model" class="text-sm font-medium text-text-secondary">
           Image Model
         </label>
         <input
+          id="image-model"
           v-model="imageModel"
           type="text"
           placeholder="dall-e-3"
           class="input-field"
+          aria-describedby="image-model-help"
         />
-        <p class="text-xs text-text-tertiary">
+        <p id="image-model-help" class="text-xs text-text-tertiary">
           dall-e-2, dall-e-3, or custom model
         </p>
       </div>
@@ -316,10 +334,10 @@ const handleTest = async () => {
       <template v-if="provider === 'openai' || provider === 'anthropic'">
         <!-- Image Size -->
         <div class="w-full space-y-2">
-          <label class="text-sm font-medium text-text-secondary">
+          <label for="image-size" class="text-sm font-medium text-text-secondary">
             Image Size
           </label>
-          <select v-model="imageSize" class="input-field">
+          <select id="image-size" v-model="imageSize" class="input-field">
             <option value="256x256">256x256</option>
             <option value="512x512">512x512</option>
             <option value="1024x1024">1024x1024 (Square)</option>
@@ -330,10 +348,10 @@ const handleTest = async () => {
 
         <!-- Image Quality -->
         <div class="w-full space-y-2">
-          <label class="text-sm font-medium text-text-secondary">
+          <label for="image-quality" class="text-sm font-medium text-text-secondary">
             Image Quality
           </label>
-          <select v-model="imageQuality" class="input-field">
+          <select id="image-quality" v-model="imageQuality" class="input-field">
             <option value="standard">Standard</option>
             <option value="hd">HD (DALL-E 3 only)</option>
           </select>
@@ -344,10 +362,10 @@ const handleTest = async () => {
       <template v-if="provider === 'gemini'">
         <!-- Aspect Ratio -->
         <div class="w-full space-y-2">
-          <label class="text-sm font-medium text-text-secondary">
+          <label for="aspect-ratio" class="text-sm font-medium text-text-secondary">
             Aspect Ratio
           </label>
-          <select v-model="imageAspectRatio" class="input-field">
+          <select id="aspect-ratio" v-model="imageAspectRatio" class="input-field">
             <option value="1:1">1:1 (Square)</option>
             <option value="2:3">2:3 (Portrait)</option>
             <option value="3:2">3:2 (Landscape)</option>
@@ -363,29 +381,29 @@ const handleTest = async () => {
 
         <!-- Resolution -->
         <div class="w-full space-y-2">
-          <label class="text-sm font-medium text-text-secondary">
+          <label for="resolution" class="text-sm font-medium text-text-secondary">
             Resolution
           </label>
-          <select v-model="imageResolution" class="input-field">
+          <select id="resolution" v-model="imageResolution" class="input-field">
             <option value="1K">1K</option>
             <option value="2K">2K</option>
             <option value="4K">4K (Gemini 3 Pro only)</option>
           </select>
         </div>
       </template>
-    </div>
+    </fieldset>
 
     <!-- ===== WEB SEARCH ===== -->
-    <div class="w-full h-px bg-border-subtle"></div>
-    <div class="w-full space-y-4">
-      <h3 class="text-base font-semibold text-text-primary">Web Search</h3>
+    <div class="w-full h-px bg-border-subtle" role="separator"></div>
+    <fieldset class="w-full space-y-4">
+      <legend class="text-base font-semibold text-text-primary">Web Search</legend>
 
       <!-- Search Provider -->
       <div class="w-full space-y-2">
-        <label class="text-sm font-medium text-text-secondary">
+        <label for="search-provider" class="text-sm font-medium text-text-secondary">
           Search Provider
         </label>
-        <select v-model="searchProvider" class="input-field">
+        <select id="search-provider" v-model="searchProvider" class="input-field">
           <option value="brave">Brave Search</option>
           <option value="tavily">Tavily AI</option>
           <option value="custom">Custom</option>
@@ -394,39 +412,42 @@ const handleTest = async () => {
 
       <!-- Search API Key -->
       <div class="w-full space-y-2">
-        <label class="text-sm font-medium text-text-secondary">
+        <label for="search-api-key" class="text-sm font-medium text-text-secondary">
           Search API Key
         </label>
         <input
+          id="search-api-key"
           v-model="searchApiKey"
           type="password"
           placeholder="Enter search API key"
           class="input-field"
+          aria-describedby="search-api-key-help"
         />
-        <p class="text-xs text-text-tertiary">
+        <p id="search-api-key-help" class="text-xs text-text-tertiary">
           Required for Brave or Tavily
         </p>
       </div>
-    </div>
+    </fieldset>
 
     <!-- ===== CONNECTION TEST ===== -->
-    <div class="w-full h-px bg-border-subtle"></div>
+    <div class="w-full h-px bg-border-subtle" role="separator"></div>
     <div class="flex items-center justify-between w-full">
       <div class="flex flex-col gap-1">
         <h3 class="text-base font-semibold text-text-primary">
           Connection Test
         </h3>
-        <p class="text-sm text-text-tertiary">
+        <p id="test-description" class="text-sm text-text-tertiary">
           Verify your chat API settings
         </p>
       </div>
       <button
-        @click="handleTest"
+        type="submit"
         :disabled="!isValid || testing"
+        aria-describedby="test-description"
         class="h-10 px-5 bg-forest-green text-white text-sm font-semibold rounded-md hover:bg-dark-green transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
       >
         {{ testing ? 'Testing...' : 'Test' }}
       </button>
     </div>
-  </div>
+  </form>
 </template>

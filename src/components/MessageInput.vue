@@ -125,6 +125,9 @@ const handleInput = () => {
     <!-- Command Menu -->
     <div
       v-if="showCommandMenu"
+      id="command-menu"
+      role="listbox"
+      aria-label="Available slash commands"
       class="absolute bottom-full left-6 right-6 mb-3 bg-bg-surface rounded-2xl shadow-elevated border border-border-subtle overflow-hidden animate-fade-in"
     >
       <div class="px-4 py-3 bg-bg-elevated border-b border-border-subtle">
@@ -134,22 +137,25 @@ const handleInput = () => {
         <button
           v-for="(cmd, index) in filteredCommands"
           :key="cmd.command"
+          :id="`cmd-${index}`"
           @click="selectCommand(cmd)"
+          role="option"
+          :aria-selected="index === selectedCommandIndex"
           class="w-full px-4 py-3 text-left hover:bg-light-green/30 transition-all"
           :class="{ 'bg-light-green/30': index === selectedCommandIndex }"
         >
           <div class="flex items-start gap-3">
-            <div class="w-8 h-8 bg-light-green rounded-lg flex items-center justify-center flex-shrink-0">
+            <div class="w-8 h-8 bg-light-green rounded-lg flex items-center justify-center flex-shrink-0" aria-hidden="true">
               <!-- Image icon -->
-              <svg v-if="cmd.icon === 'image'" class="w-4 h-4 text-forest-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg v-if="cmd.icon === 'image'" class="w-4 h-4 text-forest-green" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
               </svg>
               <!-- Search icon -->
-              <svg v-else-if="cmd.icon === 'search'" class="w-4 h-4 text-forest-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg v-else-if="cmd.icon === 'search'" class="w-4 h-4 text-forest-green" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
               </svg>
               <!-- Globe/Fetch icon -->
-              <svg v-else-if="cmd.icon === 'globe'" class="w-4 h-4 text-forest-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg v-else-if="cmd.icon === 'globe'" class="w-4 h-4 text-forest-green" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"/>
               </svg>
             </div>
@@ -175,21 +181,34 @@ const handleInput = () => {
 
     <!-- Input Area -->
     <div class="flex items-center gap-3 w-full bg-bg-surface rounded-2xl shadow-elevated border border-border-subtle px-4 py-3">
+      <label for="message-input" class="sr-only">Message input</label>
       <textarea
+        id="message-input"
         ref="textarea"
         v-model="message"
         placeholder="Type your message..."
         rows="1"
+        aria-label="Message input"
+        :aria-expanded="showCommandMenu"
+        :aria-activedescendant="showCommandMenu ? `cmd-${selectedCommandIndex}` : undefined"
+        aria-describedby="input-help"
+        role="combobox"
+        aria-controls="command-menu"
+        aria-autocomplete="list"
         class="flex-1 bg-transparent text-base text-text-primary outline-none placeholder:text-text-tertiary resize-none max-h-32 overflow-y-auto leading-relaxed"
         @keydown="handleKeydown"
         @input="handleInput"
       ></textarea>
+      <span id="input-help" class="sr-only">
+        Press forward slash to open command menu. Press Enter to send message, Shift+Enter for new line.
+      </span>
       <button
         @click="handleSend"
         :disabled="!message.trim()"
-        class="w-10 h-10 bg-forest-green rounded-full flex items-center justify-center flex-shrink-0 hover:bg-dark-green hover:scale-105 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+        aria-label="Send message"
+        class="w-11 h-11 bg-forest-green rounded-full flex items-center justify-center flex-shrink-0 hover:bg-dark-green hover:scale-105 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
       >
-        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/>
         </svg>
       </button>

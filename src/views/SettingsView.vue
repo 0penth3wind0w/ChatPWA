@@ -52,25 +52,26 @@ const handleBack = () => {
 <template>
   <div class="h-screen w-full flex flex-col bg-bg-primary">
     <!-- Fixed Header -->
-    <div class="flex-shrink-0 px-6 pt-6 pb-4">
+    <header role="banner" class="flex-shrink-0 px-6 pt-6 pb-4">
       <div class="flex items-center justify-between w-full">
         <button
           @click="handleBack"
+          aria-label="Back to chat"
           class="w-11 h-11 bg-bg-surface rounded-full shadow-elevated flex items-center justify-center hover:bg-bg-elevated transition-colors"
         >
-          <svg class="w-5 h-5 text-text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg class="w-5 h-5 text-text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
           </svg>
         </button>
         <h1 class="text-2xl font-semibold text-text-primary -tracking-tight">
           Settings
         </h1>
-        <div class="w-11 h-11"></div>
+        <div class="w-11 h-11" aria-hidden="true"></div>
       </div>
-    </div>
+    </header>
 
     <!-- Scrollable Content -->
-    <div class="flex-1 overflow-y-auto px-6 min-h-0">
+    <main id="main-content" role="main" class="flex-1 overflow-y-auto px-6 min-h-0" aria-label="Settings configuration">
       <div class="flex flex-col gap-6 pb-6">
         <!-- Settings Card -->
         <div class="card">
@@ -119,6 +120,6 @@ const handleBack = () => {
           </div>
         </div>
       </div>
-    </div>
+    </main>
   </div>
 </template>
