@@ -159,6 +159,8 @@ export function useApi() {
   const handleStandardResponse = async (response, provider = 'openai') => {
     const data = await response.json()
 
+    console.log('[Chat API Response]', JSON.stringify(data, null, 2))
+
     if (provider === 'openai') {
       return data.choices?.[0]?.message?.content || ''
     } else if (provider === 'anthropic') {
@@ -255,6 +257,8 @@ export function useApi() {
    */
   const generateImage = async (prompt, config) => {
     try {
+      console.log('[Image API Request]', { prompt, config })
+
       // Build endpoint - replace {model} placeholder if present
       let imagePath = config.imagePath || '/images/generations'
       if (imagePath.includes('{model}')) {
@@ -320,7 +324,7 @@ export function useApi() {
       } else {
         // OpenAI DALL-E format
         const images = data.data || []
-        return images.map(img => {
+        const result = images.map(img => {
           if (img.b64_json) {
             return {
               ...img,
@@ -329,6 +333,9 @@ export function useApi() {
           }
           return img
         })
+
+        console.log('[Image API Response]', JSON.stringify(data, null, 2))
+        return result
       }
     } catch (err) {
       throw err
