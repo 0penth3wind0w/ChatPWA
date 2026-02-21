@@ -47,6 +47,17 @@ const debouncedAutoSave = () => {
   }, 500)
 }
 
+// Update chat path when provider changes
+watch(provider, (newProvider) => {
+  if (newProvider === 'openai') {
+    chatPath.value = '/chat/completions'
+  } else if (newProvider === 'anthropic') {
+    chatPath.value = '/messages'
+  } else if (newProvider === 'gemini') {
+    chatPath.value = '/models/{model}:generateContent'
+  }
+})
+
 // Clear search API key when search provider changes
 watch(searchProvider, () => {
   searchApiKey.value = ''
