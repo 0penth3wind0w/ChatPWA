@@ -24,6 +24,8 @@ const DEFAULT_CONFIG = {
   imageCount: 1,
   imageAspectRatio: '1:1', // For Gemini
   imageResolution: '2K', // For Gemini
+  // Chat Configuration
+  maxHistoryMessages: 10, // Number of messages to send to API (0 = unlimited)
   // Web Tools Configuration
   searchProvider: 'brave', // 'brave', 'tavily', or 'custom'
   searchApiKey: '',

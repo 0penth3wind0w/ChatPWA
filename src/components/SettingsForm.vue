@@ -20,6 +20,7 @@ const imageQuality = ref(config.value.imageQuality || 'standard')
 const imageAspectRatio = ref(config.value.imageAspectRatio || '1:1')
 const imageResolution = ref(config.value.imageResolution || '2K')
 const systemPrompt = ref(config.value.systemPrompt || '')
+const maxHistoryMessages = ref(config.value.maxHistoryMessages ?? 10)
 const searchProvider = ref(config.value.searchProvider || 'brave')
 const searchApiKey = ref(config.value.searchApiKey || '')
 const errors = ref({})
@@ -46,6 +47,7 @@ const debouncedAutoSave = () => {
         imageQuality: imageQuality.value,
         imageAspectRatio: imageAspectRatio.value,
         imageResolution: imageResolution.value,
+        maxHistoryMessages: maxHistoryMessages.value,
         searchProvider: searchProvider.value,
         searchApiKey: searchApiKey.value
       })
@@ -73,7 +75,7 @@ watch(searchProvider, () => {
 })
 
 // Watch all fields for changes with debounce
-watch([endpoint, model, token, provider, chatPath, imagePath, enableStreaming, systemPrompt, imageModel, imageSize, imageQuality, imageAspectRatio, imageResolution, searchProvider, searchApiKey], debouncedAutoSave)
+watch([endpoint, model, token, provider, chatPath, imagePath, enableStreaming, systemPrompt, imageModel, imageSize, imageQuality, imageAspectRatio, imageResolution, maxHistoryMessages, searchProvider, searchApiKey], debouncedAutoSave)
 
 const isValid = computed(() => {
   return endpoint.value.trim() && model.value.trim() && token.value.trim()
@@ -163,6 +165,23 @@ const handleTest = async () => {
         ></textarea>
         <p class="text-xs text-text-tertiary">
           Customize AI behavior and personality
+        </p>
+      </div>
+
+      <!-- History Limit -->
+      <div class="w-full space-y-2">
+        <label class="text-sm font-medium text-text-secondary">
+          Message History Limit
+        </label>
+        <select v-model.number="maxHistoryMessages" class="input-field">
+          <option :value="0">Unlimited (all messages)</option>
+          <option :value="6">6 messages (3 exchanges)</option>
+          <option :value="10">10 messages (5 exchanges)</option>
+          <option :value="20">20 messages (10 exchanges)</option>
+          <option :value="40">40 messages (20 exchanges)</option>
+        </select>
+        <p class="text-xs text-text-tertiary">
+          Limit messages sent to API to reduce token usage and costs
         </p>
       </div>
     </div>

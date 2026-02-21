@@ -139,7 +139,12 @@ const handleSendMessage = async (content) => {
       }
 
       // Prepare messages for API (convert to OpenAI/Anthropic format)
-      const apiMessages = messages.value.slice(0, -1).map(msg => ({
+      // Limit history based on config to reduce token usage
+      const allMessages = messages.value.slice(0, -1)
+      const historyLimit = config.value.maxHistoryMessages || 0
+      const recentMessages = historyLimit > 0 ? allMessages.slice(-historyLimit) : allMessages
+
+      const apiMessages = recentMessages.map(msg => ({
         role: msg.role,
         content: msg.content
       }))
