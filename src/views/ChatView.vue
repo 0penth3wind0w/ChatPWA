@@ -155,36 +155,15 @@ const handleSendMessage = async (content) => {
         content: enhancedContent
       })
 
-      if (config.value.enableStreaming) {
-        // Handle streaming response
-        let streamedContent = ''
-        isTyping.value = true
-        scrollToBottom(messagesContainer)
+      // Send message and get response
+      isTyping.value = true
+      scrollToBottom(messagesContainer)
 
-        await sendChatMessage(apiMessages, config.value, (chunk) => {
-          if (isTyping.value) {
-            isTyping.value = false
-            addAssistantMessage('', config.value.model)
-          }
-          streamedContent += chunk
-          updateLastAssistantMessage(streamedContent)
-          scrollToBottom(messagesContainer)
-        })
+      const response = await sendChatMessage(apiMessages, config.value)
 
-        if (isTyping.value) {
-          isTyping.value = false
-        }
-      } else {
-        // Handle standard response
-        isTyping.value = true
-        scrollToBottom(messagesContainer)
-
-        const response = await sendChatMessage(apiMessages, config.value)
-
-        isTyping.value = false
-        addAssistantMessage(response, config.value.model)
-        scrollToBottom(messagesContainer)
-      }
+      isTyping.value = false
+      addAssistantMessage(response, config.value.model)
+      scrollToBottom(messagesContainer)
     }
   } catch (err) {
     console.error('Failed to send message:', err)

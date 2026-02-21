@@ -13,7 +13,6 @@ const token = ref(config.value.token || '')
 const provider = ref(config.value.provider || 'openai')
 const chatPath = ref(config.value.chatPath || '/chat/completions')
 const imagePath = ref(config.value.imagePath || '/images/generations')
-const enableStreaming = ref(config.value.enableStreaming || false)
 const imageModel = ref(config.value.imageModel || 'dall-e-3')
 const imageSize = ref(config.value.imageSize || '1024x1024')
 const imageQuality = ref(config.value.imageQuality || 'standard')
@@ -40,7 +39,6 @@ const debouncedAutoSave = () => {
         provider: provider.value,
         chatPath: chatPath.value,
         imagePath: imagePath.value,
-        enableStreaming: enableStreaming.value,
         systemPrompt: systemPrompt.value,
         imageModel: imageModel.value,
         imageSize: imageSize.value,
@@ -75,7 +73,7 @@ watch(searchProvider, () => {
 })
 
 // Watch all fields for changes with debounce
-watch([endpoint, model, token, provider, chatPath, imagePath, enableStreaming, systemPrompt, imageModel, imageSize, imageQuality, imageAspectRatio, imageResolution, maxHistoryMessages, searchProvider, searchApiKey], debouncedAutoSave)
+watch([endpoint, model, token, provider, chatPath, imagePath, systemPrompt, imageModel, imageSize, imageQuality, imageAspectRatio, imageResolution, maxHistoryMessages, searchProvider, searchApiKey], debouncedAutoSave)
 
 const isValid = computed(() => {
   return endpoint.value.trim() && model.value.trim() && token.value.trim()

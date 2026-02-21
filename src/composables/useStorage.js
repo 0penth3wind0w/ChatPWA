@@ -12,7 +12,6 @@ const DEFAULT_CONFIG = {
   chatPath: '/chat/completions', // '/messages' for Anthropic, '/models/{model}:generateContent' for Gemini
   imagePath: '/images/generations',
   provider: 'openai', // 'openai', 'anthropic', or 'gemini'
-  enableStreaming: false,
   systemPrompt: '', // Custom system prompt for AI behavior
   temperature: null, // null means don't send this parameter
   maxTokens: null, // null means don't send this parameter

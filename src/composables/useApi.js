@@ -23,10 +23,6 @@ export function useApi() {
       request.max_tokens = config.maxTokens
     }
 
-    if (config.enableStreaming !== undefined) {
-      request.stream = config.enableStreaming
-    }
-
     if (config.topP) {
       request.top_p = config.topP
     }
@@ -56,7 +52,6 @@ export function useApi() {
       messages: conversationMessages,
       ...(systemMessage && { system: systemMessage.content }),
       temperature: config.temperature || 1.0,
-      stream: config.enableStreaming || false,
       ...(config.topP && { top_p: config.topP })
     }
   }
@@ -167,55 +162,7 @@ export function useApi() {
   }
 
   /**
-   * Parse streaming response (Server-Sent Events)
-   */
-  const handleStreamingResponse = async (response, onChunk, provider = 'openai') => {
-    const reader = response.body.getReader()
-    const decoder = new TextDecoder()
-    let buffer = ''
-
-    try {
-      while (true) {
-        const { done, value } = await reader.read()
-        if (done) break
-
-        buffer += decoder.decode(value, { stream: true })
-        const lines = buffer.split('\n')
-        buffer = lines.pop() || ''
-
-        for (const line of lines) {
-          if (line.startsWith('data: ')) {
-            const data = line.slice(6).trim()
-            if (data === '[DONE]') continue
-
-            try {
-              const parsed = JSON.parse(data)
-              console.log('[DEBUG] Streaming chunk:', parsed)
-
-              // Handle different provider formats
-              if (provider === 'openai') {
-                const content = parsed.choices?.[0]?.delta?.content
-                if (content) onChunk(content)
-              } else if (provider === 'anthropic') {
-                const content = parsed.delta?.text
-                if (content) onChunk(content)
-              } else if (provider === 'gemini') {
-                const content = parsed.candidates?.[0]?.content?.parts?.[0]?.text
-                if (content) onChunk(content)
-              }
-            } catch (e) {
-              console.error('Failed to parse SSE data:', e)
-            }
-          }
-        }
-      }
-    } finally {
-      reader.releaseLock()
-    }
-  }
-
-  /**
-   * Parse standard (non-streaming) response
+   * Parse standard response
    */
   const handleStandardResponse = async (response, provider = 'openai') => {
     const data = await response.json()
@@ -235,7 +182,7 @@ export function useApi() {
   /**
    * Send chat message to API
    */
-  const sendChatMessage = async (messages, config, onChunk = null) => {
+  const sendChatMessage = async (messages, config) => {
     isLoading.value = true
     error.value = null
 
@@ -261,11 +208,6 @@ export function useApi() {
       let chatPath = config.chatPath || '/chat/completions'
       if (chatPath.includes('{model}')) {
         chatPath = chatPath.replace('{model}', config.model)
-      }
-      // Handle streaming suffix for Gemini
-      if (provider === 'gemini' && chatPath.includes(':generateContent')) {
-        const streamSuffix = config.enableStreaming ? 'streamGenerateContent' : 'generateContent'
-        chatPath = chatPath.replace(':generateContent', `:${streamSuffix}`)
       }
       const endpoint = `${config.endpoint}${chatPath}`
 
@@ -323,15 +265,9 @@ export function useApi() {
         throw new Error(errorData.error?.message || errorData.message || `API Error: ${response.status} ${response.statusText}`)
       }
 
-      // Handle streaming vs standard response
-      if (config.enableStreaming && onChunk) {
-        await handleStreamingResponse(response, onChunk, provider)
-        return null
-      } else {
-        const result = await handleStandardResponse(response, provider)
-        console.log('[DEBUG] Chat API Success Response:', result)
-        return result
-      }
+      const result = await handleStandardResponse(response, provider)
+      console.log('[DEBUG] Chat API Success Response:', result)
+      return result
     } catch (err) {
       error.value = err.message
       throw err
@@ -448,7 +384,7 @@ export function useApi() {
       const testMessages = [
         { role: 'user', content: 'Hello, this is a connection test.' }
       ]
-      await sendChatMessage(testMessages, { ...config, enableStreaming: false })
+      await sendChatMessage(testMessages, config)
       return true
     } catch (err) {
       throw new Error(`Connection test failed: ${err.message}`)
