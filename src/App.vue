@@ -3,6 +3,7 @@ import { ref, onMounted } from 'vue'
 import WelcomeView from './views/WelcomeView.vue'
 import ChatView from './views/ChatView.vue'
 import SettingsView from './views/SettingsView.vue'
+import UpdatePrompt from './components/UpdatePrompt.vue'
 import { useStorage } from './composables/useStorage.js'
 
 const currentView = ref('welcome')
@@ -35,4 +36,7 @@ const handleNavigate = (view) => {
     v-else-if="currentView === 'settings'"
     @navigate="handleNavigate"
   />
+
+  <!-- PWA Update Prompt -->
+  <UpdatePrompt />
 </template>
