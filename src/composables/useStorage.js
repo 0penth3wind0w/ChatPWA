@@ -22,6 +22,8 @@ const DEFAULT_CONFIG = {
   imageQuality: 'standard',
   imageStyle: 'vivid',
   imageCount: 1,
+  imageAspectRatio: '1:1', // For Gemini
+  imageResolution: '2K', // For Gemini
   // Web Tools Configuration
   searchProvider: 'brave', // 'brave', 'tavily', or 'custom'
   searchApiKey: '',
