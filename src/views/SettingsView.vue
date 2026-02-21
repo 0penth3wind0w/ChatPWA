@@ -72,10 +72,10 @@ const handleBack = () => {
 
     <!-- Scrollable Content -->
     <main id="main-content" role="main" class="flex-1 overflow-y-auto px-6 min-h-0" aria-label="Settings configuration">
-      <div class="flex flex-col gap-6 pb-6">
+      <div class="flex flex-col gap-6 pb-8 pt-2">
         <!-- Settings Card -->
         <div class="card">
-          <h2 class="text-lg font-semibold text-text-primary -tracking-tight mb-5">
+          <h2 class="text-lg font-semibold text-text-primary -tracking-tight mb-6">
             API Configuration
           </h2>
           <SettingsForm
@@ -83,8 +83,8 @@ const handleBack = () => {
           />
 
           <!-- Test Status Message -->
-          <div v-if="testMessage" class="mt-4 p-3 rounded-md" :class="{
-            'bg-sage-green text-forest-green': testStatus === 'success',
+          <div v-if="testMessage" class="mt-5 p-4 rounded-xl" :class="{
+            'bg-light-green/30 text-forest-green': testStatus === 'success',
             'bg-red-50 text-warm-red': testStatus === 'error',
             'bg-bg-elevated text-text-secondary': !testStatus
           }">
@@ -95,25 +95,25 @@ const handleBack = () => {
         <!-- Back to Chat Button -->
         <button
           @click="emit('navigate', 'chat')"
-          class="btn-primary w-full h-13 shadow-elevated"
+          class="btn-primary w-full h-14 shadow-elevated text-base"
         >
           Back to Chat
         </button>
 
         <!-- Clear Chat History Card -->
         <div class="card">
-          <div class="flex items-center justify-between w-full">
-            <div class="flex flex-col gap-1">
-              <p class="text-base font-medium text-text-primary">
+          <div class="flex items-center justify-between w-full gap-4">
+            <div class="flex flex-col gap-1.5">
+              <p class="text-base font-semibold text-text-primary">
                 Clear Chat History
               </p>
-              <p class="text-sm text-text-tertiary">
+              <p class="text-sm text-text-tertiary leading-relaxed">
                 Remove all conversation messages
               </p>
             </div>
             <button
               @click="handleClearHistory"
-              class="h-9 px-4 bg-bg-muted text-text-secondary text-sm font-semibold rounded-md hover:bg-border-subtle transition-colors"
+              class="h-10 px-5 bg-bg-elevated text-text-secondary text-sm font-semibold rounded-lg hover:bg-border-subtle transition-colors border border-border-subtle"
             >
               Clear
             </button>

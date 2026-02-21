@@ -180,7 +180,7 @@ const handleInput = () => {
     </div>
 
     <!-- Input Area -->
-    <div class="flex items-center gap-3 w-full bg-bg-surface rounded-2xl shadow-elevated border border-border-subtle px-4 py-3">
+    <div class="flex items-center gap-3 w-full bg-bg-surface rounded-2xl shadow-elevated border border-border-subtle px-5 py-3.5">
       <label for="message-input" class="sr-only">Message input</label>
       <textarea
         id="message-input"
@@ -195,7 +195,7 @@ const handleInput = () => {
         role="combobox"
         aria-controls="command-menu"
         aria-autocomplete="list"
-        class="flex-1 bg-transparent text-base text-text-primary outline-none placeholder:text-text-tertiary resize-none max-h-32 overflow-y-auto leading-relaxed focus-visible:!outline-none"
+        class="flex-1 bg-transparent text-base text-text-primary outline-none placeholder:text-text-tertiary resize-none max-h-32 overflow-y-auto leading-relaxed focus-visible:!outline-none py-1"
         @keydown="handleKeydown"
         @input="handleInput"
       ></textarea>
@@ -206,7 +206,7 @@ const handleInput = () => {
         @click="handleSend"
         :disabled="!message.trim()"
         aria-label="Send message"
-        class="w-11 h-11 bg-forest-green rounded-full flex items-center justify-center flex-shrink-0 hover:bg-dark-green hover:scale-105 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+        class="w-12 h-12 bg-forest-green rounded-full flex items-center justify-center flex-shrink-0 hover:bg-dark-green hover:scale-105 transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100"
       >
         <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/>

@@ -245,7 +245,7 @@ watch(isTyping, () => {
       class="flex-1 overflow-y-auto px-6 min-h-0"
       aria-label="Chat messages"
     >
-      <div role="log" aria-live="polite" aria-atomic="false" class="flex flex-col gap-4 pb-4">
+      <div role="log" aria-live="polite" aria-atomic="false" class="flex flex-col gap-5 pb-6 pt-2">
         <!-- Empty State -->
         <EmptyState v-if="!hasMessages && !isTyping" />
 
