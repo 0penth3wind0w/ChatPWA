@@ -11,6 +11,7 @@ import markdown from 'highlight.js/lib/languages/markdown'
 import xml from 'highlight.js/lib/languages/xml'
 import css from 'highlight.js/lib/languages/css'
 import DOMPurify from 'dompurify'
+import { logger } from '../utils/logger.js'
 
 // Register only commonly used languages
 hljs.registerLanguage('javascript', javascript)
@@ -31,7 +32,7 @@ marked.setOptions({
       try {
         return hljs.highlight(code, { language: lang }).value
       } catch (err) {
-        console.error('Highlight error:', err)
+        logger.error('Highlight error:', err)
       }
     }
     return hljs.highlightAuto(code).value
@@ -71,7 +72,7 @@ const renderedContent = computed(() => {
         ALLOWED_URI_REGEXP: /^(?:(?:(?:f|ht)tps?|mailto|tel|callto|sms|cid|xmpp|data):|[^a-z]|[a-z+.\-]+(?:[^a-z+.\-:]|$))/i
       })
     } catch (error) {
-      console.error('Error rendering message:', error)
+      logger.error('Error rendering message:', error)
       return props.message.content
     }
   }

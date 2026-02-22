@@ -1,4 +1,5 @@
 import { ref } from 'vue'
+import { logger } from '../utils/logger.js'
 
 const STORAGE_KEYS = {
   API_CONFIG: 'chatpwa_api_config'
@@ -46,7 +47,7 @@ const initConfig = () => {
       }
     }
   } catch (error) {
-    console.error('Failed to load configuration:', error)
+    logger.error('Failed to load configuration:', error)
   }
 }
 
@@ -67,7 +68,7 @@ export function useStorage() {
       localStorage.setItem(STORAGE_KEYS.API_CONFIG, JSON.stringify(config.value))
       return true
     } catch (error) {
-      console.error('Failed to save configuration:', error)
+      logger.error('Failed to save configuration:', error)
       return false
     }
   }
@@ -81,7 +82,7 @@ export function useStorage() {
       localStorage.removeItem(STORAGE_KEYS.API_CONFIG)
       return true
     } catch (error) {
-      console.error('Failed to clear configuration:', error)
+      logger.error('Failed to clear configuration:', error)
       return false
     }
   }

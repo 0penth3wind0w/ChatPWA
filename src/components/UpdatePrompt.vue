@@ -1,5 +1,8 @@
 <script setup>
+import { onUnmounted } from 'vue'
 import { useRegisterSW } from 'virtual:pwa-register/vue'
+
+let visibilityHandler = null
 
 const { needRefresh, updateServiceWorker } = useRegisterSW({
   onRegisteredSW(swUrl, r) {
@@ -26,12 +29,20 @@ const { needRefresh, updateServiceWorker } = useRegisterSW({
       checkForUpdate()
 
       // Check when app becomes visible again (user returns to PWA)
-      document.addEventListener('visibilitychange', () => {
+      visibilityHandler = () => {
         if (!document.hidden) {
           checkForUpdate()
         }
-      })
+      }
+      document.addEventListener('visibilitychange', visibilityHandler)
     }
+  }
+})
+
+// Cleanup event listener to prevent memory leak
+onUnmounted(() => {
+  if (visibilityHandler) {
+    document.removeEventListener('visibilitychange', visibilityHandler)
   }
 })
 

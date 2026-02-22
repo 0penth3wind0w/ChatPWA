@@ -1,5 +1,6 @@
 import { ref, computed, nextTick } from 'vue'
 import Dexie from 'dexie'
+import { logger } from '../utils/logger.js'
 
 // Initialize Dexie database
 const db = new Dexie('ChatPWA')
@@ -20,7 +21,7 @@ const initMessages = async () => {
     const storedMessages = await db.messages.orderBy('timestamp').toArray()
     messages.value = storedMessages
   } catch (error) {
-    console.error('Failed to load messages from IndexedDB:', error)
+    logger.error('Failed to load messages from IndexedDB:', error)
   }
 }
 
@@ -41,7 +42,7 @@ const saveMessageToDb = async (message) => {
       }
       await db.messages.put(plainMessage)
     } catch (error) {
-      console.error('Failed to save message to IndexedDB:', error)
+      logger.error('Failed to save message to IndexedDB:', error)
     }
   })
   return pendingDbOperations
@@ -54,7 +55,7 @@ const updateMessageInDb = async (messageId, updates) => {
     try {
       await db.messages.update(messageId, updates)
     } catch (error) {
-      console.error('Failed to update message in IndexedDB:', error)
+      logger.error('Failed to update message in IndexedDB:', error)
     }
   })
   return pendingDbOperations
@@ -100,7 +101,7 @@ export function useChat() {
     try {
       await db.messages.clear()
     } catch (error) {
-      console.error('Failed to clear messages from IndexedDB:', error)
+      logger.error('Failed to clear messages from IndexedDB:', error)
     }
   }
 

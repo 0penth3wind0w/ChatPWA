@@ -1,3 +1,5 @@
+import { logger } from '../utils/logger.js'
+
 export function useWebTools() {
   /**
    * Search the web using configured search provider
@@ -77,7 +79,7 @@ export function useWebTools() {
       return markdown
 
     } catch (err) {
-      console.error('Search error:', err)
+      logger.error('Search error:', err)
       throw err
     }
   }
@@ -106,7 +108,7 @@ export function useWebTools() {
       return result
 
     } catch (err) {
-      console.error('Fetch error:', err)
+      logger.error('Fetch error:', err)
       throw err
     }
   }

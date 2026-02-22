@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, watch, nextTick } from 'vue'
+import { ref, computed, watch, nextTick, onUnmounted } from 'vue'
 import { useStorage } from '../composables/useStorage.js'
 
 const emit = defineEmits(['test'])
@@ -171,6 +171,13 @@ watch(systemPromptTextarea, async (newVal) => {
   if (newVal) {
     await nextTick()
     resizeTextarea()
+  }
+})
+
+// Cleanup timeout on unmount to prevent errors
+onUnmounted(() => {
+  if (saveTimeout) {
+    clearTimeout(saveTimeout)
   }
 })
 </script>

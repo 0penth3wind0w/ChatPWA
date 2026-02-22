@@ -1,4 +1,5 @@
 import { ref } from 'vue'
+import { logger, sanitizeConfig } from '../utils/logger.js'
 
 export function useApi() {
   /**
@@ -178,7 +179,7 @@ export function useApi() {
   const handleStandardResponse = async (response, provider = 'openai') => {
     const data = await response.json()
 
-    console.log('[Chat API Response]', JSON.stringify(data, null, 2))
+    logger.log('[Chat API Response]', JSON.stringify(data, null, 2))
 
     if (provider === 'openai') {
       return data.choices?.[0]?.message?.content || ''
@@ -275,7 +276,7 @@ export function useApi() {
    */
   const generateImage = async (prompt, config) => {
     try {
-      console.log('[Image API Request]', { prompt, config })
+      logger.log('[Image API Request]', { prompt, config: sanitizeConfig(config) })
 
       // Build endpoint - replace {model} placeholder if present
       let imagePath = config.imagePath || '/images/generations'
@@ -351,7 +352,7 @@ export function useApi() {
           return img
         })
 
-        console.log('[Image API Response]', JSON.stringify(data, null, 2))
+        logger.log('[Image API Response]', JSON.stringify(data, null, 2))
         return result
       }
     } catch (err) {

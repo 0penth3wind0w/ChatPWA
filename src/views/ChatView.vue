@@ -8,6 +8,7 @@ import { useChat } from '../composables/useChat.js'
 import { useStorage } from '../composables/useStorage.js'
 import { useApi } from '../composables/useApi.js'
 import { useWebTools } from '../composables/useWebTools.js'
+import { logger } from '../utils/logger.js'
 
 const emit = defineEmits(['navigate'])
 
@@ -134,7 +135,7 @@ const handleSendMessage = async (content) => {
 
           const failedCount = results.filter(r => r.status === 'rejected').length
           if (failedCount > 0) {
-            console.warn(`Failed to fetch ${failedCount} of ${urls.length} URLs`)
+            logger.warn(`Failed to fetch ${failedCount} of ${urls.length} URLs`)
           }
 
           // Enhance the user message with successfully fetched content
@@ -145,7 +146,7 @@ const handleSendMessage = async (content) => {
           fetchingStatus.value = ''
           isTyping.value = false
         } catch (err) {
-          console.error('Error fetching URLs:', err)
+          logger.error('Error fetching URLs:', err)
           fetchingStatus.value = ''
           // Continue with original message if fetch fails
           isTyping.value = false
@@ -179,7 +180,7 @@ const handleSendMessage = async (content) => {
       addAssistantMessage(response, config.value.model)
     }
   } catch (err) {
-    console.error('Failed to send message:', err)
+    logger.error('Failed to send message:', err)
     isTyping.value = false
     addAssistantMessage(`Error: ${err.message || 'Failed to get response from AI'}`)
   }
