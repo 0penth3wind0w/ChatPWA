@@ -5,9 +5,11 @@ import { useStorage } from '../composables/useStorage.js'
 import { useApi } from '../composables/useApi.js'
 import { useChat } from '../composables/useChat.js'
 import { useDarkMode } from '../composables/useDarkMode.js'
+import { useColorTheme } from '../composables/useColorTheme.js'
 
 const emit = defineEmits(['navigate'])
 const { isDark, toggleDarkMode } = useDarkMode()
+const { currentTheme, setTheme, themes } = useColorTheme()
 
 const { testConnection } = useApi()
 const { clearMessages } = useChat()
@@ -111,6 +113,69 @@ const handleBack = () => {
             'bg-bg-elevated text-text-secondary': !testStatus
           }">
             <p class="text-sm font-medium">{{ testMessage }}</p>
+          </div>
+        </div>
+
+        <!-- Color Theme Card -->
+        <div class="card">
+          <div class="flex flex-col gap-5 w-full">
+            <div class="flex flex-col gap-1.5">
+              <p class="text-base font-semibold text-text-primary">
+                Color Theme
+              </p>
+              <p class="text-sm text-text-tertiary leading-relaxed">
+                Choose your accent color
+              </p>
+            </div>
+            <div class="flex flex-col gap-3">
+              <button
+                v-for="(theme, key) in themes"
+                :key="key"
+                @click="setTheme(key)"
+                :aria-label="`Select ${theme.name} theme`"
+                :aria-pressed="currentTheme === key"
+                class="relative flex items-center justify-between p-4 rounded-xl border-2 transition-all group"
+                :class="currentTheme === key ? 'border-forest-green bg-light-green/20' : 'border-border-subtle bg-bg-elevated hover:border-border-strong hover:bg-bg-surface'"
+              >
+                <div class="flex items-center gap-4">
+                  <!-- Color Preview Circles -->
+                  <div class="flex items-center gap-1.5" aria-hidden="true">
+                    <div
+                      class="w-10 h-10 rounded-full shadow-soft border-2 border-white"
+                      :style="{ backgroundColor: theme.primary }"
+                    ></div>
+                    <div
+                      class="w-8 h-8 rounded-full shadow-soft border-2 border-white"
+                      :style="{ backgroundColor: theme.dark }"
+                    ></div>
+                    <div
+                      class="w-6 h-6 rounded-full shadow-soft border-2 border-white"
+                      :style="{ backgroundColor: theme.light }"
+                    ></div>
+                  </div>
+                  <!-- Theme Name -->
+                  <span class="text-base font-semibold text-text-primary">
+                    {{ theme.name }}
+                  </span>
+                </div>
+                <!-- Selected Indicator -->
+                <div
+                  v-if="currentTheme === key"
+                  class="w-6 h-6 rounded-full bg-forest-green flex items-center justify-center"
+                  aria-hidden="true"
+                >
+                  <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
+                  </svg>
+                </div>
+                <!-- Hover Ring -->
+                <div
+                  v-else
+                  class="w-6 h-6 rounded-full border-2 border-border-subtle transition-colors group-hover:border-forest-green"
+                  aria-hidden="true"
+                ></div>
+              </button>
+            </div>
           </div>
         </div>
 

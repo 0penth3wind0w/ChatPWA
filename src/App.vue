@@ -6,12 +6,14 @@ import SettingsView from './views/SettingsView.vue'
 import UpdatePrompt from './components/UpdatePrompt.vue'
 import { useStorage } from './composables/useStorage.js'
 import { useDarkMode } from './composables/useDarkMode.js'
+import { useColorTheme } from './composables/useColorTheme.js'
 
 const currentView = ref('welcome')
 const { isConfigured } = useStorage()
 
-// Initialize dark mode
+// Initialize dark mode and color theme
 useDarkMode()
+useColorTheme()
 
 // Handle viewport height for iOS Safari URL bar
 const setViewportHeight = () => {

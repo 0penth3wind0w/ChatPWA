@@ -26,7 +26,9 @@ const DEFAULT_CONFIG = {
   // Web Tools Configuration
   searchProvider: 'brave', // 'brave', 'tavily', or 'custom'
   searchApiKey: '',
-  searchEndpoint: '' // For custom search provider
+  searchEndpoint: '', // For custom search provider
+  // Appearance
+  colorTheme: 'green' // 'green', 'blue', 'purple', 'orange'
 }
 
 // Shared config state (singleton)
