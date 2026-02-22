@@ -63,43 +63,36 @@ const handleSendMessage = async (content) => {
       // Handle web search
       const query = searchCommandMatch[1]
       isTyping.value = true
-      scrollToBottom(messagesContainer)
 
       try {
         const searchResults = await searchWeb(query, config.value)
         isTyping.value = false
 
-        // Add search results as assistant message
+        // Add search results as assistant message (watcher handles scroll)
         addAssistantMessage(searchResults, config.value.model)
-        scrollToBottom(messagesContainer)
       } catch (err) {
         isTyping.value = false
         addAssistantMessage(`Error searching: ${err.message}`, config.value.model)
-        scrollToBottom(messagesContainer)
       }
     } else if (fetchCommandMatch) {
       // Handle web fetch
       const url = fetchCommandMatch[1].trim()
       isTyping.value = true
-      scrollToBottom(messagesContainer)
 
       try {
         const webContent = await fetchWebContent(url)
         isTyping.value = false
 
-        // Add fetched content as assistant message
+        // Add fetched content as assistant message (watcher handles scroll)
         addAssistantMessage(webContent, config.value.model)
-        scrollToBottom(messagesContainer)
       } catch (err) {
         isTyping.value = false
         addAssistantMessage(`Error fetching: ${err.message}`, config.value.model)
-        scrollToBottom(messagesContainer)
       }
     } else if (imageCommandMatch) {
       // Handle image generation
       const prompt = imageCommandMatch[1]
       isTyping.value = true
-      scrollToBottom(messagesContainer)
 
       const images = await generateImage(prompt, config.value)
 
@@ -115,7 +108,6 @@ const handleSendMessage = async (content) => {
       } else {
         addAssistantMessage('Failed to generate image. No images returned.', config.value.imageModel)
       }
-      scrollToBottom(messagesContainer)
     } else {
       // Handle regular chat message
       // Detect URLs in the message and fetch their content
@@ -185,25 +177,19 @@ const handleSendMessage = async (content) => {
 
       isTyping.value = false
       addAssistantMessage(response, config.value.model)
-      scrollToBottom(messagesContainer)
     }
   } catch (err) {
     console.error('Failed to send message:', err)
     isTyping.value = false
     addAssistantMessage(`Error: ${err.message || 'Failed to get response from AI'}`)
-    scrollToBottom(messagesContainer)
   }
 }
 
-// Watch for new messages and auto-scroll
-watch(messages, () => {
+// Watch for new messages and typing indicator changes, auto-scroll
+// Consolidate watchers and use flush: 'post' to batch DOM updates
+watch([messages, isTyping], () => {
   scrollToBottom(messagesContainer)
-}, { deep: true })
-
-// Watch for typing indicator changes and auto-scroll
-watch(isTyping, () => {
-  scrollToBottom(messagesContainer)
-})
+}, { deep: true, flush: 'post' })
 </script>
 
 <template>
