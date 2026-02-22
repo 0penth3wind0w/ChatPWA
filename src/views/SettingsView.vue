@@ -143,9 +143,14 @@ const handleBack = () => {
           </div>
         </div>
 
-        <!-- Language Card -->
+        <!-- Appearance Card -->
         <div class="card">
-          <div class="flex flex-col gap-5 w-full">
+          <h2 class="text-lg font-semibold text-text-primary -tracking-tight mb-6">
+            {{ t('settings.appearance.title') }}
+          </h2>
+
+          <!-- Language -->
+          <div class="flex flex-col gap-5 w-full mb-6">
             <div class="flex flex-col gap-1.5">
               <p class="text-base font-semibold text-text-primary">
                 {{ t('settings.language.label') }}
@@ -179,15 +184,9 @@ const handleBack = () => {
               </button>
             </div>
           </div>
-        </div>
-
-        <!-- Appearance Card -->
-        <div class="card">
-          <h2 class="text-lg font-semibold text-text-primary -tracking-tight mb-6">
-            {{ t('settings.appearance.title') }}
-          </h2>
 
           <!-- Color Theme -->
+          <div class="w-full h-px bg-border-subtle my-6"></div>
           <div class="flex flex-col gap-5 w-full mb-6">
             <div class="flex flex-col gap-1.5">
               <p class="text-base font-semibold text-text-primary">
