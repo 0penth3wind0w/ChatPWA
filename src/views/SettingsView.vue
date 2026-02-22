@@ -1,6 +1,7 @@
 <script setup>
 import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useRegisterSW } from 'virtual:pwa-register/vue'
 import SettingsForm from '../components/SettingsForm.vue'
 import { useStorage } from '../composables/useStorage.js'
 import { useApi } from '../composables/useApi.js'
@@ -19,6 +20,28 @@ const { testConnection } = useApi()
 const { clearMessages } = useChat()
 const testStatus = ref(null) // null, 'success', or 'error'
 const testMessage = ref('')
+
+// Get version from Vite define
+const appVersion = __APP_VERSION__
+
+// PWA update handler
+const { needRefresh, updateServiceWorker } = useRegisterSW()
+const updateStatus = ref(null) // null, 'updating', or 'success'
+
+const handleUpdate = async () => {
+  updateStatus.value = 'updating'
+  try {
+    await updateServiceWorker(true)
+    updateStatus.value = 'success'
+    // Reload the page after successful update
+    setTimeout(() => {
+      window.location.reload()
+    }, 1000)
+  } catch (err) {
+    updateStatus.value = null
+    console.error('Failed to update:', err)
+  }
+}
 
 const handleTest = async (testConfig) => {
   testStatus.value = null
@@ -251,6 +274,51 @@ const handleBack = () => {
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
                 </svg>
               </span>
+            </button>
+          </div>
+        </div>
+
+        <!-- PWA Update Card -->
+        <div class="card">
+          <div class="flex items-center justify-between w-full gap-4">
+            <div class="flex flex-col gap-1.5">
+              <p class="text-base font-semibold text-text-primary">
+                Check for Updates
+              </p>
+              <p class="text-sm text-text-tertiary leading-relaxed">
+                Manually check and install app updates
+              </p>
+            </div>
+            <button
+              @click="handleUpdate"
+              :disabled="updateStatus === 'updating'"
+              class="h-10 px-5 bg-forest-green text-white text-sm font-semibold rounded-md hover:bg-dark-green transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <span v-if="updateStatus === 'updating'">Updating...</span>
+              <span v-else-if="updateStatus === 'success'">Updated!</span>
+              <span v-else-if="needRefresh">Update Available</span>
+              <span v-else>Check</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Version Info Card -->
+        <div class="card">
+          <div class="flex items-center justify-between w-full gap-4">
+            <div class="flex flex-col gap-1.5">
+              <p class="text-base font-semibold text-text-primary">
+                Version
+              </p>
+              <p class="text-sm text-text-tertiary leading-relaxed font-mono">
+                {{ appVersion }}
+              </p>
+            </div>
+            <button
+              @click="() => { navigator.clipboard.writeText(appVersion) }"
+              class="h-10 px-5 bg-bg-elevated text-text-secondary text-sm font-semibold rounded-lg hover:bg-border-subtle transition-colors border border-border-subtle"
+              aria-label="Copy version to clipboard"
+            >
+              Copy
             </button>
           </div>
         </div>
