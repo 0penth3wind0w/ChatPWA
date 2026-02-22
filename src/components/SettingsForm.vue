@@ -9,13 +9,41 @@ const { t } = useI18n()
 const { config, saveConfig } = useStorage()
 const systemPromptTextarea = ref(null)
 
+// Helper to get default paths based on provider
+const getDefaultPaths = (providerType) => {
+  if (providerType === 'openai') {
+    return {
+      chatPath: '/chat/completions',
+      imagePath: '/images/generations'
+    }
+  } else if (providerType === 'anthropic') {
+    return {
+      chatPath: '/messages',
+      imagePath: '/images/generations'
+    }
+  } else if (providerType === 'gemini') {
+    return {
+      chatPath: '/models/{model}:generateContent',
+      imagePath: '/models/{model}:generateContent'
+    }
+  }
+  return {
+    chatPath: '/chat/completions',
+    imagePath: '/images/generations'
+  }
+}
+
 // Use the shared config directly instead of props
 const endpoint = ref(config.value.endpoint || '')
 const model = ref(config.value.model || '')
 const token = ref(config.value.token || '')
 const provider = ref(config.value.provider || 'openai')
-const chatPath = ref(config.value.chatPath || '/chat/completions')
-const imagePath = ref(config.value.imagePath || '/images/generations')
+
+// Initialize paths based on provider if not explicitly set in config
+const defaultPaths = getDefaultPaths(provider.value)
+const chatPath = ref(config.value.chatPath || defaultPaths.chatPath)
+const imagePath = ref(config.value.imagePath || defaultPaths.imagePath)
+
 const imageModel = ref(config.value.imageModel || 'dall-e-3')
 const imageSize = ref(config.value.imageSize || '1024x1024')
 const imageQuality = ref(config.value.imageQuality || 'standard')
@@ -152,7 +180,15 @@ const handleTest = async () => {
     emit('test', {
       endpoint: endpoint.value.trim(),
       model: model.value.trim(),
-      token: token.value.trim()
+      token: token.value.trim(),
+      provider: provider.value,
+      chatPath: chatPath.value,
+      imagePath: imagePath.value,
+      imageModel: imageModel.value,
+      imageSize: imageSize.value,
+      imageQuality: imageQuality.value,
+      imageAspectRatio: imageAspectRatio.value,
+      imageResolution: imageResolution.value
     })
     // Reset testing state after configured timeout
     setTimeout(() => {
