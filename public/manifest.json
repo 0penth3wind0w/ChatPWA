@@ -2,7 +2,7 @@
   "name": "ChatPWA",
   "short_name": "ChatPWA",
   "description": "AI Chat with custom endpoints - Connect to OpenAI, Anthropic, Gemini or any compatible API",
-  "start_url": "/",
+  "start_url": "/ChatPWA/",
   "display": "standalone",
   "background_color": "#F5F4F1",
   "theme_color": "#3D8A5A",
