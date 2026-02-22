@@ -211,6 +211,8 @@ select.input-field {
 /* Markdown prose styles for AI messages */
 .markdown-content {
   line-height: 1.7;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 .markdown-content p {
@@ -259,6 +261,7 @@ select.input-field {
 .markdown-content a {
   color: var(--color-forest-green);
   text-decoration: underline;
+  word-break: break-all;
 }
 
 .markdown-content a:hover {

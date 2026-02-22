@@ -75,6 +75,26 @@ const handleBack = () => {
     <!-- Scrollable Content -->
     <main id="main-content" role="main" class="flex-1 overflow-y-auto px-6 min-h-0" aria-label="Settings configuration">
       <div class="flex flex-col gap-6 pb-24 pt-2">
+        <!-- Clear Chat History Card -->
+        <div class="card">
+          <div class="flex items-center justify-between w-full gap-4">
+            <div class="flex flex-col gap-1.5">
+              <p class="text-base font-semibold text-text-primary">
+                Clear Chat History
+              </p>
+              <p class="text-sm text-text-tertiary leading-relaxed">
+                Remove all conversation messages
+              </p>
+            </div>
+            <button
+              @click="handleClearHistory"
+              class="h-10 px-5 bg-bg-elevated text-text-secondary text-sm font-semibold rounded-lg hover:bg-border-subtle transition-colors border border-border-subtle"
+            >
+              Clear
+            </button>
+          </div>
+        </div>
+
         <!-- Settings Card -->
         <div class="card">
           <h2 class="text-lg font-semibold text-text-primary -tracking-tight mb-6">
@@ -93,14 +113,6 @@ const handleBack = () => {
             <p class="text-sm font-medium">{{ testMessage }}</p>
           </div>
         </div>
-
-        <!-- Back to Chat Button -->
-        <button
-          @click="emit('navigate', 'chat')"
-          class="btn-primary w-full h-14 shadow-elevated text-base"
-        >
-          Back to Chat
-        </button>
 
         <!-- Dark Mode Card -->
         <div class="card">
@@ -132,26 +144,6 @@ const handleBack = () => {
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
                 </svg>
               </span>
-            </button>
-          </div>
-        </div>
-
-        <!-- Clear Chat History Card -->
-        <div class="card">
-          <div class="flex items-center justify-between w-full gap-4">
-            <div class="flex flex-col gap-1.5">
-              <p class="text-base font-semibold text-text-primary">
-                Clear Chat History
-              </p>
-              <p class="text-sm text-text-tertiary leading-relaxed">
-                Remove all conversation messages
-              </p>
-            </div>
-            <button
-              @click="handleClearHistory"
-              class="h-10 px-5 bg-bg-elevated text-text-secondary text-sm font-semibold rounded-lg hover:bg-border-subtle transition-colors border border-border-subtle"
-            >
-              Clear
             </button>
           </div>
         </div>

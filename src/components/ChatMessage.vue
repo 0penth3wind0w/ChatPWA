@@ -119,7 +119,7 @@ const renderedContent = computed(() => {
         </div>
       </div>
       <div class="bg-forest-green rounded-2xl rounded-tr-sm shadow-soft p-5">
-        <p class="text-base text-white leading-relaxed whitespace-pre-wrap">
+        <p class="text-base text-white leading-relaxed whitespace-pre-wrap break-words">
           {{ message.content }}
         </p>
       </div>

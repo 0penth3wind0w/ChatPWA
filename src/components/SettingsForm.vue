@@ -1,10 +1,11 @@
 <script setup>
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, nextTick } from 'vue'
 import { useStorage } from '../composables/useStorage.js'
 
 const emit = defineEmits(['test'])
 
 const { config, saveConfig } = useStorage()
+const systemPromptTextarea = ref(null)
 
 // Use the shared config directly instead of props
 const endpoint = ref(config.value.endpoint || '')
@@ -146,6 +147,28 @@ const handleTest = async () => {
     }, 3000)
   }
 }
+
+// Auto-resize textarea
+const resizeTextarea = () => {
+  if (systemPromptTextarea.value) {
+    systemPromptTextarea.value.style.height = 'auto'
+    systemPromptTextarea.value.style.height = systemPromptTextarea.value.scrollHeight + 'px'
+  }
+}
+
+// Watch systemPrompt for changes and resize
+watch(systemPrompt, async () => {
+  await nextTick()
+  resizeTextarea()
+})
+
+// Initial resize on mount
+watch(systemPromptTextarea, async (newVal) => {
+  if (newVal) {
+    await nextTick()
+    resizeTextarea()
+  }
+})
 </script>
 
 <template>
@@ -158,11 +181,14 @@ const handleTest = async () => {
         <label for="system-prompt" class="sr-only">System Prompt</label>
         <textarea
           id="system-prompt"
+          ref="systemPromptTextarea"
           v-model="systemPrompt"
           placeholder="You are a helpful assistant..."
-          rows="3"
-          class="input-field resize-none py-3"
+          rows="1"
+          class="input-field resize-none overflow-hidden leading-normal"
+          style="min-height: 3.25rem; padding-top: 0.875rem; padding-bottom: 0.875rem;"
           aria-describedby="system-prompt-help"
+          @input="resizeTextarea"
         ></textarea>
         <p id="system-prompt-help" class="text-xs text-text-tertiary">
           Customize AI behavior and personality
