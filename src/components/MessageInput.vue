@@ -45,13 +45,6 @@ const availableCommands = computed(() => [
   }
 ])
 
-// Pre-compute lowercase commands for faster filtering
-const commandsLowercase = availableCommands.map(cmd => ({
-  ...cmd,
-  commandLower: cmd.command.toLowerCase(),
-  aliasLower: cmd.alias?.toLowerCase()
-}))
-
 // Filter commands based on user input
 const filteredCommands = computed(() => {
   if (!message.value.startsWith('/')) {
@@ -62,21 +55,20 @@ const filteredCommands = computed(() => {
 
   // Early return for exact slash
   if (input === '/') {
-    return availableCommands
+    return availableCommands.value
   }
 
-  // Optimized filter with pre-computed lowercase
-  return commandsLowercase
-    .filter(cmd =>
-      cmd.commandLower.startsWith(input) ||
-      (cmd.aliasLower && cmd.aliasLower.startsWith(input))
-    )
-    .map(cmd => availableCommands.find(original => original.command === cmd.command))
+  // Filter commands
+  return availableCommands.value.filter(cmd =>
+    cmd.command.toLowerCase().startsWith(input) ||
+    (cmd.alias && cmd.alias.toLowerCase().startsWith(input))
+  )
 })
 
 // Watch message for slash command detection
 watch(message, (newValue) => {
-  if (newValue.startsWith('/') && newValue.indexOf(' ') === -1) {
+  const msgVal = newValue || ''
+  if (msgVal.startsWith('/') && msgVal.indexOf(' ') === -1) {
     showCommandMenu.value = filteredCommands.value.length > 0
     selectedCommandIndex.value = 0
   } else {
@@ -274,7 +266,7 @@ const handleInput = () => {
 
       <button
         @click="handleSend"
-        :disabled="!message.trim() || isOverLimit"
+        :disabled="!(message || '').trim() || isOverLimit"
         aria-label="Send message"
         class="w-12 h-12 bg-forest-green rounded-full flex items-center justify-center flex-shrink-0 hover:bg-dark-green hover:scale-105 transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100"
       >
