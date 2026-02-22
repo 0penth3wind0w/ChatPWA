@@ -5,9 +5,13 @@ import ChatView from './views/ChatView.vue'
 import SettingsView from './views/SettingsView.vue'
 import UpdatePrompt from './components/UpdatePrompt.vue'
 import { useStorage } from './composables/useStorage.js'
+import { useDarkMode } from './composables/useDarkMode.js'
 
 const currentView = ref('welcome')
 const { isConfigured } = useStorage()
+
+// Initialize dark mode
+useDarkMode()
 
 // Handle viewport height for iOS Safari URL bar
 const setViewportHeight = () => {
