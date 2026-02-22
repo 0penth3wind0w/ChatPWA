@@ -290,10 +290,12 @@ watch([messages, isTyping], () => {
           <TypingIndicator />
           <button
             @click="handleCancelRequest"
-            class="px-3 py-1.5 text-xs text-text-tertiary hover:text-text-secondary bg-transparent rounded-lg transition-colors"
+            class="w-8 h-8 flex items-center justify-center rounded-lg bg-bg-surface border border-border-subtle text-text-secondary hover:text-text-primary hover:border-border-strong hover:bg-bg-elevated transition-colors shadow-soft"
             aria-label="Stop generating"
           >
-            Stop
+            <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <rect x="6" y="6" width="12" height="12" rx="1"/>
+            </svg>
           </button>
         </div>
       </div>
