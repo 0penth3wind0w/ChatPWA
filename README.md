@@ -12,18 +12,24 @@ An elegant Progressive Web App for AI chat with custom API endpoints. Connect to
 - 📝 **Markdown Support** - Full markdown rendering with code syntax highlighting
 - 🎯 **Smart Typing Indicator** - Animated dots show when AI is responding
 - 💾 **Auto-Save Everything** - Messages and settings persist automatically (IndexedDB + localStorage)
+- 🌍 **Internationalization** - Support for English, Traditional Chinese, French, and Japanese
+- 🌓 **Dark Mode** - System preference detection with manual toggle
+- 🎨 **Color Themes** - Choose from Green (Forest), Blue (Calm), or Slate (Professional) themes
 - 🔒 **Privacy First** - All data stays on your device, no external tracking
 - 📱 **Install as App** - Add to home screen for native-like experience
 - ⚡ **Fast & Lightweight** - Built with Vue 3 + Vite + Tailwind CSS v4
 
 ## Tech Stack
 
-- **Vue 3.5.28** - Composition API with `<script setup>` syntax
+- **Vue 3.5.25** - Composition API with `<script setup>` syntax
 - **Vite 7.3.1** - Lightning-fast development and optimized builds
 - **Tailwind CSS 4.2.0** - Custom design system via `@tailwindcss/vite` plugin
+- **Vue I18n 11.2.8** - Internationalization support for 4 languages
 - **Dexie 4.3.0** - IndexedDB wrapper for chat history persistence
 - **Marked 17.0.3** - Markdown rendering in AI responses
 - **Highlight.js 11.11.1** - Code syntax highlighting
+- **DOMPurify 3.3.1** - XSS protection for user-generated content
+- **Vite PWA Plugin 1.2.0** - Service worker with auto-update support
 
 ## Getting Started
 
@@ -115,10 +121,35 @@ Example: `/image a sunset over mountains`
 
 ### Settings
 
-- Click the ⚙️ icon in the chat header
-- All settings auto-save on change
+Click the ⚙️ icon in the chat header to access:
+
+**API Configuration:**
+- Endpoint URL, model name, authentication token
+- Provider selection (OpenAI/Anthropic/Gemini)
+- Custom chat/image paths
+- Message history limit
+
+**Appearance:**
+- **Dark Mode**: Toggle or use system preference
+- **Color Themes**: Choose from 3 color palettes:
+  - **Green (Forest)**: Natural, calming (#3D8A5A)
+  - **Blue (Calm)**: Muted, peaceful (#5B8AA8)
+  - **Slate (Professional)**: Neutral, modern (#6B7F8C)
+
+**Language:**
+- English (en)
+- Traditional Chinese (zh-TW)
+- French (fr)
+- Japanese (ja)
+
+**Image Generation:**
+- Model, size, and quality settings
+
+**Actions:**
 - **Connection Test**: Verify your API configuration
 - **Clear Chat History**: Delete all messages (cannot be undone)
+
+All settings auto-save on change.
 
 ## Project Structure
 
@@ -134,7 +165,13 @@ ChatPWA/
 │   ├── composables/
 │   │   ├── useApi.js            # Multi-provider API client
 │   │   ├── useChat.js           # Message state + IndexedDB
-│   │   └── useStorage.js        # Config persistence (singleton)
+│   │   ├── useStorage.js        # Config persistence (singleton)
+│   │   ├── useDarkMode.js       # Dark mode state management
+│   │   ├── useColorTheme.js     # Color theme management
+│   │   └── useLocale.js         # Language switching
+│   ├── i18n/
+│   │   ├── index.js             # Vue I18n configuration
+│   │   └── locales/             # Translation files (en, zh-TW, fr, ja)
 │   ├── views/
 │   │   ├── WelcomeView.vue      # Onboarding screen
 │   │   ├── ChatView.vue         # Main chat with fixed header
@@ -150,12 +187,22 @@ ChatPWA/
 
 ## Design System
 
-**Color Palette:**
-- Background: `#F5F4F1` (warm cream)
-- Surface: `#FFFFFF` (white cards)
-- Primary: `#3D8A5A` (forest green)
-- Accent: `#C8F0D8` (light green)
-- Text hierarchy: `#1A1918`, `#6D6C6A`, `#9C9B99`
+**Dynamic Color Themes:**
+
+All color themes adapt to both light and dark modes:
+
+- **Green (Forest)**: Natural, calming
+  - Primary: `#3D8A5A`, Dark: `#4D9B6A`, Light: `#C8F0D8`
+- **Blue (Calm)**: Muted, peaceful
+  - Primary: `#5B8AA8`, Dark: `#6B9AB8`, Light: `#D4E8F3`
+- **Slate (Professional)**: Neutral, modern
+  - Primary: `#6B7F8C`, Dark: `#7B8F9C`, Light: `#D8DEE3`
+
+**Base Colors:**
+- Light Mode Background: `#F5F4F1` (warm cream)
+- Dark Mode Background: `#1A1918` (near black)
+- Surface: `#FFFFFF` (light) / `#2A2928` (dark)
+- Text hierarchy: `#1A1918`, `#6D6C6A`, `#9C9B99` (light) / inverted (dark)
 
 **Typography:**
 - Font: Outfit (Google Fonts)
@@ -168,6 +215,7 @@ ChatPWA/
 - Smooth fade-in animations
 - Fixed headers (always visible)
 - Auto-scroll to bottom
+- Responsive dark mode with system preference detection
 
 ## Architecture
 
@@ -188,6 +236,9 @@ User Input → Views → Composables → API/Storage
 - Auto-save with Vue `watch()`
 - No manual save buttons
 - Fixed header layouts (`h-screen` + `flex-shrink-0`)
+- Vue I18n Composition API for internationalization
+- CSS custom properties for dynamic theming
+- System preference detection (dark mode, language)
 
 ## API Integration
 
@@ -221,9 +272,9 @@ Body: { prompt, model, size, quality, response_format: 'b64_json' }
 
 ## Storage
 
-- **localStorage** - API configuration (endpoint, model, token, provider, image settings)
+- **localStorage** - API configuration, dark mode preference, color theme, and language preference
 - **IndexedDB (Dexie)** - Chat messages with model names (auto-save on change)
-- **No Service Worker** - PWA uses plain manifest.json for installability only
+- **Service Worker (Workbox)** - Auto-update mechanism with network-first caching for fonts
 
 ## PWA Installation
 
@@ -232,7 +283,13 @@ Body: { prompt, model, size, quality, response_format: 'b64_json' }
 3. On mobile: tap "Add to Home Screen"
 4. App icon appears on home screen
 
-**Note:** This PWA is installable but does not work offline (no service worker by design).
+**Features:**
+- Auto-update notifications when new versions are available
+- Service worker with network-first caching strategy
+- Optimized font loading (Google Fonts cached for 1 week)
+- Immediate activation of new service worker versions
+
+**Note:** This PWA requires an active internet connection. The service worker provides auto-update functionality and font caching, but does not support full offline mode.
 
 ## Deploy to GitHub Pages
 
