@@ -238,6 +238,18 @@
       "tokenRequired": "Le jeton d'authentification est requis",
       "removeBearerPrefix": "Supprimez le préfixe \"Bearer\" du jeton",
       "tokenWhitespace": "Le jeton contient des espaces - veuillez vérifier les sauts de ligne ou les espaces"
+    },
+    "pwaUpdate": {
+      "title": "Vérifier les mises à jour",
+      "description": "Vérifier et installer manuellement les mises à jour de l'application",
+      "check": "Vérifier",
+      "updateAvailable": "Mise à jour disponible",
+      "updating": "Mise à jour...",
+      "updated": "Mis à jour !"
+    },
+    "version": {
+      "title": "Version",
+      "copy": "Copier"
     }
   },
   "pwa": {

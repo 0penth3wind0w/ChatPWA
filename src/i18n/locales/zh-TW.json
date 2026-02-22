@@ -222,6 +222,18 @@
       "tokenRequired": "需要驗證令牌",
       "removeBearerPrefix": "請移除令牌中的 \"Bearer \" 前綴",
       "tokenWhitespace": "令牌包含空白字元 - 請檢查換行或空格"
+    },
+    "pwaUpdate": {
+      "title": "檢查更新",
+      "description": "手動檢查並安裝應用程式更新",
+      "check": "檢查",
+      "updateAvailable": "有可用更新",
+      "updating": "更新中...",
+      "updated": "已更新！"
+    },
+    "version": {
+      "title": "版本",
+      "copy": "複製"
     }
   },
   "pwa": {

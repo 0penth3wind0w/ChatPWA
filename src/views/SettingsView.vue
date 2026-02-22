@@ -283,10 +283,10 @@ const handleBack = () => {
           <div class="flex items-center justify-between w-full gap-4">
             <div class="flex flex-col gap-1.5">
               <p class="text-base font-semibold text-text-primary">
-                Check for Updates
+                {{ t('settings.pwaUpdate.title') }}
               </p>
               <p class="text-sm text-text-tertiary leading-relaxed">
-                Manually check and install app updates
+                {{ t('settings.pwaUpdate.description') }}
               </p>
             </div>
             <button
@@ -294,10 +294,10 @@ const handleBack = () => {
               :disabled="updateStatus === 'updating'"
               class="h-10 px-5 bg-forest-green text-white text-sm font-semibold rounded-md hover:bg-dark-green transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <span v-if="updateStatus === 'updating'">Updating...</span>
-              <span v-else-if="updateStatus === 'success'">Updated!</span>
-              <span v-else-if="needRefresh">Update Available</span>
-              <span v-else>Check</span>
+              <span v-if="updateStatus === 'updating'">{{ t('settings.pwaUpdate.updating') }}</span>
+              <span v-else-if="updateStatus === 'success'">{{ t('settings.pwaUpdate.updated') }}</span>
+              <span v-else-if="needRefresh">{{ t('settings.pwaUpdate.updateAvailable') }}</span>
+              <span v-else>{{ t('settings.pwaUpdate.check') }}</span>
             </button>
           </div>
         </div>
@@ -307,7 +307,7 @@ const handleBack = () => {
           <div class="flex items-center justify-between w-full gap-4">
             <div class="flex flex-col gap-1.5">
               <p class="text-base font-semibold text-text-primary">
-                Version
+                {{ t('settings.version.title') }}
               </p>
               <p class="text-sm text-text-tertiary leading-relaxed font-mono">
                 {{ appVersion }}
@@ -316,9 +316,9 @@ const handleBack = () => {
             <button
               @click="() => { navigator.clipboard.writeText(appVersion) }"
               class="h-10 px-5 bg-bg-elevated text-text-secondary text-sm font-semibold rounded-lg hover:bg-border-subtle transition-colors border border-border-subtle"
-              aria-label="Copy version to clipboard"
+              :aria-label="t('settings.version.copy')"
             >
-              Copy
+              {{ t('settings.version.copy') }}
             </button>
           </div>
         </div>

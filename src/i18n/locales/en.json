@@ -222,6 +222,18 @@
       "tokenRequired": "Authentication token is required",
       "removeBearerPrefix": "Remove \"Bearer \" prefix from token",
       "tokenWhitespace": "Token contains whitespace - please check for line breaks or spaces"
+    },
+    "pwaUpdate": {
+      "title": "Check for Updates",
+      "description": "Manually check and install app updates",
+      "check": "Check",
+      "updateAvailable": "Update Available",
+      "updating": "Updating...",
+      "updated": "Updated!"
+    },
+    "version": {
+      "title": "Version",
+      "copy": "Copy"
     }
   },
   "pwa": {

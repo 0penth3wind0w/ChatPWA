@@ -238,6 +238,18 @@
       "tokenRequired": "認証トークンが必要です",
       "removeBearerPrefix": "トークンから「Bearer」プレフィックスを削除してください",
       "tokenWhitespace": "トークンに空白が含まれています - 改行やスペースを確認してください"
+    },
+    "pwaUpdate": {
+      "title": "更新を確認",
+      "description": "アプリの更新を手動で確認してインストール",
+      "check": "確認",
+      "updateAvailable": "更新利用可能",
+      "updating": "更新中...",
+      "updated": "更新完了！"
+    },
+    "version": {
+      "title": "バージョン",
+      "copy": "コピー"
     }
   },
   "pwa": {
