@@ -4,6 +4,9 @@ import { useI18n } from 'vue-i18n'
 const emit = defineEmits(['navigate'])
 const { t } = useI18n()
 
+// Get version from Vite define
+const appVersion = __APP_VERSION__
+
 const handleGetStarted = () => {
   emit('navigate', 'settings')
 }
@@ -95,6 +98,11 @@ const handleGetStarted = () => {
       >
         {{ t('welcome.getStarted') }}
       </button>
+
+      <!-- Version Info -->
+      <div class="text-xs text-text-tertiary text-center mt-auto">
+        <p>Version: {{ appVersion }}</p>
+      </div>
     </main>
   </div>
 </template>

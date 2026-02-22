@@ -2,9 +2,22 @@ import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import tailwindcss from '@tailwindcss/vite'
 import { VitePWA } from 'vite-plugin-pwa'
+import { execSync } from 'child_process'
+
+// Get git commit hash
+const getGitHash = () => {
+  try {
+    return execSync('git rev-parse --short HEAD').toString().trim()
+  } catch (e) {
+    return 'unknown'
+  }
+}
 
 // https://vite.dev/config/
 export default defineConfig({
+  define: {
+    __APP_VERSION__: JSON.stringify(getGitHash())
+  },
   plugins: [
     vue(),
     tailwindcss(),
