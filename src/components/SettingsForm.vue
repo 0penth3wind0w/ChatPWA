@@ -38,11 +38,15 @@ const debouncedAutoSave = () => {
   clearTimeout(saveTimeout)
   saveTimeout = setTimeout(() => {
     // Only auto-save if basic fields are filled
-    if (endpoint.value.trim() && model.value.trim() && token.value.trim()) {
+    const endpointVal = endpoint.value || ''
+    const modelVal = model.value || ''
+    const tokenVal = token.value || ''
+
+    if (endpointVal.trim() && modelVal.trim() && tokenVal.trim()) {
       saveConfig({
-        endpoint: endpoint.value.trim(),
-        model: model.value.trim(),
-        token: token.value.trim(),
+        endpoint: endpointVal.trim(),
+        model: modelVal.trim(),
+        token: tokenVal.trim(),
         provider: provider.value,
         chatPath: chatPath.value,
         imagePath: imagePath.value,
@@ -83,17 +87,18 @@ watch(searchProvider, () => {
 watch([endpoint, model, token, provider, chatPath, imagePath, systemPrompt, imageModel, imageSize, imageQuality, imageAspectRatio, imageResolution, maxHistoryMessages, searchProvider, searchApiKey], debouncedAutoSave)
 
 const isValid = computed(() => {
-  return endpoint.value.trim() && model.value.trim() && token.value.trim()
+  return !!(endpoint.value || '').trim() && !!(model.value || '').trim() && !!(token.value || '').trim()
 })
 
 const validateEndpoint = () => {
-  if (!endpoint.value.trim()) {
+  const endpointVal = endpoint.value || ''
+  if (!endpointVal.trim()) {
     errors.value.endpoint = t('settings.errors.endpointRequired')
     return false
   }
 
   try {
-    new URL(endpoint.value)
+    new URL(endpointVal)
     delete errors.value.endpoint
     return true
   } catch (e) {
@@ -103,7 +108,8 @@ const validateEndpoint = () => {
 }
 
 const validateModel = () => {
-  if (!model.value.trim()) {
+  const modelVal = model.value || ''
+  if (!modelVal.trim()) {
     errors.value.model = t('settings.errors.modelRequired')
     return false
   }
@@ -112,7 +118,8 @@ const validateModel = () => {
 }
 
 const validateToken = () => {
-  const trimmedToken = token.value.trim()
+  const tokenVal = token.value || ''
+  const trimmedToken = tokenVal.trim()
 
   if (!trimmedToken) {
     errors.value.token = t('settings.errors.tokenRequired')
