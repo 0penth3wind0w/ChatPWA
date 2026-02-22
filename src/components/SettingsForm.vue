@@ -213,27 +213,30 @@ watch(systemPromptTextarea, async (newVal) => {
       </div>
     </fieldset>
 
-    <!-- ===== CHAT PROVIDER ===== -->
+    <!-- ===== API CONFIGURATION ===== -->
     <div class="w-full h-px bg-border-subtle" role="separator"></div>
     <fieldset class="w-full space-y-4">
-      <legend class="text-base font-semibold text-text-primary">Chat Provider</legend>
+      <legend class="text-base font-semibold text-text-primary">API Configuration</legend>
 
-      <!-- Provider Selection -->
+      <!-- API Format Selection -->
       <div class="w-full space-y-2">
         <label for="provider" class="text-sm font-medium text-text-secondary">
-          Provider
+          API Format
         </label>
-        <select id="provider" v-model="provider" class="input-field">
-          <option value="openai">OpenAI (GPT models)</option>
-          <option value="anthropic">Anthropic (Claude models)</option>
-          <option value="gemini">Google (Gemini models)</option>
+        <select id="provider" v-model="provider" class="input-field" aria-describedby="provider-help">
+          <option value="openai">OpenAI Compatible</option>
+          <option value="anthropic">Anthropic Compatible</option>
+          <option value="gemini">Google Gemini Compatible</option>
         </select>
+        <p id="provider-help" class="text-xs text-text-tertiary">
+          Request/response format your API uses
+        </p>
       </div>
 
       <!-- API Endpoint URL -->
       <div class="w-full space-y-2">
         <label for="endpoint" class="text-sm font-medium text-text-secondary">
-          API Endpoint
+          Endpoint URL
         </label>
         <input
           id="endpoint"
@@ -243,32 +246,14 @@ watch(systemPromptTextarea, async (newVal) => {
           class="input-field"
           :class="{ 'border-warm-red': errors.endpoint }"
           :aria-invalid="!!errors.endpoint"
-          :aria-describedby="errors.endpoint ? 'endpoint-error' : undefined"
+          :aria-describedby="errors.endpoint ? 'endpoint-error endpoint-help' : 'endpoint-help'"
           @blur="validateEndpoint"
         />
         <p v-if="errors.endpoint" id="endpoint-error" class="text-xs text-warm-red" role="alert">
           {{ errors.endpoint }}
         </p>
-      </div>
-
-      <!-- Model Name -->
-      <div class="w-full space-y-2">
-        <label for="model" class="text-sm font-medium text-text-secondary">
-          Model
-        </label>
-        <input
-          id="model"
-          v-model="model"
-          type="text"
-          placeholder="gpt-4"
-          class="input-field"
-          :class="{ 'border-warm-red': errors.model }"
-          :aria-invalid="!!errors.model"
-          :aria-describedby="errors.model ? 'model-error' : undefined"
-          @blur="validateModel"
-        />
-        <p v-if="errors.model" id="model-error" class="text-xs text-warm-red" role="alert">
-          {{ errors.model }}
+        <p id="endpoint-help" class="text-xs text-text-tertiary">
+          Your API base URL (custom or official)
         </p>
       </div>
 
@@ -293,6 +278,33 @@ watch(systemPromptTextarea, async (newVal) => {
         </p>
         <p id="api-key-help" class="text-xs text-text-tertiary">
           No "Bearer " prefix needed
+        </p>
+      </div>
+    </fieldset>
+
+    <!-- ===== CHAT CONFIGURATION ===== -->
+    <div class="w-full h-px bg-border-subtle" role="separator"></div>
+    <fieldset class="w-full space-y-4">
+      <legend class="text-base font-semibold text-text-primary">Chat Configuration</legend>
+
+      <!-- Model Name -->
+      <div class="w-full space-y-2">
+        <label for="model" class="text-sm font-medium text-text-secondary">
+          Chat Model
+        </label>
+        <input
+          id="model"
+          v-model="model"
+          type="text"
+          placeholder="gpt-4"
+          class="input-field"
+          :class="{ 'border-warm-red': errors.model }"
+          :aria-invalid="!!errors.model"
+          :aria-describedby="errors.model ? 'model-error' : undefined"
+          @blur="validateModel"
+        />
+        <p v-if="errors.model" id="model-error" class="text-xs text-warm-red" role="alert">
+          {{ errors.model }}
         </p>
       </div>
 
