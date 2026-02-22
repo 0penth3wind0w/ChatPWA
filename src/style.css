@@ -183,7 +183,7 @@ body {
   border: 1px solid var(--color-border-subtle);
   border-radius: var(--radius-md);
   padding: 0 1.125rem;
-  font-size: 15px;
+  font-size: 16px; /* Prevent iOS Safari zoom on focus */
   color: var(--color-text-primary);
   outline: none;
   transition: all 200ms ease;
