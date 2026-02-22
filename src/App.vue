@@ -1,12 +1,14 @@
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
-import WelcomeView from './views/WelcomeView.vue'
-import ChatView from './views/ChatView.vue'
-import SettingsView from './views/SettingsView.vue'
+import { ref, onMounted, onUnmounted, defineAsyncComponent } from 'vue'
 import UpdatePrompt from './components/UpdatePrompt.vue'
 import { useStorage } from './composables/useStorage.js'
 import { useDarkMode } from './composables/useDarkMode.js'
 import { useColorTheme } from './composables/useColorTheme.js'
+
+// Lazy load views for code splitting
+const WelcomeView = defineAsyncComponent(() => import('./views/WelcomeView.vue'))
+const ChatView = defineAsyncComponent(() => import('./views/ChatView.vue'))
+const SettingsView = defineAsyncComponent(() => import('./views/SettingsView.vue'))
 
 const currentView = ref('welcome')
 const { isConfigured } = useStorage()

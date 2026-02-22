@@ -136,6 +136,7 @@ const handleInput = () => {
       <div class="max-h-64 overflow-y-auto">
         <button
           v-for="(cmd, index) in filteredCommands"
+          v-memo="[index === selectedCommandIndex]"
           :key="cmd.command"
           :id="`cmd-${index}`"
           @click="selectCommand(cmd)"

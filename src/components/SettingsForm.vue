@@ -26,6 +26,10 @@ const searchApiKey = ref(config.value.searchApiKey || '')
 const errors = ref({})
 const testing = ref(false)
 
+// Auto-save configuration
+const AUTO_SAVE_DEBOUNCE_MS = 500 // Balance between responsiveness and save frequency
+const TEST_TIMEOUT_MS = 3000 // Time to show test status message
+
 // Debounce helper
 let saveTimeout = null
 const debouncedAutoSave = () => {
@@ -51,7 +55,7 @@ const debouncedAutoSave = () => {
         searchApiKey: searchApiKey.value
       })
     }
-  }, 500)
+  }, AUTO_SAVE_DEBOUNCE_MS)
 }
 
 // Update chat path when provider changes
@@ -141,10 +145,10 @@ const handleTest = async () => {
       model: model.value.trim(),
       token: token.value.trim()
     })
-    // Reset testing state after 3 seconds
+    // Reset testing state after configured timeout
     setTimeout(() => {
       testing.value = false
-    }, 3000)
+    }, TEST_TIMEOUT_MS)
   }
 }
 

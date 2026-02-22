@@ -2,26 +2,38 @@ import { ref } from 'vue'
 
 export function useApi() {
   /**
-   * Build OpenAI-compatible request body
+   * Extract common optional parameters from config
    */
-  const buildOpenAIRequest = (messages, config) => {
-    // Start with required fields only
-    const request = {
-      model: config.model,
-      messages: messages
-    }
+  const buildCommonParams = (config, keyMap = {}) => {
+    const params = {}
 
-    // Add optional fields only if they have valid values
     if (config.temperature !== undefined && config.temperature !== null) {
-      request.temperature = config.temperature
+      params[keyMap.temperature || 'temperature'] = config.temperature
     }
 
     if (config.maxTokens) {
-      request.max_tokens = config.maxTokens
+      params[keyMap.maxTokens || 'maxTokens'] = config.maxTokens
     }
 
     if (config.topP) {
-      request.top_p = config.topP
+      params[keyMap.topP || 'topP'] = config.topP
+    }
+
+    return params
+  }
+
+  /**
+   * Build OpenAI-compatible request body
+   */
+  const buildOpenAIRequest = (messages, config) => {
+    const request = {
+      model: config.model,
+      messages: messages,
+      ...buildCommonParams(config, {
+        temperature: 'temperature',
+        maxTokens: 'max_tokens',
+        topP: 'top_p'
+      })
     }
 
     if (config.presencePenalty) {
@@ -43,14 +55,22 @@ export function useApi() {
     const systemMessage = messages.find(m => m.role === 'system')
     const conversationMessages = messages.filter(m => m.role !== 'system')
 
-    return {
+    const request = {
       model: config.model,
       max_tokens: config.maxTokens || 2000,
       messages: conversationMessages,
-      ...(systemMessage && { system: systemMessage.content }),
-      temperature: config.temperature || 1.0,
-      ...(config.topP && { top_p: config.topP })
+      temperature: config.temperature || 1.0
     }
+
+    if (systemMessage) {
+      request.system = systemMessage.content
+    }
+
+    if (config.topP) {
+      request.top_p = config.topP
+    }
+
+    return request
   }
 
   /**
@@ -81,19 +101,9 @@ export function useApi() {
     }
 
     // Add generation config with optional parameters
-    const generationConfig = {}
-
-    if (config.temperature !== undefined && config.temperature !== null) {
-      generationConfig.temperature = config.temperature
-    }
-
-    if (config.maxTokens) {
-      generationConfig.maxOutputTokens = config.maxTokens
-    }
-
-    if (config.topP) {
-      generationConfig.topP = config.topP
-    }
+    const generationConfig = buildCommonParams(config, {
+      maxTokens: 'maxOutputTokens'
+    })
 
     if (Object.keys(generationConfig).length > 0) {
       request.generationConfig = generationConfig
@@ -151,6 +161,15 @@ export function useApi() {
 
       return requestBody
     }
+  }
+
+  /**
+   * Handle API errors consistently
+   */
+  const handleApiError = async (response) => {
+    const errorData = await response.json().catch(() => ({ error: { message: 'Unknown error' } }))
+    const message = errorData.error?.message || errorData.message || `API Error: ${response.status} ${response.statusText}`
+    throw new Error(message)
   }
 
   /**
@@ -242,8 +261,7 @@ export function useApi() {
       })
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}))
-        throw new Error(errorData.error?.message || errorData.message || `API Error: ${response.status} ${response.statusText}`)
+        await handleApiError(response)
       }
 
       return await handleStandardResponse(response, provider)
@@ -292,8 +310,7 @@ export function useApi() {
       })
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}))
-        throw new Error(errorData.error?.message || errorData.message || `API Error: ${response.status} ${response.statusText}`)
+        await handleApiError(response)
       }
 
       const data = await response.json()
