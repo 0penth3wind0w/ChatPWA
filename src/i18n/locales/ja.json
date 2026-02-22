@@ -65,7 +65,7 @@
         "example": "/fetch https://example.com"
       }
     },
-    "typing": "入力中...",
+    "typing": "AIアシスタントが入力中",
     "stopGenerating": "生成を停止",
     "fetching": "{count}個のURLからコンテンツを取得中...",
     "assistant": "AIアシスタント",

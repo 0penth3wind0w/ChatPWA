@@ -53,7 +53,7 @@
         "example": "/fetch https://example.com"
       }
     },
-    "typing": "typing...",
+    "typing": "AI Assistant is typing",
     "fetching": "Fetching content from {count} URL(s)...",
     "assistant": "AI Assistant",
     "you": "You",

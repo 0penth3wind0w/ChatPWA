@@ -65,7 +65,7 @@
         "example": "/fetch https://example.com"
       }
     },
-    "typing": "en train d'écrire...",
+    "typing": "L'Assistant IA écrit",
     "stopGenerating": "Arrêter la génération",
     "fetching": "Récupération du contenu de {count} URL...",
     "assistant": "Assistant IA",

@@ -53,7 +53,7 @@
         "example": "/fetch https://example.com"
       }
     },
-    "typing": "輸入中...",
+    "typing": "AI 助手正在輸入",
     "fetching": "正在讀取 {count} 個網址的內容...",
     "assistant": "AI 助手",
     "you": "您",
