@@ -36,37 +36,24 @@
       "title": "Start a Conversation",
       "tips": {
         "title": "Tips",
-        "slashCommands": "Use / for slash commands (/img, /search, /fetch)",
-        "urls": "Paste URLs to automatically fetch their content",
-        "shiftEnter": "Press Shift+Enter for new lines"
+        "slashCommands": "Use / for slash commands (/img, /search, /fetch)"
       }
     },
-    "input": {
-      "placeholder": "Type your message...",
-      "send": "Send message",
-      "help": "Press forward slash to open command menu. Press Enter to send message, Shift+Enter for new line."
-    },
     "commands": {
-      "title": "Slash Commands",
-      "navigate": "↑↓ navigate • Tab select • Esc close",
       "image": {
-        "command": "/img",
         "description": "Generate an image from text description",
         "example": "/img a sunset over mountains"
       },
       "search": {
-        "command": "/search",
         "description": "Search the web for information",
         "example": "/search latest Vue 3 features"
       },
       "fetch": {
-        "command": "/fetch",
         "description": "Fetch and read web page content",
         "example": "/fetch https://example.com"
       }
     },
-    "typing": "AI Assistant is typing",
-    "stopGenerating": "Stop generating",
+    "typing": "typing...",
     "fetching": "Fetching content from {count} URL(s)...",
     "assistant": "AI Assistant",
     "you": "You",
@@ -77,106 +64,159 @@
       "imageFailed": "Error generating image: {message}",
       "sendFailed": "Error: {message}",
       "defaultError": "Failed to get response from AI"
-    },
-    "validation": {
-      "tooLong": "Message is too long ({current}/{max} characters)"
     }
   },
   "settings": {
-    "title": "Settings",
-    "backToChat": "Back to Chat",
-    "clearHistory": "Clear Chat History",
-    "clearHistoryConfirm": "Are you sure you want to clear all chat history? This cannot be undone.",
-    "sections": {
-      "appearance": "Appearance",
-      "apiConfig": "API Configuration",
-      "chatConfig": "Chat Configuration",
-      "imageConfig": "Image Generation",
-      "webTools": "Web Tools"
+    "clearHistory": {
+      "title": "Clear Chat History",
+      "description": "Remove all conversation messages",
+      "button": "Clear",
+      "confirm": "Are you sure you want to clear all chat history? This cannot be undone."
     },
     "language": {
       "label": "Language",
-      "en": "English",
-      "zh-TW": "繁體中文",
-      "fr": "Français",
-      "ja": "日本語"
+      "description": "Choose your preferred language"
     },
     "colorTheme": {
       "label": "Color Theme",
-      "green": "Forest Green",
-      "blue": "Calm Blue",
-      "slate": "Slate"
+      "description": "Choose your accent color"
     },
     "darkMode": {
       "label": "Dark Mode",
-      "light": "Light",
-      "dark": "Dark"
-    },
-    "apiFormat": {
-      "label": "API Format",
-      "openai": "OpenAI Compatible",
-      "anthropic": "Anthropic Compatible",
-      "gemini": "Google Gemini Compatible"
-    },
-    "endpoint": {
-      "label": "API Endpoint",
-      "placeholder": "https://api.openai.com/v1",
-      "help": "Base URL for the API (without path)"
-    },
-    "model": {
-      "label": "Model Name",
-      "placeholder": "gpt-4-turbo",
-      "help": "Model identifier to use for chat"
-    },
-    "apiKey": {
-      "label": "API Key",
-      "placeholder": "sk-...",
-      "help": "Your API authentication key"
-    },
-    "chatPath": {
-      "label": "Chat API Path",
-      "help": "API path for chat completions"
-    },
-    "imagePath": {
-      "label": "Image API Path",
-      "help": "API path for image generation"
+      "description": "Switch between light and dark theme",
+      "switchToLight": "Switch to light mode",
+      "switchToDark": "Switch to dark mode"
     },
     "systemPrompt": {
       "label": "System Prompt",
       "placeholder": "You are a helpful assistant...",
-      "help": "Custom instructions for AI behavior"
+      "help": "Customize AI behavior and personality"
     },
-    "maxHistory": {
-      "label": "Max History Messages",
-      "help": "Number of previous messages to send (0 = unlimited)"
+    "historyLimit": {
+      "label": "Message History Limit",
+      "help": "Limit messages sent to API to reduce token usage and costs",
+      "options": {
+        "unlimited": "Unlimited (all messages)",
+        "6": "6 messages (3 exchanges)",
+        "10": "10 messages (5 exchanges)",
+        "20": "20 messages (10 exchanges)",
+        "40": "40 messages (20 exchanges)"
+      }
+    },
+    "apiConfig": {
+      "title": "API Configuration"
+    },
+    "provider": {
+      "label": "API Format",
+      "help": "Request/response format your API uses",
+      "options": {
+        "openai": "OpenAI Compatible",
+        "anthropic": "Anthropic Compatible",
+        "gemini": "Google Gemini Compatible"
+      }
+    },
+    "endpoint": {
+      "label": "Endpoint URL",
+      "placeholder": "https://api.openai.com/v1",
+      "help": "Your API base URL (custom or official)"
+    },
+    "apiKey": {
+      "label": "API Key",
+      "placeholder": "Enter your API key",
+      "help": "No \"Bearer \" prefix needed"
+    },
+    "chatConfig": {
+      "title": "Chat Configuration"
+    },
+    "model": {
+      "label": "Chat Model",
+      "placeholder": "gpt-4"
+    },
+    "chatPath": {
+      "label": "Chat Endpoint Path",
+      "placeholder": "/chat/completions",
+      "help": "Auto-updates when provider changes"
+    },
+    "imageGeneration": {
+      "title": "Image Generation"
+    },
+    "imagePath": {
+      "label": "Image Endpoint Path",
+      "placeholder": "/images/generations",
+      "help": "Auto-updates when provider changes"
     },
     "imageModel": {
       "label": "Image Model",
-      "placeholder": "dall-e-3"
+      "placeholder": "dall-e-3",
+      "help": "dall-e-2, dall-e-3, or custom model"
     },
     "imageSize": {
-      "label": "Image Size"
+      "label": "Image Size",
+      "options": {
+        "square": "1024x1024 (Square)",
+        "landscape": "1792x1024 (Landscape)",
+        "portrait": "1024x1792 (Portrait)"
+      }
     },
     "imageQuality": {
       "label": "Image Quality",
-      "standard": "Standard",
-      "hd": "HD"
+      "options": {
+        "standard": "Standard",
+        "hd": "HD (DALL-E 3 only)"
+      }
+    },
+    "aspectRatio": {
+      "label": "Aspect Ratio",
+      "options": {
+        "square": "1:1 (Square)",
+        "portrait23": "2:3 (Portrait)",
+        "landscape32": "3:2 (Landscape)",
+        "portrait34": "3:4 (Portrait)",
+        "landscape43": "4:3 (Landscape)",
+        "portrait45": "4:5 (Portrait)",
+        "landscape54": "5:4 (Landscape)",
+        "tall": "9:16 (Tall)",
+        "wide": "16:9 (Wide)",
+        "ultraWide": "21:9 (Ultra Wide)"
+      }
+    },
+    "resolution": {
+      "label": "Resolution",
+      "options": {
+        "4k": "4K (Gemini 3 Pro only)"
+      }
+    },
+    "webSearch": {
+      "title": "Web Search"
     },
     "searchProvider": {
       "label": "Search Provider",
-      "brave": "Brave Search",
-      "tavily": "Tavily",
-      "custom": "Custom"
+      "options": {
+        "brave": "Brave Search",
+        "tavily": "Tavily AI",
+        "custom": "Custom"
+      }
     },
     "searchApiKey": {
       "label": "Search API Key",
-      "placeholder": "Enter API key..."
+      "placeholder": "Enter search API key",
+      "help": "Required for Brave or Tavily"
     },
-    "test": {
-      "button": "Test Connection",
+    "connectionTest": {
+      "title": "Connection Test",
+      "description": "Verify your chat API settings",
+      "test": "Test",
       "testing": "Testing...",
       "success": "Connection successful!",
-      "failed": "Connection test failed: {message}"
+      "failed": "Connection failed"
+    },
+    "errors": {
+      "endpointRequired": "API endpoint is required",
+      "invalidUrl": "Please enter a valid URL",
+      "modelRequired": "Model name is required",
+      "tokenRequired": "Authentication token is required",
+      "removeBearerPrefix": "Remove \"Bearer \" prefix from token",
+      "tokenWhitespace": "Token contains whitespace - please check for line breaks or spaces"
     }
   },
   "pwa": {

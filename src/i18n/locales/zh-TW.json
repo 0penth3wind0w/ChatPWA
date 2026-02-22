@@ -12,176 +12,216 @@
   },
   "welcome": {
     "title": "ChatPWA",
-    "subtitle": "你的個人 AI 助理",
-    "description": "連接至任何 AI 提供商，與強大的語言模型對話。設定你自己的 API 端點，完全掌控隱私。",
+    "subtitle": "您的個人AI助手",
+    "description": "連接任何AI供應商，與強大的語言模型對話。配置自己的API端點，完全掌控和保護隱私。",
     "features": {
       "custom": {
         "title": "自訂端點",
-        "description": "連接至 OpenAI、Anthropic、Gemini 或任何相容的 API"
+        "description": "連接OpenAI、Anthropic、Gemini或任何相容的API"
       },
       "private": {
         "title": "隱私優先",
-        "description": "你的 API 金鑰和對話紀錄都保存在你的裝置上"
+        "description": "您的API金鑰和對話記錄都保存在您的裝置上"
       },
       "offline": {
-        "title": "離線運作",
-        "description": "安裝為 PWA，隨時存取你的聊天紀錄"
+        "title": "離線使用",
+        "description": "安裝為PWA，隨時存取您的聊天記錄"
       }
     },
     "getStarted": "開始使用"
   },
   "chat": {
-    "title": "AI 對話",
+    "title": "AI 聊天",
     "emptyState": {
       "title": "開始對話",
       "tips": {
         "title": "提示",
-        "slashCommands": "使用 / 執行斜線指令（/img、/search、/fetch）",
-        "urls": "貼上網址以自動擷取內容",
-        "shiftEnter": "按 Shift+Enter 換行"
+        "slashCommands": "使用 / 進行斜線命令（/img、/search、/fetch）"
       }
     },
-    "input": {
-      "placeholder": "輸入訊息...",
-      "send": "傳送訊息",
-      "help": "按斜線鍵開啟指令選單。按 Enter 傳送訊息，Shift+Enter 換行。"
-    },
     "commands": {
-      "title": "斜線指令",
-      "navigate": "↑↓ 導航 • Tab 選擇 • Esc 關閉",
       "image": {
-        "command": "/img",
         "description": "從文字描述生成圖片",
         "example": "/img 山上的日落"
       },
       "search": {
-        "command": "/search",
         "description": "搜尋網路資訊",
         "example": "/search Vue 3 最新功能"
       },
       "fetch": {
-        "command": "/fetch",
-        "description": "擷取並讀取網頁內容",
+        "description": "讀取網頁內容",
         "example": "/fetch https://example.com"
       }
     },
-    "typing": "AI 助理正在輸入",
-    "stopGenerating": "停止生成",
-    "fetching": "正在擷取 {count} 個網址的內容...",
-    "assistant": "AI 助理",
-    "you": "你",
+    "typing": "輸入中...",
+    "fetching": "正在讀取 {count} 個網址的內容...",
+    "assistant": "AI 助手",
+    "you": "您",
     "model": "模型",
     "errors": {
       "searchFailed": "搜尋錯誤：{message}",
-      "fetchFailed": "擷取錯誤：{message}",
+      "fetchFailed": "讀取錯誤：{message}",
       "imageFailed": "圖片生成錯誤：{message}",
       "sendFailed": "錯誤：{message}",
-      "defaultError": "無法取得 AI 回應"
-    },
-    "validation": {
-      "tooLong": "訊息過長（{current}/{max} 字元）"
+      "defaultError": "無法從AI獲得回應"
     }
   },
   "settings": {
-    "title": "設定",
-    "backToChat": "返回對話",
-    "clearHistory": "清除聊天紀錄",
-    "clearHistoryConfirm": "確定要清除所有聊天紀錄嗎？此動作無法復原。",
-    "sections": {
-      "appearance": "外觀",
-      "apiConfig": "API 設定",
-      "chatConfig": "對話設定",
-      "imageConfig": "圖片生成",
-      "webTools": "網路工具"
+    "clearHistory": {
+      "title": "清除聊天記錄",
+      "description": "移除所有對話訊息",
+      "button": "清除",
+      "confirm": "確定要清除所有聊天記錄嗎？此操作無法復原。"
     },
     "language": {
       "label": "語言",
-      "en": "English",
-      "zh-TW": "繁體中文",
-      "fr": "Français",
-      "ja": "日本語"
+      "description": "選擇您偏好的語言"
     },
     "colorTheme": {
-      "label": "色彩主題",
-      "green": "森林綠",
-      "blue": "沉靜藍",
-      "slate": "岩板灰"
+      "label": "配色主題",
+      "description": "選擇您的強調色"
     },
     "darkMode": {
       "label": "深色模式",
-      "light": "淺色",
-      "dark": "深色"
-    },
-    "apiFormat": {
-      "label": "API 格式",
-      "openai": "OpenAI 相容",
-      "anthropic": "Anthropic 相容",
-      "gemini": "Google Gemini 相容"
-    },
-    "endpoint": {
-      "label": "API 端點",
-      "placeholder": "https://api.openai.com/v1",
-      "help": "API 的基礎網址（不含路徑）"
-    },
-    "model": {
-      "label": "模型名稱",
-      "placeholder": "gpt-4-turbo",
-      "help": "用於對話的模型識別碼"
-    },
-    "apiKey": {
-      "label": "API 金鑰",
-      "placeholder": "sk-...",
-      "help": "你的 API 認證金鑰"
-    },
-    "chatPath": {
-      "label": "對話 API 路徑",
-      "help": "對話完成的 API 路徑"
-    },
-    "imagePath": {
-      "label": "圖片 API 路徑",
-      "help": "圖片生成的 API 路徑"
+      "description": "切換淺色和深色主題",
+      "switchToLight": "切換到淺色模式",
+      "switchToDark": "切換到深色模式"
     },
     "systemPrompt": {
       "label": "系統提示",
-      "placeholder": "你是一個有用的助理...",
-      "help": "自訂 AI 行為的指令"
+      "placeholder": "你是一個有用的助手...",
+      "help": "自訂AI行為和個性"
     },
-    "maxHistory": {
-      "label": "最大歷史訊息數",
-      "help": "要傳送的先前訊息數量（0 = 不限）"
+    "historyLimit": {
+      "label": "訊息歷史限制",
+      "help": "限制發送到API的訊息數量以減少令牌使用和成本",
+      "options": {
+        "unlimited": "無限制（所有訊息）",
+        "6": "6 則訊息（3 次交流）",
+        "10": "10 則訊息（5 次交流）",
+        "20": "20 則訊息（10 次交流）",
+        "40": "40 則訊息（20 次交流）"
+      }
+    },
+    "apiConfig": {
+      "title": "API 配置"
+    },
+    "provider": {
+      "label": "API 格式",
+      "help": "您的API使用的請求/回應格式",
+      "options": {
+        "openai": "OpenAI 相容",
+        "anthropic": "Anthropic 相容",
+        "gemini": "Google Gemini 相容"
+      }
+    },
+    "endpoint": {
+      "label": "端點網址",
+      "placeholder": "https://api.openai.com/v1",
+      "help": "您的API基礎網址（自訂或官方）"
+    },
+    "apiKey": {
+      "label": "API 金鑰",
+      "placeholder": "輸入您的API金鑰",
+      "help": "不需要 \"Bearer \" 前綴"
+    },
+    "chatConfig": {
+      "title": "聊天配置"
+    },
+    "model": {
+      "label": "聊天模型",
+      "placeholder": "gpt-4"
+    },
+    "chatPath": {
+      "label": "聊天端點路徑",
+      "placeholder": "/chat/completions",
+      "help": "當供應商變更時自動更新"
+    },
+    "imageGeneration": {
+      "title": "圖片生成"
+    },
+    "imagePath": {
+      "label": "圖片端點路徑",
+      "placeholder": "/images/generations",
+      "help": "當供應商變更時自動更新"
     },
     "imageModel": {
       "label": "圖片模型",
-      "placeholder": "dall-e-3"
+      "placeholder": "dall-e-3",
+      "help": "dall-e-2、dall-e-3 或自訂模型"
     },
     "imageSize": {
-      "label": "圖片尺寸"
+      "label": "圖片尺寸",
+      "options": {
+        "square": "1024x1024（正方形）",
+        "landscape": "1792x1024（橫向）",
+        "portrait": "1024x1792（縱向）"
+      }
     },
     "imageQuality": {
       "label": "圖片品質",
-      "standard": "標準",
-      "hd": "高清"
+      "options": {
+        "standard": "標準",
+        "hd": "高畫質（僅 DALL-E 3）"
+      }
+    },
+    "aspectRatio": {
+      "label": "長寬比",
+      "options": {
+        "square": "1:1（正方形）",
+        "portrait23": "2:3（縱向）",
+        "landscape32": "3:2（橫向）",
+        "portrait34": "3:4（縱向）",
+        "landscape43": "4:3（橫向）",
+        "portrait45": "4:5（縱向）",
+        "landscape54": "5:4（橫向）",
+        "tall": "9:16（高）",
+        "wide": "16:9（寬）",
+        "ultraWide": "21:9（超寬）"
+      }
+    },
+    "resolution": {
+      "label": "解析度",
+      "options": {
+        "4k": "4K（僅 Gemini 3 Pro）"
+      }
+    },
+    "webSearch": {
+      "title": "網頁搜尋"
     },
     "searchProvider": {
-      "label": "搜尋提供商",
-      "brave": "Brave Search",
-      "tavily": "Tavily",
-      "custom": "自訂"
+      "label": "搜尋供應商",
+      "options": {
+        "brave": "Brave 搜尋",
+        "tavily": "Tavily AI",
+        "custom": "自訂"
+      }
     },
     "searchApiKey": {
       "label": "搜尋 API 金鑰",
-      "placeholder": "輸入 API 金鑰..."
+      "placeholder": "輸入搜尋API金鑰",
+      "help": "Brave 或 Tavily 需要"
     },
-    "test": {
-      "button": "測試連線",
+    "connectionTest": {
+      "title": "連線測試",
+      "description": "驗證您的聊天API設定",
+      "test": "測試",
       "testing": "測試中...",
       "success": "連線成功！",
-      "failed": "連線測試失敗：{message}"
+      "failed": "連線失敗"
+    },
+    "errors": {
+      "endpointRequired": "需要API端點",
+      "invalidUrl": "請輸入有效的網址",
+      "modelRequired": "需要模型名稱",
+      "tokenRequired": "需要驗證令牌",
+      "removeBearerPrefix": "請移除令牌中的 \"Bearer \" 前綴",
+      "tokenWhitespace": "令牌包含空白字元 - 請檢查換行或空格"
     }
   },
   "pwa": {
     "updateAvailable": "有可用更新",
-    "updateMessage": "新版本已就緒。重新載入以更新。",
+    "updateMessage": "新版本已準備好。重新載入以更新。",
     "later": "稍後",
     "reload": "重新載入"
   },
