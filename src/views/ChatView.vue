@@ -88,9 +88,12 @@ const handleSendMessage = async (content) => {
         addAssistantMessage(searchResults, config.value.model)
       } catch (err) {
         isTyping.value = false
-        const errorMsg = `Error searching: ${err.message}`
-        addAssistantMessage(errorMsg, config.value.model)
-        showError(errorMsg)
+        // Don't show error if request was cancelled by user
+        if (err.name !== 'AbortError') {
+          const errorMsg = `Error searching: ${err.message}`
+          addAssistantMessage(errorMsg, config.value.model)
+          showError(errorMsg)
+        }
       }
     } else if (fetchCommandMatch) {
       // Handle web fetch
@@ -105,28 +108,40 @@ const handleSendMessage = async (content) => {
         addAssistantMessage(webContent, config.value.model)
       } catch (err) {
         isTyping.value = false
-        const errorMsg = `Error fetching: ${err.message}`
-        addAssistantMessage(errorMsg, config.value.model)
-        showError(errorMsg)
+        // Don't show error if request was cancelled by user
+        if (err.name !== 'AbortError') {
+          const errorMsg = `Error fetching: ${err.message}`
+          addAssistantMessage(errorMsg, config.value.model)
+          showError(errorMsg)
+        }
       }
     } else if (imageCommandMatch) {
       // Handle image generation
       const prompt = imageCommandMatch[1]
       isTyping.value = true
 
-      const images = await generateImage(prompt, config.value)
+      try {
+        const images = await generateImage(prompt, config.value)
+        isTyping.value = false
 
-      isTyping.value = false
+        if (images && images.length > 0) {
+          // Create markdown with image
+          const imageMarkdown = images.map(img =>
+            `![${prompt}](${img.url})\n\n*Generated image: ${prompt}*`
+          ).join('\n\n')
 
-      if (images && images.length > 0) {
-        // Create markdown with image
-        const imageMarkdown = images.map(img =>
-          `![${prompt}](${img.url})\n\n*Generated image: ${prompt}*`
-        ).join('\n\n')
-
-        addAssistantMessage(imageMarkdown, config.value.imageModel)
-      } else {
-        addAssistantMessage('Failed to generate image. No images returned.', config.value.imageModel)
+          addAssistantMessage(imageMarkdown, config.value.imageModel)
+        } else {
+          addAssistantMessage('Failed to generate image. No images returned.', config.value.imageModel)
+        }
+      } catch (err) {
+        isTyping.value = false
+        // Don't show error if request was cancelled by user
+        if (err.name !== 'AbortError') {
+          const errorMsg = `Error generating image: ${err.message}`
+          addAssistantMessage(errorMsg, config.value.imageModel)
+          showError(errorMsg)
+        }
       }
     } else {
       // Handle regular chat message
@@ -201,9 +216,12 @@ const handleSendMessage = async (content) => {
   } catch (err) {
     logger.error('Failed to send message:', err)
     isTyping.value = false
-    const errorMsg = `Error: ${err.message || 'Failed to get response from AI'}`
-    addAssistantMessage(errorMsg)
-    showError(errorMsg)
+    // Don't show error if request was cancelled by user
+    if (err.name !== 'AbortError') {
+      const errorMsg = `Error: ${err.message || 'Failed to get response from AI'}`
+      addAssistantMessage(errorMsg)
+      showError(errorMsg)
+    }
   }
 }
 
@@ -272,10 +290,10 @@ watch([messages, isTyping], () => {
           <TypingIndicator />
           <button
             @click="handleCancelRequest"
-            class="px-3 py-1.5 text-sm text-text-secondary hover:text-text-primary bg-bg-surface rounded-lg border border-border-subtle hover:border-border-strong transition-colors"
-            aria-label="Cancel request"
+            class="px-3 py-1.5 text-xs text-text-tertiary hover:text-text-secondary bg-transparent rounded-lg transition-colors"
+            aria-label="Stop generating"
           >
-            Cancel
+            Stop
           </button>
         </div>
       </div>

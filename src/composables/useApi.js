@@ -211,7 +211,8 @@ export function useApi() {
 
         // Don't retry if abort was called
         if (error.name === 'AbortError') {
-          throw new Error('Request cancelled')
+          // Preserve AbortError so it can be handled gracefully
+          throw error
         }
 
         // Don't retry on last attempt
