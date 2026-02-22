@@ -1,8 +1,10 @@
 <script setup>
 import { ref, computed, watch, nextTick, onUnmounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useStorage } from '../composables/useStorage.js'
 
 const emit = defineEmits(['test'])
+const { t } = useI18n()
 
 const { config, saveConfig } = useStorage()
 const systemPromptTextarea = ref(null)
@@ -86,7 +88,7 @@ const isValid = computed(() => {
 
 const validateEndpoint = () => {
   if (!endpoint.value.trim()) {
-    errors.value.endpoint = 'API endpoint is required'
+    errors.value.endpoint = t('settings.errors.endpointRequired')
     return false
   }
 
@@ -95,14 +97,14 @@ const validateEndpoint = () => {
     delete errors.value.endpoint
     return true
   } catch (e) {
-    errors.value.endpoint = 'Please enter a valid URL'
+    errors.value.endpoint = t('settings.errors.invalidUrl')
     return false
   }
 }
 
 const validateModel = () => {
   if (!model.value.trim()) {
-    errors.value.model = 'Model name is required'
+    errors.value.model = t('settings.errors.modelRequired')
     return false
   }
   delete errors.value.model
@@ -113,19 +115,19 @@ const validateToken = () => {
   const trimmedToken = token.value.trim()
 
   if (!trimmedToken) {
-    errors.value.token = 'Authentication token is required'
+    errors.value.token = t('settings.errors.tokenRequired')
     return false
   }
 
   // Check if token starts with 'Bearer ' and warn user to remove it
   if (trimmedToken.toLowerCase().startsWith('bearer ')) {
-    errors.value.token = 'Remove "Bearer " prefix from token'
+    errors.value.token = t('settings.errors.removeBearerPrefix')
     return false
   }
 
   // Check for whitespace (common copy-paste error)
   if (/\s/.test(trimmedToken)) {
-    errors.value.token = 'Token contains whitespace - please check for line breaks or spaces'
+    errors.value.token = t('settings.errors.tokenWhitespace')
     return false
   }
 
@@ -197,15 +199,15 @@ onUnmounted(() => {
   <form class="w-full space-y-5" @submit.prevent="handleTest">
     <!-- ===== SYSTEM PROMPT ===== -->
     <fieldset class="w-full space-y-4">
-      <legend class="text-base font-semibold text-text-primary">System Prompt</legend>
+      <legend class="text-base font-semibold text-text-primary">{{ t('settings.systemPrompt.label') }}</legend>
 
       <div class="w-full space-y-2">
-        <label for="system-prompt" class="sr-only">System Prompt</label>
+        <label for="system-prompt" class="sr-only">{{ t('settings.systemPrompt.label') }}</label>
         <textarea
           id="system-prompt"
           ref="systemPromptTextarea"
           v-model="systemPrompt"
-          placeholder="You are a helpful assistant..."
+          :placeholder="t('settings.systemPrompt.placeholder')"
           rows="1"
           class="input-field resize-none overflow-hidden leading-normal"
           style="min-height: 3.25rem; padding-top: 0.875rem; padding-bottom: 0.875rem;"
@@ -213,24 +215,24 @@ onUnmounted(() => {
           @input="resizeTextarea"
         ></textarea>
         <p id="system-prompt-help" class="text-xs text-text-tertiary">
-          Customize AI behavior and personality
+          {{ t('settings.systemPrompt.help') }}
         </p>
       </div>
 
       <!-- History Limit -->
       <div class="w-full space-y-2">
         <label for="history-limit" class="text-sm font-medium text-text-secondary">
-          Message History Limit
+          {{ t('settings.historyLimit.label') }}
         </label>
         <select id="history-limit" v-model.number="maxHistoryMessages" class="input-field" aria-describedby="history-limit-help">
-          <option :value="0">Unlimited (all messages)</option>
-          <option :value="6">6 messages (3 exchanges)</option>
-          <option :value="10">10 messages (5 exchanges)</option>
-          <option :value="20">20 messages (10 exchanges)</option>
-          <option :value="40">40 messages (20 exchanges)</option>
+          <option :value="0">{{ t('settings.historyLimit.options.unlimited') }}</option>
+          <option :value="6">{{ t('settings.historyLimit.options.6') }}</option>
+          <option :value="10">{{ t('settings.historyLimit.options.10') }}</option>
+          <option :value="20">{{ t('settings.historyLimit.options.20') }}</option>
+          <option :value="40">{{ t('settings.historyLimit.options.40') }}</option>
         </select>
         <p id="history-limit-help" class="text-xs text-text-tertiary">
-          Limit messages sent to API to reduce token usage and costs
+          {{ t('settings.historyLimit.help') }}
         </p>
       </div>
     </fieldset>
@@ -238,33 +240,33 @@ onUnmounted(() => {
     <!-- ===== API CONFIGURATION ===== -->
     <div class="w-full h-px bg-border-subtle" role="separator"></div>
     <fieldset class="w-full space-y-4">
-      <legend class="text-base font-semibold text-text-primary">API Configuration</legend>
+      <legend class="text-base font-semibold text-text-primary">{{ t('settings.apiConfig.title') }}</legend>
 
       <!-- API Format Selection -->
       <div class="w-full space-y-2">
         <label for="provider" class="text-sm font-medium text-text-secondary">
-          API Format
+          {{ t('settings.provider.label') }}
         </label>
         <select id="provider" v-model="provider" class="input-field" aria-describedby="provider-help">
-          <option value="openai">OpenAI Compatible</option>
-          <option value="anthropic">Anthropic Compatible</option>
-          <option value="gemini">Google Gemini Compatible</option>
+          <option value="openai">{{ t('settings.provider.options.openai') }}</option>
+          <option value="anthropic">{{ t('settings.provider.options.anthropic') }}</option>
+          <option value="gemini">{{ t('settings.provider.options.gemini') }}</option>
         </select>
         <p id="provider-help" class="text-xs text-text-tertiary">
-          Request/response format your API uses
+          {{ t('settings.provider.help') }}
         </p>
       </div>
 
       <!-- API Endpoint URL -->
       <div class="w-full space-y-2">
         <label for="endpoint" class="text-sm font-medium text-text-secondary">
-          Endpoint URL
+          {{ t('settings.endpoint.label') }}
         </label>
         <input
           id="endpoint"
           v-model="endpoint"
           type="url"
-          placeholder="https://api.openai.com/v1"
+          :placeholder="t('settings.endpoint.placeholder')"
           class="input-field"
           :class="{ 'border-warm-red': errors.endpoint }"
           :aria-invalid="!!errors.endpoint"
@@ -275,20 +277,20 @@ onUnmounted(() => {
           {{ errors.endpoint }}
         </p>
         <p id="endpoint-help" class="text-xs text-text-tertiary">
-          Your API base URL (custom or official)
+          {{ t('settings.endpoint.help') }}
         </p>
       </div>
 
       <!-- Authentication Token -->
       <div class="w-full space-y-2">
         <label for="api-key" class="text-sm font-medium text-text-secondary">
-          API Key
+          {{ t('settings.apiKey.label') }}
         </label>
         <input
           id="api-key"
           v-model="token"
           type="password"
-          placeholder="Enter your API key"
+          :placeholder="t('settings.apiKey.placeholder')"
           class="input-field"
           :class="{ 'border-warm-red': errors.token }"
           :aria-invalid="!!errors.token"
@@ -299,7 +301,7 @@ onUnmounted(() => {
           {{ errors.token }}
         </p>
         <p id="api-key-help" class="text-xs text-text-tertiary">
-          No "Bearer " prefix needed
+          {{ t('settings.apiKey.help') }}
         </p>
       </div>
     </fieldset>
@@ -307,18 +309,18 @@ onUnmounted(() => {
     <!-- ===== CHAT CONFIGURATION ===== -->
     <div class="w-full h-px bg-border-subtle" role="separator"></div>
     <fieldset class="w-full space-y-4">
-      <legend class="text-base font-semibold text-text-primary">Chat Configuration</legend>
+      <legend class="text-base font-semibold text-text-primary">{{ t('settings.chatConfig.title') }}</legend>
 
       <!-- Model Name -->
       <div class="w-full space-y-2">
         <label for="model" class="text-sm font-medium text-text-secondary">
-          Chat Model
+          {{ t('settings.model.label') }}
         </label>
         <input
           id="model"
           v-model="model"
           type="text"
-          placeholder="gpt-4"
+          :placeholder="t('settings.model.placeholder')"
           class="input-field"
           :class="{ 'border-warm-red': errors.model }"
           :aria-invalid="!!errors.model"
@@ -333,18 +335,18 @@ onUnmounted(() => {
       <!-- Chat Path -->
       <div class="w-full space-y-2">
         <label for="chat-path" class="text-sm font-medium text-text-secondary">
-          Chat Endpoint Path
+          {{ t('settings.chatPath.label') }}
         </label>
         <input
           id="chat-path"
           v-model="chatPath"
           type="text"
           class="input-field"
-          placeholder="/chat/completions"
+          :placeholder="t('settings.chatPath.placeholder')"
           aria-describedby="chat-path-help"
         />
         <p id="chat-path-help" class="text-xs text-text-tertiary">
-          Auto-updates when provider changes
+          {{ t('settings.chatPath.help') }}
         </p>
       </div>
     </fieldset>
@@ -352,41 +354,41 @@ onUnmounted(() => {
     <!-- ===== IMAGE GENERATION ===== -->
     <div class="w-full h-px bg-border-subtle" role="separator"></div>
     <fieldset class="w-full space-y-4">
-      <legend class="text-base font-semibold text-text-primary">Image Generation</legend>
+      <legend class="text-base font-semibold text-text-primary">{{ t('settings.imageGeneration.title') }}</legend>
 
       <!-- Image Endpoint Path -->
       <div class="w-full space-y-2">
         <label for="image-path" class="text-sm font-medium text-text-secondary">
-          Image Endpoint Path
+          {{ t('settings.imagePath.label') }}
         </label>
         <input
           id="image-path"
           v-model="imagePath"
           type="text"
           class="input-field"
-          placeholder="/images/generations"
+          :placeholder="t('settings.imagePath.placeholder')"
           aria-describedby="image-path-help"
         />
         <p id="image-path-help" class="text-xs text-text-tertiary">
-          Auto-updates when provider changes
+          {{ t('settings.imagePath.help') }}
         </p>
       </div>
 
       <!-- Image Model -->
       <div class="w-full space-y-2">
         <label for="image-model" class="text-sm font-medium text-text-secondary">
-          Image Model
+          {{ t('settings.imageModel.label') }}
         </label>
         <input
           id="image-model"
           v-model="imageModel"
           type="text"
-          placeholder="dall-e-3"
+          :placeholder="t('settings.imageModel.placeholder')"
           class="input-field"
           aria-describedby="image-model-help"
         />
         <p id="image-model-help" class="text-xs text-text-tertiary">
-          dall-e-2, dall-e-3, or custom model
+          {{ t('settings.imageModel.help') }}
         </p>
       </div>
 
@@ -395,25 +397,25 @@ onUnmounted(() => {
         <!-- Image Size -->
         <div class="w-full space-y-2">
           <label for="image-size" class="text-sm font-medium text-text-secondary">
-            Image Size
+            {{ t('settings.imageSize.label') }}
           </label>
           <select id="image-size" v-model="imageSize" class="input-field">
             <option value="256x256">256x256</option>
             <option value="512x512">512x512</option>
-            <option value="1024x1024">1024x1024 (Square)</option>
-            <option value="1792x1024">1792x1024 (Landscape)</option>
-            <option value="1024x1792">1024x1792 (Portrait)</option>
+            <option value="1024x1024">{{ t('settings.imageSize.options.square') }}</option>
+            <option value="1792x1024">{{ t('settings.imageSize.options.landscape') }}</option>
+            <option value="1024x1792">{{ t('settings.imageSize.options.portrait') }}</option>
           </select>
         </div>
 
         <!-- Image Quality -->
         <div class="w-full space-y-2">
           <label for="image-quality" class="text-sm font-medium text-text-secondary">
-            Image Quality
+            {{ t('settings.imageQuality.label') }}
           </label>
           <select id="image-quality" v-model="imageQuality" class="input-field">
-            <option value="standard">Standard</option>
-            <option value="hd">HD (DALL-E 3 only)</option>
+            <option value="standard">{{ t('settings.imageQuality.options.standard') }}</option>
+            <option value="hd">{{ t('settings.imageQuality.options.hd') }}</option>
           </select>
         </div>
       </template>
@@ -423,31 +425,31 @@ onUnmounted(() => {
         <!-- Aspect Ratio -->
         <div class="w-full space-y-2">
           <label for="aspect-ratio" class="text-sm font-medium text-text-secondary">
-            Aspect Ratio
+            {{ t('settings.aspectRatio.label') }}
           </label>
           <select id="aspect-ratio" v-model="imageAspectRatio" class="input-field">
-            <option value="1:1">1:1 (Square)</option>
-            <option value="2:3">2:3 (Portrait)</option>
-            <option value="3:2">3:2 (Landscape)</option>
-            <option value="3:4">3:4 (Portrait)</option>
-            <option value="4:3">4:3 (Landscape)</option>
-            <option value="4:5">4:5 (Portrait)</option>
-            <option value="5:4">5:4 (Landscape)</option>
-            <option value="9:16">9:16 (Tall)</option>
-            <option value="16:9">16:9 (Wide)</option>
-            <option value="21:9">21:9 (Ultra Wide)</option>
+            <option value="1:1">{{ t('settings.aspectRatio.options.square') }}</option>
+            <option value="2:3">{{ t('settings.aspectRatio.options.portrait23') }}</option>
+            <option value="3:2">{{ t('settings.aspectRatio.options.landscape32') }}</option>
+            <option value="3:4">{{ t('settings.aspectRatio.options.portrait34') }}</option>
+            <option value="4:3">{{ t('settings.aspectRatio.options.landscape43') }}</option>
+            <option value="4:5">{{ t('settings.aspectRatio.options.portrait45') }}</option>
+            <option value="5:4">{{ t('settings.aspectRatio.options.landscape54') }}</option>
+            <option value="9:16">{{ t('settings.aspectRatio.options.tall') }}</option>
+            <option value="16:9">{{ t('settings.aspectRatio.options.wide') }}</option>
+            <option value="21:9">{{ t('settings.aspectRatio.options.ultraWide') }}</option>
           </select>
         </div>
 
         <!-- Resolution -->
         <div class="w-full space-y-2">
           <label for="resolution" class="text-sm font-medium text-text-secondary">
-            Resolution
+            {{ t('settings.resolution.label') }}
           </label>
           <select id="resolution" v-model="imageResolution" class="input-field">
             <option value="1K">1K</option>
             <option value="2K">2K</option>
-            <option value="4K">4K (Gemini 3 Pro only)</option>
+            <option value="4K">{{ t('settings.resolution.options.4k') }}</option>
           </select>
         </div>
       </template>
@@ -456,35 +458,35 @@ onUnmounted(() => {
     <!-- ===== WEB SEARCH ===== -->
     <div class="w-full h-px bg-border-subtle" role="separator"></div>
     <fieldset class="w-full space-y-4">
-      <legend class="text-base font-semibold text-text-primary">Web Search</legend>
+      <legend class="text-base font-semibold text-text-primary">{{ t('settings.webSearch.title') }}</legend>
 
       <!-- Search Provider -->
       <div class="w-full space-y-2">
         <label for="search-provider" class="text-sm font-medium text-text-secondary">
-          Search Provider
+          {{ t('settings.searchProvider.label') }}
         </label>
         <select id="search-provider" v-model="searchProvider" class="input-field">
-          <option value="brave">Brave Search</option>
-          <option value="tavily">Tavily AI</option>
-          <option value="custom">Custom</option>
+          <option value="brave">{{ t('settings.searchProvider.options.brave') }}</option>
+          <option value="tavily">{{ t('settings.searchProvider.options.tavily') }}</option>
+          <option value="custom">{{ t('settings.searchProvider.options.custom') }}</option>
         </select>
       </div>
 
       <!-- Search API Key -->
       <div class="w-full space-y-2">
         <label for="search-api-key" class="text-sm font-medium text-text-secondary">
-          Search API Key
+          {{ t('settings.searchApiKey.label') }}
         </label>
         <input
           id="search-api-key"
           v-model="searchApiKey"
           type="password"
-          placeholder="Enter search API key"
+          :placeholder="t('settings.searchApiKey.placeholder')"
           class="input-field"
           aria-describedby="search-api-key-help"
         />
         <p id="search-api-key-help" class="text-xs text-text-tertiary">
-          Required for Brave or Tavily
+          {{ t('settings.searchApiKey.help') }}
         </p>
       </div>
     </fieldset>
@@ -494,10 +496,10 @@ onUnmounted(() => {
     <div class="flex items-center justify-between w-full">
       <div class="flex flex-col gap-1">
         <h3 class="text-base font-semibold text-text-primary">
-          Connection Test
+          {{ t('settings.connectionTest.title') }}
         </h3>
         <p id="test-description" class="text-sm text-text-tertiary">
-          Verify your chat API settings
+          {{ t('settings.connectionTest.description') }}
         </p>
       </div>
       <button
@@ -506,7 +508,7 @@ onUnmounted(() => {
         aria-describedby="test-description"
         class="h-10 px-5 bg-forest-green text-white text-sm font-semibold rounded-md hover:bg-dark-green transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
       >
-        {{ testing ? 'Testing...' : 'Test' }}
+        {{ testing ? t('settings.connectionTest.testing') : t('settings.connectionTest.test') }}
       </button>
     </div>
   </form>

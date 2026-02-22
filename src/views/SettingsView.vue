@@ -1,15 +1,19 @@
 <script setup>
 import { ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import SettingsForm from '../components/SettingsForm.vue'
 import { useStorage } from '../composables/useStorage.js'
 import { useApi } from '../composables/useApi.js'
 import { useChat } from '../composables/useChat.js'
 import { useDarkMode } from '../composables/useDarkMode.js'
 import { useColorTheme } from '../composables/useColorTheme.js'
+import { useLocale } from '../composables/useLocale.js'
 
 const emit = defineEmits(['navigate'])
+const { t } = useI18n()
 const { isDark, toggleDarkMode } = useDarkMode()
 const { currentTheme, setTheme, themes } = useColorTheme()
+const { currentLocale, localeOptions } = useLocale()
 
 const { testConnection } = useApi()
 const { clearMessages } = useChat()
@@ -18,12 +22,12 @@ const testMessage = ref('')
 
 const handleTest = async (testConfig) => {
   testStatus.value = null
-  testMessage.value = 'Testing connection...'
+  testMessage.value = t('settings.connectionTest.testing')
 
   try {
     await testConnection(testConfig)
     testStatus.value = 'success'
-    testMessage.value = 'Connection successful!'
+    testMessage.value = t('settings.connectionTest.success')
 
     // Clear success message after 3 seconds
     setTimeout(() => {
@@ -32,7 +36,7 @@ const handleTest = async (testConfig) => {
     }, 3000)
   } catch (err) {
     testStatus.value = 'error'
-    testMessage.value = err.message || 'Connection failed'
+    testMessage.value = err.message || t('settings.connectionTest.failed')
 
     // Clear error message after 5 seconds
     setTimeout(() => {
@@ -43,7 +47,7 @@ const handleTest = async (testConfig) => {
 }
 
 const handleClearHistory = async () => {
-  if (confirm('Are you sure you want to clear all chat history? This cannot be undone.')) {
+  if (confirm(t('settings.clearHistory.confirm'))) {
     await clearMessages()
   }
 }
@@ -68,7 +72,7 @@ const handleBack = () => {
           </svg>
         </button>
         <h1 class="text-2xl font-semibold text-text-primary -tracking-tight">
-          Settings
+          {{ t('common.settings') }}
         </h1>
         <div class="w-11 h-11" aria-hidden="true"></div>
       </div>
@@ -82,17 +86,17 @@ const handleBack = () => {
           <div class="flex items-center justify-between w-full gap-4">
             <div class="flex flex-col gap-1.5">
               <p class="text-base font-semibold text-text-primary">
-                Clear Chat History
+                {{ t('settings.clearHistory.title') }}
               </p>
               <p class="text-sm text-text-tertiary leading-relaxed">
-                Remove all conversation messages
+                {{ t('settings.clearHistory.description') }}
               </p>
             </div>
             <button
               @click="handleClearHistory"
               class="h-10 px-5 bg-bg-elevated text-text-secondary text-sm font-semibold rounded-lg hover:bg-border-subtle transition-colors border border-border-subtle"
             >
-              Clear
+              {{ t('settings.clearHistory.button') }}
             </button>
           </div>
         </div>
@@ -100,7 +104,7 @@ const handleBack = () => {
         <!-- Settings Card -->
         <div class="card">
           <h2 class="text-lg font-semibold text-text-primary -tracking-tight mb-6">
-            API Configuration
+            {{ t('settings.apiConfig.title') }}
           </h2>
           <SettingsForm
             @test="handleTest"
@@ -116,15 +120,53 @@ const handleBack = () => {
           </div>
         </div>
 
+        <!-- Language Card -->
+        <div class="card">
+          <div class="flex flex-col gap-5 w-full">
+            <div class="flex flex-col gap-1.5">
+              <p class="text-base font-semibold text-text-primary">
+                {{ t('settings.language.label') }}
+              </p>
+              <p class="text-sm text-text-tertiary leading-relaxed">
+                {{ t('settings.language.description') }}
+              </p>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+              <button
+                v-for="locale in localeOptions"
+                :key="locale.value"
+                @click="currentLocale = locale.value"
+                class="relative flex items-center justify-between p-4 rounded-xl border-2 transition-all"
+                :class="currentLocale === locale.value
+                  ? 'border-forest-green bg-light-green/20'
+                  : 'border-border-subtle bg-bg-surface hover:border-border-strong'"
+              >
+                <span class="text-base font-medium text-text-primary">
+                  {{ locale.nativeName }}
+                </span>
+                <svg
+                  v-if="currentLocale === locale.value"
+                  class="w-5 h-5 text-forest-green"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
+                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
         <!-- Color Theme Card -->
         <div class="card">
           <div class="flex flex-col gap-5 w-full">
             <div class="flex flex-col gap-1.5">
               <p class="text-base font-semibold text-text-primary">
-                Color Theme
+                {{ t('settings.colorTheme.label') }}
               </p>
               <p class="text-sm text-text-tertiary leading-relaxed">
-                Choose your accent color
+                {{ t('settings.colorTheme.description') }}
               </p>
             </div>
             <div class="flex flex-col gap-3">
@@ -184,15 +226,15 @@ const handleBack = () => {
           <div class="flex items-center justify-between w-full gap-4">
             <div class="flex flex-col gap-1.5">
               <p class="text-base font-semibold text-text-primary">
-                Dark Mode
+                {{ t('settings.darkMode.label') }}
               </p>
               <p class="text-sm text-text-tertiary leading-relaxed">
-                Switch between light and dark theme
+                {{ t('settings.darkMode.description') }}
               </p>
             </div>
             <button
               @click="toggleDarkMode"
-              :aria-label="isDark ? 'Switch to light mode' : 'Switch to dark mode'"
+              :aria-label="isDark ? t('settings.darkMode.switchToLight') : t('settings.darkMode.switchToDark')"
               class="w-14 h-8 bg-bg-elevated rounded-full relative transition-colors border border-border-subtle"
               :class="{ 'bg-forest-green border-forest-green': isDark }"
             >

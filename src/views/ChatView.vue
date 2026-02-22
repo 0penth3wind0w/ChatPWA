@@ -1,5 +1,6 @@
 <script setup>
 import { ref, watch, onMounted, onUnmounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import ChatMessage from '../components/ChatMessage.vue'
 import MessageInput from '../components/MessageInput.vue'
 import EmptyState from '../components/EmptyState.vue'
@@ -11,6 +12,7 @@ import { useWebTools } from '../composables/useWebTools.js'
 import { logger } from '../utils/logger.js'
 
 const emit = defineEmits(['navigate'])
+const { t } = useI18n()
 
 const { messages, hasMessages, addUserMessage, addAssistantMessage, scrollToBottom } = useChat()
 const { config } = useStorage()
@@ -90,7 +92,7 @@ const handleSendMessage = async (content) => {
         isTyping.value = false
         // Don't show error if request was cancelled by user
         if (err.name !== 'AbortError') {
-          const errorMsg = `Error searching: ${err.message}`
+          const errorMsg = t('chat.errors.searchFailed', { message: err.message })
           addAssistantMessage(errorMsg, config.value.model)
           showError(errorMsg)
         }
@@ -110,7 +112,7 @@ const handleSendMessage = async (content) => {
         isTyping.value = false
         // Don't show error if request was cancelled by user
         if (err.name !== 'AbortError') {
-          const errorMsg = `Error fetching: ${err.message}`
+          const errorMsg = t('chat.errors.fetchFailed', { message: err.message })
           addAssistantMessage(errorMsg, config.value.model)
           showError(errorMsg)
         }
@@ -138,7 +140,7 @@ const handleSendMessage = async (content) => {
         isTyping.value = false
         // Don't show error if request was cancelled by user
         if (err.name !== 'AbortError') {
-          const errorMsg = `Error generating image: ${err.message}`
+          const errorMsg = t('chat.errors.imageFailed', { message: err.message })
           addAssistantMessage(errorMsg, config.value.imageModel)
           showError(errorMsg)
         }
@@ -154,7 +156,7 @@ const handleSendMessage = async (content) => {
       // If URLs are detected, fetch their content
       if (urls && urls.length > 0) {
         isTyping.value = true
-        fetchingStatus.value = `Fetching content from ${urls.length} URL${urls.length > 1 ? 's' : ''}...`
+        fetchingStatus.value = t('chat.fetching', { count: urls.length })
         scrollToBottom(messagesContainer)
 
         try {
@@ -218,7 +220,7 @@ const handleSendMessage = async (content) => {
     isTyping.value = false
     // Don't show error if request was cancelled by user
     if (err.name !== 'AbortError') {
-      const errorMsg = `Error: ${err.message || 'Failed to get response from AI'}`
+      const errorMsg = t('chat.errors.sendFailed', { message: err.message || t('chat.errors.defaultError') })
       addAssistantMessage(errorMsg)
       showError(errorMsg)
     }
@@ -239,7 +241,7 @@ watch([messages, isTyping], () => {
       <div class="flex items-center justify-between w-full">
         <div class="flex flex-col gap-1">
           <h1 class="text-2xl font-semibold text-text-primary -tracking-tight">
-            AI Chat
+            {{ t('chat.title') }}
           </h1>
         </div>
         <button

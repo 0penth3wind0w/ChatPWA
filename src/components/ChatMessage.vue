@@ -1,5 +1,6 @@
 <script setup>
 import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { marked } from 'marked'
 import hljs from 'highlight.js/lib/core'
 import javascript from 'highlight.js/lib/languages/javascript'
@@ -12,6 +13,8 @@ import xml from 'highlight.js/lib/languages/xml'
 import css from 'highlight.js/lib/languages/css'
 import DOMPurify from 'dompurify'
 import { logger } from '../utils/logger.js'
+
+const { t } = useI18n()
 
 // Register only commonly used languages
 hljs.registerLanguage('javascript', javascript)
@@ -96,7 +99,7 @@ const renderedContent = computed(() => {
           </svg>
         </div>
         <p class="text-xs font-semibold text-forest-green" v-once>
-          AI Assistant
+          {{ t('chat.assistant') }}
         </p>
         <p v-if="message.timestamp" class="text-xs text-text-tertiary">
           <time :datetime="new Date(message.timestamp).toISOString()">
@@ -111,7 +114,7 @@ const renderedContent = computed(() => {
         />
         <div v-if="message.model" class="mt-4 pt-3 border-t border-border-subtle">
           <p class="text-xs text-text-tertiary">
-            <span class="font-medium text-text-secondary">Model:</span> {{ message.model }}
+            <span class="font-medium text-text-secondary">{{ t('chat.model') }}:</span> {{ message.model }}
           </p>
         </div>
       </div>
@@ -131,7 +134,7 @@ const renderedContent = computed(() => {
           </time>
         </p>
         <p class="text-xs font-semibold text-forest-green" v-once>
-          You
+          {{ t('chat.you') }}
         </p>
         <div class="w-7 h-7 bg-forest-green rounded-full flex items-center justify-center flex-shrink-0" aria-hidden="true" v-once>
           <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">

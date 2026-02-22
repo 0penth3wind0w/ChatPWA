@@ -1,0 +1,194 @@
+{
+  "common": {
+    "cancel": "Annuler",
+    "save": "Enregistrer",
+    "delete": "Supprimer",
+    "close": "Fermer",
+    "back": "Retour",
+    "settings": "Paramètres",
+    "loading": "Chargement...",
+    "error": "Erreur",
+    "success": "Succès"
+  },
+  "welcome": {
+    "title": "ChatPWA",
+    "subtitle": "Votre Assistant IA Personnel",
+    "description": "Connectez-vous à n'importe quel fournisseur d'IA et discutez avec des modèles de langage puissants. Configurez vos propres points de terminaison API pour un contrôle et une confidentialité totaux.",
+    "features": {
+      "custom": {
+        "title": "Points de terminaison personnalisés",
+        "description": "Connectez-vous à OpenAI, Anthropic, Gemini ou toute API compatible"
+      },
+      "private": {
+        "title": "Confidentialité d'abord",
+        "description": "Vos clés API et conversations restent sur votre appareil"
+      },
+      "offline": {
+        "title": "Fonctionne hors ligne",
+        "description": "Installez comme PWA et accédez à votre historique à tout moment"
+      }
+    },
+    "getStarted": "Commencer"
+  },
+  "chat": {
+    "title": "Chat IA",
+    "emptyState": {
+      "title": "Démarrer une conversation",
+      "tips": {
+        "title": "Astuces",
+        "slashCommands": "Utilisez / pour les commandes slash (/img, /search, /fetch)",
+        "urls": "Collez des URL pour récupérer automatiquement leur contenu",
+        "shiftEnter": "Appuyez sur Maj+Entrée pour de nouvelles lignes"
+      }
+    },
+    "input": {
+      "placeholder": "Tapez votre message...",
+      "send": "Envoyer le message",
+      "help": "Appuyez sur la barre oblique pour ouvrir le menu des commandes. Appuyez sur Entrée pour envoyer le message, Maj+Entrée pour une nouvelle ligne."
+    },
+    "commands": {
+      "title": "Commandes Slash",
+      "navigate": "↑↓ naviguer • Tab sélectionner • Échap fermer",
+      "image": {
+        "command": "/img",
+        "description": "Générer une image à partir d'une description textuelle",
+        "example": "/img un coucher de soleil sur les montagnes"
+      },
+      "search": {
+        "command": "/search",
+        "description": "Rechercher des informations sur le web",
+        "example": "/search dernières fonctionnalités Vue 3"
+      },
+      "fetch": {
+        "command": "/fetch",
+        "description": "Récupérer et lire le contenu d'une page web",
+        "example": "/fetch https://example.com"
+      }
+    },
+    "typing": "L'assistant IA tape",
+    "stopGenerating": "Arrêter la génération",
+    "fetching": "Récupération du contenu de {count} URL...",
+    "assistant": "Assistant IA",
+    "you": "Vous",
+    "model": "Modèle",
+    "errors": {
+      "searchFailed": "Erreur de recherche : {message}",
+      "fetchFailed": "Erreur de récupération : {message}",
+      "imageFailed": "Erreur de génération d'image : {message}",
+      "sendFailed": "Erreur : {message}",
+      "defaultError": "Impossible d'obtenir une réponse de l'IA"
+    },
+    "validation": {
+      "tooLong": "Message trop long ({current}/{max} caractères)"
+    }
+  },
+  "settings": {
+    "title": "Paramètres",
+    "backToChat": "Retour au chat",
+    "clearHistory": "Effacer l'historique",
+    "clearHistoryConfirm": "Êtes-vous sûr de vouloir effacer tout l'historique ? Cette action est irréversible.",
+    "sections": {
+      "appearance": "Apparence",
+      "apiConfig": "Configuration API",
+      "chatConfig": "Configuration du chat",
+      "imageConfig": "Génération d'images",
+      "webTools": "Outils web"
+    },
+    "language": {
+      "label": "Langue",
+      "en": "English",
+      "zh-TW": "繁體中文",
+      "fr": "Français",
+      "ja": "日本語"
+    },
+    "colorTheme": {
+      "label": "Thème de couleur",
+      "green": "Vert forêt",
+      "blue": "Bleu calme",
+      "slate": "Ardoise"
+    },
+    "darkMode": {
+      "label": "Mode sombre",
+      "light": "Clair",
+      "dark": "Sombre"
+    },
+    "apiFormat": {
+      "label": "Format API",
+      "openai": "Compatible OpenAI",
+      "anthropic": "Compatible Anthropic",
+      "gemini": "Compatible Google Gemini"
+    },
+    "endpoint": {
+      "label": "Point de terminaison API",
+      "placeholder": "https://api.openai.com/v1",
+      "help": "URL de base pour l'API (sans chemin)"
+    },
+    "model": {
+      "label": "Nom du modèle",
+      "placeholder": "gpt-4-turbo",
+      "help": "Identifiant du modèle à utiliser pour le chat"
+    },
+    "apiKey": {
+      "label": "Clé API",
+      "placeholder": "sk-...",
+      "help": "Votre clé d'authentification API"
+    },
+    "chatPath": {
+      "label": "Chemin API du chat",
+      "help": "Chemin API pour les complétions de chat"
+    },
+    "imagePath": {
+      "label": "Chemin API des images",
+      "help": "Chemin API pour la génération d'images"
+    },
+    "systemPrompt": {
+      "label": "Prompt système",
+      "placeholder": "Vous êtes un assistant utile...",
+      "help": "Instructions personnalisées pour le comportement de l'IA"
+    },
+    "maxHistory": {
+      "label": "Messages d'historique max",
+      "help": "Nombre de messages précédents à envoyer (0 = illimité)"
+    },
+    "imageModel": {
+      "label": "Modèle d'image",
+      "placeholder": "dall-e-3"
+    },
+    "imageSize": {
+      "label": "Taille de l'image"
+    },
+    "imageQuality": {
+      "label": "Qualité de l'image",
+      "standard": "Standard",
+      "hd": "HD"
+    },
+    "searchProvider": {
+      "label": "Fournisseur de recherche",
+      "brave": "Brave Search",
+      "tavily": "Tavily",
+      "custom": "Personnalisé"
+    },
+    "searchApiKey": {
+      "label": "Clé API de recherche",
+      "placeholder": "Entrez la clé API..."
+    },
+    "test": {
+      "button": "Tester la connexion",
+      "testing": "Test en cours...",
+      "success": "Connexion réussie !",
+      "failed": "Échec du test de connexion : {message}"
+    }
+  },
+  "pwa": {
+    "updateAvailable": "Mise à jour disponible",
+    "updateMessage": "Une nouvelle version est prête. Rechargez pour mettre à jour.",
+    "later": "Plus tard",
+    "reload": "Recharger"
+  },
+  "errors": {
+    "somethingWrong": "Quelque chose s'est mal passé",
+    "appError": "L'application a rencontré une erreur",
+    "dismiss": "Fermer",
+    "reloadApp": "Recharger l'application"
+  }
+}

@@ -1,5 +1,8 @@
 <script setup>
+import { useI18n } from 'vue-i18n'
+
 const emit = defineEmits(['navigate'])
+const { t } = useI18n()
 
 const handleGetStarted = () => {
   emit('navigate', 'settings')
@@ -20,10 +23,10 @@ const handleGetStarted = () => {
       <!-- Welcome Content -->
       <div class="flex flex-col items-center gap-4 w-full">
         <h1 class="text-3xl font-bold text-text-primary -tracking-wide text-center leading-tight">
-          Welcome to ChatPWA
+          {{ t('welcome.title') }}
         </h1>
         <p class="text-base text-text-secondary text-center leading-relaxed max-w-[300px]">
-          Connect to any AI model with your custom API endpoint
+          {{ t('welcome.description') }}
         </p>
       </div>
 
@@ -38,10 +41,10 @@ const handleGetStarted = () => {
           </div>
           <div class="flex flex-col gap-1.5 flex-1">
             <p class="text-base font-semibold text-text-primary">
-              Custom API Endpoints
+              {{ t('welcome.features.custom.title') }}
             </p>
             <p class="text-sm text-text-tertiary leading-relaxed">
-              Use any AI provider or self-hosted model
+              {{ t('welcome.features.custom.description') }}
             </p>
           </div>
         </div>
@@ -57,10 +60,10 @@ const handleGetStarted = () => {
           </div>
           <div class="flex flex-col gap-1.5 flex-1">
             <p class="text-base font-semibold text-text-primary">
-              Secure & Private
+              {{ t('welcome.features.private.title') }}
             </p>
             <p class="text-sm text-text-tertiary leading-relaxed">
-              Your data stays on your device
+              {{ t('welcome.features.private.description') }}
             </p>
           </div>
         </div>
@@ -76,10 +79,10 @@ const handleGetStarted = () => {
           </div>
           <div class="flex flex-col gap-1.5 flex-1">
             <p class="text-base font-semibold text-text-primary">
-              Multi-Provider Support
+              {{ t('welcome.features.offline.title') }}
             </p>
             <p class="text-sm text-text-tertiary leading-relaxed">
-              OpenAI, Anthropic, and Gemini compatible
+              {{ t('welcome.features.offline.description') }}
             </p>
           </div>
         </div>
@@ -90,7 +93,7 @@ const handleGetStarted = () => {
         @click="handleGetStarted"
         class="btn-primary w-full h-14 shadow-elevated text-base"
       >
-        Get Started
+        {{ t('welcome.getStarted') }}
       </button>
     </main>
   </div>

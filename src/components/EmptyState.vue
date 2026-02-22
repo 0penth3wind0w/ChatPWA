@@ -1,5 +1,7 @@
 <script setup>
-// Empty state component for when no messages exist
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 </script>
 
 <template>
@@ -14,7 +16,7 @@
 
       <!-- Title -->
       <h3 class="text-lg font-semibold text-text-primary">
-        Start a Conversation
+        {{ t('chat.emptyState.title') }}
       </h3>
 
       <!-- Description -->
@@ -31,12 +33,12 @@
             </svg>
           </div>
           <div class="text-left flex-1">
-            <p class="text-xs font-semibold text-text-secondary mb-1">Quick Tip</p>
+            <p class="text-xs font-semibold text-text-secondary mb-1">{{ t('chat.emptyState.tips.title') }}</p>
             <p class="text-xs text-text-tertiary leading-relaxed">
-              Use <code class="bg-bg-elevated px-1.5 py-0.5 rounded text-forest-green font-medium">/image</code> to generate images
+              {{ t('chat.emptyState.tips.slashCommands') }}
             </p>
             <p class="text-xs text-text-tertiary mt-1.5 font-mono bg-bg-elevated px-2 py-1 rounded">
-              /image a sunset over mountains
+              {{ t('chat.commands.image.example') }}
             </p>
           </div>
         </div>

@@ -1,0 +1,194 @@
+{
+  "common": {
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "close": "Close",
+    "back": "Back",
+    "settings": "Settings",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success"
+  },
+  "welcome": {
+    "title": "ChatPWA",
+    "subtitle": "Your Personal AI Assistant",
+    "description": "Connect to any AI provider and chat with powerful language models. Configure your own API endpoints for complete control and privacy.",
+    "features": {
+      "custom": {
+        "title": "Custom Endpoints",
+        "description": "Connect to OpenAI, Anthropic, Gemini, or any compatible API"
+      },
+      "private": {
+        "title": "Privacy First",
+        "description": "Your API keys and conversations stay on your device"
+      },
+      "offline": {
+        "title": "Works Offline",
+        "description": "Install as a PWA and access your chat history anytime"
+      }
+    },
+    "getStarted": "Get Started"
+  },
+  "chat": {
+    "title": "AI Chat",
+    "emptyState": {
+      "title": "Start a Conversation",
+      "tips": {
+        "title": "Tips",
+        "slashCommands": "Use / for slash commands (/img, /search, /fetch)",
+        "urls": "Paste URLs to automatically fetch their content",
+        "shiftEnter": "Press Shift+Enter for new lines"
+      }
+    },
+    "input": {
+      "placeholder": "Type your message...",
+      "send": "Send message",
+      "help": "Press forward slash to open command menu. Press Enter to send message, Shift+Enter for new line."
+    },
+    "commands": {
+      "title": "Slash Commands",
+      "navigate": "↑↓ navigate • Tab select • Esc close",
+      "image": {
+        "command": "/img",
+        "description": "Generate an image from text description",
+        "example": "/img a sunset over mountains"
+      },
+      "search": {
+        "command": "/search",
+        "description": "Search the web for information",
+        "example": "/search latest Vue 3 features"
+      },
+      "fetch": {
+        "command": "/fetch",
+        "description": "Fetch and read web page content",
+        "example": "/fetch https://example.com"
+      }
+    },
+    "typing": "AI Assistant is typing",
+    "stopGenerating": "Stop generating",
+    "fetching": "Fetching content from {count} URL(s)...",
+    "assistant": "AI Assistant",
+    "you": "You",
+    "model": "Model",
+    "errors": {
+      "searchFailed": "Error searching: {message}",
+      "fetchFailed": "Error fetching: {message}",
+      "imageFailed": "Error generating image: {message}",
+      "sendFailed": "Error: {message}",
+      "defaultError": "Failed to get response from AI"
+    },
+    "validation": {
+      "tooLong": "Message is too long ({current}/{max} characters)"
+    }
+  },
+  "settings": {
+    "title": "Settings",
+    "backToChat": "Back to Chat",
+    "clearHistory": "Clear Chat History",
+    "clearHistoryConfirm": "Are you sure you want to clear all chat history? This cannot be undone.",
+    "sections": {
+      "appearance": "Appearance",
+      "apiConfig": "API Configuration",
+      "chatConfig": "Chat Configuration",
+      "imageConfig": "Image Generation",
+      "webTools": "Web Tools"
+    },
+    "language": {
+      "label": "Language",
+      "en": "English",
+      "zh-TW": "繁體中文",
+      "fr": "Français",
+      "ja": "日本語"
+    },
+    "colorTheme": {
+      "label": "Color Theme",
+      "green": "Forest Green",
+      "blue": "Calm Blue",
+      "slate": "Slate"
+    },
+    "darkMode": {
+      "label": "Dark Mode",
+      "light": "Light",
+      "dark": "Dark"
+    },
+    "apiFormat": {
+      "label": "API Format",
+      "openai": "OpenAI Compatible",
+      "anthropic": "Anthropic Compatible",
+      "gemini": "Google Gemini Compatible"
+    },
+    "endpoint": {
+      "label": "API Endpoint",
+      "placeholder": "https://api.openai.com/v1",
+      "help": "Base URL for the API (without path)"
+    },
+    "model": {
+      "label": "Model Name",
+      "placeholder": "gpt-4-turbo",
+      "help": "Model identifier to use for chat"
+    },
+    "apiKey": {
+      "label": "API Key",
+      "placeholder": "sk-...",
+      "help": "Your API authentication key"
+    },
+    "chatPath": {
+      "label": "Chat API Path",
+      "help": "API path for chat completions"
+    },
+    "imagePath": {
+      "label": "Image API Path",
+      "help": "API path for image generation"
+    },
+    "systemPrompt": {
+      "label": "System Prompt",
+      "placeholder": "You are a helpful assistant...",
+      "help": "Custom instructions for AI behavior"
+    },
+    "maxHistory": {
+      "label": "Max History Messages",
+      "help": "Number of previous messages to send (0 = unlimited)"
+    },
+    "imageModel": {
+      "label": "Image Model",
+      "placeholder": "dall-e-3"
+    },
+    "imageSize": {
+      "label": "Image Size"
+    },
+    "imageQuality": {
+      "label": "Image Quality",
+      "standard": "Standard",
+      "hd": "HD"
+    },
+    "searchProvider": {
+      "label": "Search Provider",
+      "brave": "Brave Search",
+      "tavily": "Tavily",
+      "custom": "Custom"
+    },
+    "searchApiKey": {
+      "label": "Search API Key",
+      "placeholder": "Enter API key..."
+    },
+    "test": {
+      "button": "Test Connection",
+      "testing": "Testing...",
+      "success": "Connection successful!",
+      "failed": "Connection test failed: {message}"
+    }
+  },
+  "pwa": {
+    "updateAvailable": "Update Available",
+    "updateMessage": "A new version is ready. Reload to update.",
+    "later": "Later",
+    "reload": "Reload"
+  },
+  "errors": {
+    "somethingWrong": "Something went wrong",
+    "appError": "The application encountered an error",
+    "dismiss": "Dismiss",
+    "reloadApp": "Reload App"
+  }
+}

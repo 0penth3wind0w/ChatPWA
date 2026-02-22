@@ -1,7 +1,9 @@
 <script setup>
 import { ref, computed, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 
 const emit = defineEmits(['send'])
+const { t } = useI18n()
 
 // Constants
 const MAX_MESSAGE_LENGTH = 10000
@@ -19,29 +21,29 @@ const showCharacterWarning = computed(() => characterCount.value > MAX_MESSAGE_L
 const isOverLimit = computed(() => characterCount.value > MAX_MESSAGE_LENGTH)
 
 // Available slash commands
-const availableCommands = [
+const availableCommands = computed(() => [
   {
     command: '/img',
     alias: null,
-    description: 'Generate an image from text description',
-    example: '/img a sunset over mountains',
+    description: t('chat.commands.image.description'),
+    example: t('chat.commands.image.example'),
     icon: 'image'
   },
   {
     command: '/search',
     alias: null,
-    description: 'Search the web for information',
-    example: '/search latest Vue 3 features',
+    description: t('chat.commands.search.description'),
+    example: t('chat.commands.search.example'),
     icon: 'search'
   },
   {
     command: '/fetch',
     alias: null,
-    description: 'Fetch and read web page content',
-    example: '/fetch https://example.com',
+    description: t('chat.commands.fetch.description'),
+    example: t('chat.commands.fetch.example'),
     icon: 'globe'
   }
-]
+])
 
 // Pre-compute lowercase commands for faster filtering
 const commandsLowercase = availableCommands.map(cmd => ({

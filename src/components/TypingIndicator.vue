@@ -1,4 +1,8 @@
 <script setup>
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
+
 defineProps({
   model: {
     type: String,
@@ -19,7 +23,7 @@ defineProps({
         <p class="text-xs font-semibold text-forest-green">
           {{ model }}
         </p>
-        <p class="text-xs text-text-tertiary">typing...</p>
+        <p class="text-xs text-text-tertiary">{{ t('chat.typing') }}</p>
       </div>
       <div class="bg-bg-surface rounded-2xl rounded-tl-sm shadow-soft p-4 border border-border-subtle">
         <div class="flex items-center gap-1.5">

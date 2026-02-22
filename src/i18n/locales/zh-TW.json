@@ -1,0 +1,194 @@
+{
+  "common": {
+    "cancel": "取消",
+    "save": "儲存",
+    "delete": "刪除",
+    "close": "關閉",
+    "back": "返回",
+    "settings": "設定",
+    "loading": "載入中...",
+    "error": "錯誤",
+    "success": "成功"
+  },
+  "welcome": {
+    "title": "ChatPWA",
+    "subtitle": "你的個人 AI 助理",
+    "description": "連接至任何 AI 提供商，與強大的語言模型對話。設定你自己的 API 端點，完全掌控隱私。",
+    "features": {
+      "custom": {
+        "title": "自訂端點",
+        "description": "連接至 OpenAI、Anthropic、Gemini 或任何相容的 API"
+      },
+      "private": {
+        "title": "隱私優先",
+        "description": "你的 API 金鑰和對話紀錄都保存在你的裝置上"
+      },
+      "offline": {
+        "title": "離線運作",
+        "description": "安裝為 PWA，隨時存取你的聊天紀錄"
+      }
+    },
+    "getStarted": "開始使用"
+  },
+  "chat": {
+    "title": "AI 對話",
+    "emptyState": {
+      "title": "開始對話",
+      "tips": {
+        "title": "提示",
+        "slashCommands": "使用 / 執行斜線指令（/img、/search、/fetch）",
+        "urls": "貼上網址以自動擷取內容",
+        "shiftEnter": "按 Shift+Enter 換行"
+      }
+    },
+    "input": {
+      "placeholder": "輸入訊息...",
+      "send": "傳送訊息",
+      "help": "按斜線鍵開啟指令選單。按 Enter 傳送訊息，Shift+Enter 換行。"
+    },
+    "commands": {
+      "title": "斜線指令",
+      "navigate": "↑↓ 導航 • Tab 選擇 • Esc 關閉",
+      "image": {
+        "command": "/img",
+        "description": "從文字描述生成圖片",
+        "example": "/img 山上的日落"
+      },
+      "search": {
+        "command": "/search",
+        "description": "搜尋網路資訊",
+        "example": "/search Vue 3 最新功能"
+      },
+      "fetch": {
+        "command": "/fetch",
+        "description": "擷取並讀取網頁內容",
+        "example": "/fetch https://example.com"
+      }
+    },
+    "typing": "AI 助理正在輸入",
+    "stopGenerating": "停止生成",
+    "fetching": "正在擷取 {count} 個網址的內容...",
+    "assistant": "AI 助理",
+    "you": "你",
+    "model": "模型",
+    "errors": {
+      "searchFailed": "搜尋錯誤：{message}",
+      "fetchFailed": "擷取錯誤：{message}",
+      "imageFailed": "圖片生成錯誤：{message}",
+      "sendFailed": "錯誤：{message}",
+      "defaultError": "無法取得 AI 回應"
+    },
+    "validation": {
+      "tooLong": "訊息過長（{current}/{max} 字元）"
+    }
+  },
+  "settings": {
+    "title": "設定",
+    "backToChat": "返回對話",
+    "clearHistory": "清除聊天紀錄",
+    "clearHistoryConfirm": "確定要清除所有聊天紀錄嗎？此動作無法復原。",
+    "sections": {
+      "appearance": "外觀",
+      "apiConfig": "API 設定",
+      "chatConfig": "對話設定",
+      "imageConfig": "圖片生成",
+      "webTools": "網路工具"
+    },
+    "language": {
+      "label": "語言",
+      "en": "English",
+      "zh-TW": "繁體中文",
+      "fr": "Français",
+      "ja": "日本語"
+    },
+    "colorTheme": {
+      "label": "色彩主題",
+      "green": "森林綠",
+      "blue": "沉靜藍",
+      "slate": "岩板灰"
+    },
+    "darkMode": {
+      "label": "深色模式",
+      "light": "淺色",
+      "dark": "深色"
+    },
+    "apiFormat": {
+      "label": "API 格式",
+      "openai": "OpenAI 相容",
+      "anthropic": "Anthropic 相容",
+      "gemini": "Google Gemini 相容"
+    },
+    "endpoint": {
+      "label": "API 端點",
+      "placeholder": "https://api.openai.com/v1",
+      "help": "API 的基礎網址（不含路徑）"
+    },
+    "model": {
+      "label": "模型名稱",
+      "placeholder": "gpt-4-turbo",
+      "help": "用於對話的模型識別碼"
+    },
+    "apiKey": {
+      "label": "API 金鑰",
+      "placeholder": "sk-...",
+      "help": "你的 API 認證金鑰"
+    },
+    "chatPath": {
+      "label": "對話 API 路徑",
+      "help": "對話完成的 API 路徑"
+    },
+    "imagePath": {
+      "label": "圖片 API 路徑",
+      "help": "圖片生成的 API 路徑"
+    },
+    "systemPrompt": {
+      "label": "系統提示",
+      "placeholder": "你是一個有用的助理...",
+      "help": "自訂 AI 行為的指令"
+    },
+    "maxHistory": {
+      "label": "最大歷史訊息數",
+      "help": "要傳送的先前訊息數量（0 = 不限）"
+    },
+    "imageModel": {
+      "label": "圖片模型",
+      "placeholder": "dall-e-3"
+    },
+    "imageSize": {
+      "label": "圖片尺寸"
+    },
+    "imageQuality": {
+      "label": "圖片品質",
+      "standard": "標準",
+      "hd": "高清"
+    },
+    "searchProvider": {
+      "label": "搜尋提供商",
+      "brave": "Brave Search",
+      "tavily": "Tavily",
+      "custom": "自訂"
+    },
+    "searchApiKey": {
+      "label": "搜尋 API 金鑰",
+      "placeholder": "輸入 API 金鑰..."
+    },
+    "test": {
+      "button": "測試連線",
+      "testing": "測試中...",
+      "success": "連線成功！",
+      "failed": "連線測試失敗：{message}"
+    }
+  },
+  "pwa": {
+    "updateAvailable": "有可用更新",
+    "updateMessage": "新版本已就緒。重新載入以更新。",
+    "later": "稍後",
+    "reload": "重新載入"
+  },
+  "errors": {
+    "somethingWrong": "發生錯誤",
+    "appError": "應用程式遇到錯誤",
+    "dismiss": "關閉",
+    "reloadApp": "重新載入應用程式"
+  }
+}
