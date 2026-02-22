@@ -73,6 +73,15 @@
       "button": "清除",
       "confirm": "確定要清除所有聊天記錄嗎？此操作無法復原。"
     },
+    "aiSettings": {
+      "title": "AI 設定"
+    },
+    "appearance": {
+      "title": "外觀"
+    },
+    "about": {
+      "title": "關於"
+    },
     "language": {
       "label": "語言",
       "description": "選擇您偏好的語言"

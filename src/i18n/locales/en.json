@@ -73,6 +73,15 @@
       "button": "Clear",
       "confirm": "Are you sure you want to clear all chat history? This cannot be undone."
     },
+    "aiSettings": {
+      "title": "AI Settings"
+    },
+    "appearance": {
+      "title": "Appearance"
+    },
+    "about": {
+      "title": "About"
+    },
     "language": {
       "label": "Language",
       "description": "Choose your preferred language"

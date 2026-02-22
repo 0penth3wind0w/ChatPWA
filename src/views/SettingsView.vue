@@ -124,10 +124,10 @@ const handleBack = () => {
           </div>
         </div>
 
-        <!-- Settings Card -->
+        <!-- AI Settings Card -->
         <div class="card">
           <h2 class="text-lg font-semibold text-text-primary -tracking-tight mb-6">
-            {{ t('settings.apiConfig.title') }}
+            {{ t('settings.aiSettings.title') }}
           </h2>
           <SettingsForm
             @test="handleTest"
@@ -181,9 +181,14 @@ const handleBack = () => {
           </div>
         </div>
 
-        <!-- Color Theme Card -->
+        <!-- Appearance Card -->
         <div class="card">
-          <div class="flex flex-col gap-5 w-full">
+          <h2 class="text-lg font-semibold text-text-primary -tracking-tight mb-6">
+            {{ t('settings.appearance.title') }}
+          </h2>
+
+          <!-- Color Theme -->
+          <div class="flex flex-col gap-5 w-full mb-6">
             <div class="flex flex-col gap-1.5">
               <p class="text-base font-semibold text-text-primary">
                 {{ t('settings.colorTheme.label') }}
@@ -242,10 +247,9 @@ const handleBack = () => {
               </button>
             </div>
           </div>
-        </div>
 
-        <!-- Dark Mode Card -->
-        <div class="card">
+          <!-- Dark Mode -->
+          <div class="w-full h-px bg-border-subtle my-6"></div>
           <div class="flex items-center justify-between w-full gap-4">
             <div class="flex flex-col gap-1.5">
               <p class="text-base font-semibold text-text-primary">
@@ -278,9 +282,14 @@ const handleBack = () => {
           </div>
         </div>
 
-        <!-- PWA Update Card -->
+        <!-- About Card -->
         <div class="card">
-          <div class="flex items-center justify-between w-full gap-4">
+          <h2 class="text-lg font-semibold text-text-primary -tracking-tight mb-6">
+            {{ t('settings.about.title') }}
+          </h2>
+
+          <!-- PWA Update -->
+          <div class="flex items-center justify-between w-full gap-4 mb-6">
             <div class="flex flex-col gap-1.5">
               <p class="text-base font-semibold text-text-primary">
                 {{ t('settings.pwaUpdate.title') }}
@@ -300,10 +309,9 @@ const handleBack = () => {
               <span v-else>{{ t('settings.pwaUpdate.check') }}</span>
             </button>
           </div>
-        </div>
 
-        <!-- Version Info Card -->
-        <div class="card">
+          <!-- Version Info -->
+          <div class="w-full h-px bg-border-subtle my-6"></div>
           <div class="flex items-center justify-between w-full gap-4">
             <div class="flex flex-col gap-1.5">
               <p class="text-base font-semibold text-text-primary">

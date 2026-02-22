@@ -89,6 +89,15 @@
       "button": "Effacer",
       "confirm": "Êtes-vous sûr de vouloir effacer tout l'historique des conversations ? Cette action est irréversible."
     },
+    "aiSettings": {
+      "title": "Paramètres IA"
+    },
+    "appearance": {
+      "title": "Apparence"
+    },
+    "about": {
+      "title": "À propos"
+    },
     "language": {
       "label": "Langue",
       "description": "Choisissez votre langue préférée"

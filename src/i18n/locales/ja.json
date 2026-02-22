@@ -89,6 +89,15 @@
       "button": "クリア",
       "confirm": "本当にすべてのチャット履歴をクリアしますか？この操作は元に戻せません。"
     },
+    "aiSettings": {
+      "title": "AI設定"
+    },
+    "appearance": {
+      "title": "外観"
+    },
+    "about": {
+      "title": "について"
+    },
     "language": {
       "label": "言語",
       "description": "お好みの言語を選択"
