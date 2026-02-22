@@ -12,8 +12,8 @@
   },
   "welcome": {
     "title": "ChatPWA",
-    "subtitle": "あなたの個人AIアシスタント",
-    "description": "任意のAIプロバイダーに接続し、強力な言語モデルとチャットできます。完全なコントロールとプライバシーのために、独自のAPIエンドポイントを設定してください。",
+    "subtitle": "あなた専用のAIアシスタント",
+    "description": "任意のAIプロバイダーに接続し、強力な言語モデルとチャットできます。独自のAPIエンドポイントを設定して、完全な制御とプライバシーを実現します。",
     "features": {
       "custom": {
         "title": "カスタムエンドポイント",
@@ -25,7 +25,7 @@
       },
       "offline": {
         "title": "オフライン動作",
-        "description": "PWAとしてインストールし、いつでもチャット履歴にアクセス"
+        "description": "PWAとしてインストールして、いつでもチャット履歴にアクセス"
       }
     },
     "getStarted": "始める"
@@ -36,7 +36,7 @@
       "title": "会話を開始",
       "tips": {
         "title": "ヒント",
-        "slashCommands": "スラッシュコマンドには / を使用（/img、/search、/fetch）",
+        "slashCommands": "スラッシュコマンドは / を使用（/img、/search、/fetch）",
         "urls": "URLを貼り付けて自動的にコンテンツを取得",
         "shiftEnter": "Shift+Enterで改行"
       }
@@ -52,20 +52,20 @@
       "image": {
         "command": "/img",
         "description": "テキスト説明から画像を生成",
-        "example": "/img 山の上の夕日"
+        "example": "/img 山の夕日"
       },
       "search": {
         "command": "/search",
         "description": "ウェブで情報を検索",
-        "example": "/search 最新のVue 3機能"
+        "example": "/search Vue 3の最新機能"
       },
       "fetch": {
         "command": "/fetch",
-        "description": "ウェブページのコンテンツを取得して読む",
+        "description": "ウェブページのコンテンツを取得して読み取り",
         "example": "/fetch https://example.com"
       }
     },
-    "typing": "AIアシスタントが入力中",
+    "typing": "入力中...",
     "stopGenerating": "生成を停止",
     "fetching": "{count}個のURLからコンテンツを取得中...",
     "assistant": "AIアシスタント",
@@ -83,23 +83,15 @@
     }
   },
   "settings": {
-    "title": "設定",
-    "backToChat": "チャットに戻る",
-    "clearHistory": "チャット履歴を消去",
-    "clearHistoryConfirm": "すべてのチャット履歴を消去してもよろしいですか？この操作は元に戻せません。",
-    "sections": {
-      "appearance": "外観",
-      "apiConfig": "API設定",
-      "chatConfig": "チャット設定",
-      "imageConfig": "画像生成",
-      "webTools": "ウェブツール"
+    "clearHistory": {
+      "title": "チャット履歴をクリア",
+      "description": "すべての会話メッセージを削除",
+      "button": "クリア",
+      "confirm": "本当にすべてのチャット履歴をクリアしますか？この操作は元に戻せません。"
     },
     "language": {
       "label": "言語",
-      "en": "English",
-      "zh-TW": "繁體中文",
-      "fr": "Français",
-      "ja": "日本語"
+      "description": "お好みの言語を選択"
     },
     "colorTheme": {
       "label": "カラーテーマ",
@@ -112,86 +104,152 @@
     },
     "darkMode": {
       "label": "ダークモード",
-      "light": "ライト",
-      "dark": "ダーク"
-    },
-    "apiFormat": {
-      "label": "API形式",
-      "openai": "OpenAI互換",
-      "anthropic": "Anthropic互換",
-      "gemini": "Google Gemini互換"
-    },
-    "endpoint": {
-      "label": "APIエンドポイント",
-      "placeholder": "https://api.openai.com/v1",
-      "help": "APIのベースURL（パスなし）"
-    },
-    "model": {
-      "label": "モデル名",
-      "placeholder": "gpt-4-turbo",
-      "help": "チャットに使用するモデル識別子"
-    },
-    "apiKey": {
-      "label": "APIキー",
-      "placeholder": "sk-...",
-      "help": "API認証キー"
-    },
-    "chatPath": {
-      "label": "チャットAPIパス",
-      "help": "チャット補完のAPIパス"
-    },
-    "imagePath": {
-      "label": "画像APIパス",
-      "help": "画像生成のAPIパス"
+      "description": "ライトテーマとダークテーマを切り替え",
+      "switchToLight": "ライトモードに切り替え",
+      "switchToDark": "ダークモードに切り替え"
     },
     "systemPrompt": {
       "label": "システムプロンプト",
       "placeholder": "あなたは役立つアシスタントです...",
-      "help": "AI動作のカスタム指示"
+      "help": "AIの動作とパーソナリティをカスタマイズ"
     },
-    "maxHistory": {
-      "label": "最大履歴メッセージ数",
-      "help": "送信する過去のメッセージ数（0 = 無制限）"
+    "historyLimit": {
+      "label": "メッセージ履歴の制限",
+      "help": "APIに送信するメッセージを制限してトークン使用量とコストを削減",
+      "options": {
+        "unlimited": "無制限（すべてのメッセージ）",
+        "6": "6メッセージ（3回のやり取り）",
+        "10": "10メッセージ（5回のやり取り）",
+        "20": "20メッセージ（10回のやり取り）",
+        "40": "40メッセージ（20回のやり取り）"
+      }
+    },
+    "apiConfig": {
+      "title": "API設定"
+    },
+    "provider": {
+      "label": "APIフォーマット",
+      "help": "使用するAPIのリクエスト/レスポンス形式",
+      "options": {
+        "openai": "OpenAI互換",
+        "anthropic": "Anthropic互換",
+        "gemini": "Google Gemini互換"
+      }
+    },
+    "endpoint": {
+      "label": "エンドポイントURL",
+      "placeholder": "https://api.openai.com/v1",
+      "help": "APIのベースURL（カスタムまたは公式）"
+    },
+    "apiKey": {
+      "label": "APIキー",
+      "placeholder": "APIキーを入力",
+      "help": "「Bearer」プレフィックスは不要"
+    },
+    "chatConfig": {
+      "title": "チャット設定"
+    },
+    "model": {
+      "label": "チャットモデル",
+      "placeholder": "gpt-4"
+    },
+    "chatPath": {
+      "label": "チャットエンドポイントパス",
+      "placeholder": "/chat/completions",
+      "help": "プロバイダー変更時に自動更新"
+    },
+    "imageGeneration": {
+      "title": "画像生成"
+    },
+    "imagePath": {
+      "label": "画像エンドポイントパス",
+      "placeholder": "/images/generations",
+      "help": "プロバイダー変更時に自動更新"
     },
     "imageModel": {
       "label": "画像モデル",
-      "placeholder": "dall-e-3"
+      "placeholder": "dall-e-3",
+      "help": "dall-e-2、dall-e-3、またはカスタムモデル"
     },
     "imageSize": {
-      "label": "画像サイズ"
+      "label": "画像サイズ",
+      "options": {
+        "square": "1024x1024（正方形）",
+        "landscape": "1792x1024（横向き）",
+        "portrait": "1024x1792（縦向き）"
+      }
     },
     "imageQuality": {
       "label": "画像品質",
-      "standard": "標準",
-      "hd": "HD"
+      "options": {
+        "standard": "標準",
+        "hd": "HD（DALL-E 3のみ）"
+      }
+    },
+    "aspectRatio": {
+      "label": "アスペクト比",
+      "options": {
+        "square": "1:1（正方形）",
+        "portrait23": "2:3（縦向き）",
+        "landscape32": "3:2（横向き）",
+        "portrait34": "3:4（縦向き）",
+        "landscape43": "4:3（横向き）",
+        "portrait45": "4:5（縦向き）",
+        "landscape54": "5:4（横向き）",
+        "tall": "9:16（縦長）",
+        "wide": "16:9（横長）",
+        "ultraWide": "21:9（超横長）"
+      }
+    },
+    "resolution": {
+      "label": "解像度",
+      "options": {
+        "4k": "4K（Gemini 3 Proのみ）"
+      }
+    },
+    "webSearch": {
+      "title": "ウェブ検索"
     },
     "searchProvider": {
       "label": "検索プロバイダー",
-      "brave": "Brave Search",
-      "tavily": "Tavily",
-      "custom": "カスタム"
+      "options": {
+        "brave": "Brave Search",
+        "tavily": "Tavily AI",
+        "custom": "カスタム"
+      }
     },
     "searchApiKey": {
       "label": "検索APIキー",
-      "placeholder": "APIキーを入力..."
+      "placeholder": "検索APIキーを入力",
+      "help": "BraveまたはTavilyに必要"
     },
-    "test": {
-      "button": "接続をテスト",
+    "connectionTest": {
+      "title": "接続テスト",
+      "description": "チャットAPI設定を検証",
+      "test": "テスト",
       "testing": "テスト中...",
       "success": "接続成功！",
-      "failed": "接続テスト失敗：{message}"
+      "failed": "接続失敗"
+    },
+    "errors": {
+      "endpointRequired": "APIエンドポイントが必要です",
+      "invalidUrl": "有効なURLを入力してください",
+      "modelRequired": "モデル名が必要です",
+      "tokenRequired": "認証トークンが必要です",
+      "removeBearerPrefix": "トークンから「Bearer」プレフィックスを削除してください",
+      "tokenWhitespace": "トークンに空白が含まれています - 改行やスペースを確認してください"
     }
   },
   "pwa": {
-    "updateAvailable": "アップデート可能",
-    "updateMessage": "新しいバージョンが準備できました。再読み込みして更新してください。",
+    "updateAvailable": "アップデート利用可能",
+    "updateMessage": "新しいバージョンが準備できました。リロードして更新してください。",
     "later": "後で",
-    "reload": "再読み込み"
+    "reload": "リロード"
   },
   "errors": {
     "somethingWrong": "問題が発生しました",
     "appError": "アプリケーションでエラーが発生しました",
     "dismiss": "閉じる",
-    "reloadApp": "アプリを再読み込み"
+    "reloadApp": "アプリをリロード"
   }
 }

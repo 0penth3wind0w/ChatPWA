@@ -12,8 +12,8 @@
   },
   "welcome": {
     "title": "ChatPWA",
-    "subtitle": "Votre Assistant IA Personnel",
-    "description": "Connectez-vous à n'importe quel fournisseur d'IA et discutez avec des modèles de langage puissants. Configurez vos propres points de terminaison API pour un contrôle et une confidentialité totaux.",
+    "subtitle": "Votre assistant IA personnel",
+    "description": "Connectez-vous à n'importe quel fournisseur d'IA et discutez avec de puissants modèles de langage. Configurez vos propres points de terminaison API pour un contrôle et une confidentialité complets.",
     "features": {
       "custom": {
         "title": "Points de terminaison personnalisés",
@@ -25,7 +25,7 @@
       },
       "offline": {
         "title": "Fonctionne hors ligne",
-        "description": "Installez comme PWA et accédez à votre historique à tout moment"
+        "description": "Installez en tant que PWA et accédez à votre historique à tout moment"
       }
     },
     "getStarted": "Commencer"
@@ -35,8 +35,8 @@
     "emptyState": {
       "title": "Démarrer une conversation",
       "tips": {
-        "title": "Astuces",
-        "slashCommands": "Utilisez / pour les commandes slash (/img, /search, /fetch)",
+        "title": "Conseils",
+        "slashCommands": "Utilisez / pour les commandes (/img, /search, /fetch)",
         "urls": "Collez des URL pour récupérer automatiquement leur contenu",
         "shiftEnter": "Appuyez sur Maj+Entrée pour de nouvelles lignes"
       }
@@ -65,7 +65,7 @@
         "example": "/fetch https://example.com"
       }
     },
-    "typing": "L'assistant IA tape",
+    "typing": "en train d'écrire...",
     "stopGenerating": "Arrêter la génération",
     "fetching": "Récupération du contenu de {count} URL...",
     "assistant": "Assistant IA",
@@ -83,23 +83,15 @@
     }
   },
   "settings": {
-    "title": "Paramètres",
-    "backToChat": "Retour au chat",
-    "clearHistory": "Effacer l'historique",
-    "clearHistoryConfirm": "Êtes-vous sûr de vouloir effacer tout l'historique ? Cette action est irréversible.",
-    "sections": {
-      "appearance": "Apparence",
-      "apiConfig": "Configuration API",
-      "chatConfig": "Configuration du chat",
-      "imageConfig": "Génération d'images",
-      "webTools": "Outils web"
+    "clearHistory": {
+      "title": "Effacer l'historique des conversations",
+      "description": "Supprimer tous les messages de conversation",
+      "button": "Effacer",
+      "confirm": "Êtes-vous sûr de vouloir effacer tout l'historique des conversations ? Cette action est irréversible."
     },
     "language": {
       "label": "Langue",
-      "en": "English",
-      "zh-TW": "繁體中文",
-      "fr": "Français",
-      "ja": "日本語"
+      "description": "Choisissez votre langue préférée"
     },
     "colorTheme": {
       "label": "Thème de couleur",
@@ -112,74 +104,140 @@
     },
     "darkMode": {
       "label": "Mode sombre",
-      "light": "Clair",
-      "dark": "Sombre"
+      "description": "Basculer entre le thème clair et sombre",
+      "switchToLight": "Passer en mode clair",
+      "switchToDark": "Passer en mode sombre"
     },
-    "apiFormat": {
-      "label": "Format API",
-      "openai": "Compatible OpenAI",
-      "anthropic": "Compatible Anthropic",
-      "gemini": "Compatible Google Gemini"
+    "systemPrompt": {
+      "label": "Invite système",
+      "placeholder": "Vous êtes un assistant utile...",
+      "help": "Personnaliser le comportement et la personnalité de l'IA"
+    },
+    "historyLimit": {
+      "label": "Limite de l'historique des messages",
+      "help": "Limiter les messages envoyés à l'API pour réduire l'utilisation de jetons et les coûts",
+      "options": {
+        "unlimited": "Illimité (tous les messages)",
+        "6": "6 messages (3 échanges)",
+        "10": "10 messages (5 échanges)",
+        "20": "20 messages (10 échanges)",
+        "40": "40 messages (20 échanges)"
+      }
+    },
+    "apiConfig": {
+      "title": "Configuration de l'API"
+    },
+    "provider": {
+      "label": "Format de l'API",
+      "help": "Format de requête/réponse utilisé par votre API",
+      "options": {
+        "openai": "Compatible OpenAI",
+        "anthropic": "Compatible Anthropic",
+        "gemini": "Compatible Google Gemini"
+      }
     },
     "endpoint": {
-      "label": "Point de terminaison API",
+      "label": "URL du point de terminaison",
       "placeholder": "https://api.openai.com/v1",
-      "help": "URL de base pour l'API (sans chemin)"
-    },
-    "model": {
-      "label": "Nom du modèle",
-      "placeholder": "gpt-4-turbo",
-      "help": "Identifiant du modèle à utiliser pour le chat"
+      "help": "Votre URL de base API (personnalisée ou officielle)"
     },
     "apiKey": {
       "label": "Clé API",
-      "placeholder": "sk-...",
-      "help": "Votre clé d'authentification API"
+      "placeholder": "Entrez votre clé API",
+      "help": "Pas besoin du préfixe \"Bearer\""
+    },
+    "chatConfig": {
+      "title": "Configuration du chat"
+    },
+    "model": {
+      "label": "Modèle de chat",
+      "placeholder": "gpt-4"
     },
     "chatPath": {
-      "label": "Chemin API du chat",
-      "help": "Chemin API pour les complétions de chat"
+      "label": "Chemin du point de terminaison de chat",
+      "placeholder": "/chat/completions",
+      "help": "Mise à jour automatique lors du changement de fournisseur"
+    },
+    "imageGeneration": {
+      "title": "Génération d'images"
     },
     "imagePath": {
-      "label": "Chemin API des images",
-      "help": "Chemin API pour la génération d'images"
-    },
-    "systemPrompt": {
-      "label": "Prompt système",
-      "placeholder": "Vous êtes un assistant utile...",
-      "help": "Instructions personnalisées pour le comportement de l'IA"
-    },
-    "maxHistory": {
-      "label": "Messages d'historique max",
-      "help": "Nombre de messages précédents à envoyer (0 = illimité)"
+      "label": "Chemin du point de terminaison d'image",
+      "placeholder": "/images/generations",
+      "help": "Mise à jour automatique lors du changement de fournisseur"
     },
     "imageModel": {
       "label": "Modèle d'image",
-      "placeholder": "dall-e-3"
+      "placeholder": "dall-e-3",
+      "help": "dall-e-2, dall-e-3 ou modèle personnalisé"
     },
     "imageSize": {
-      "label": "Taille de l'image"
+      "label": "Taille de l'image",
+      "options": {
+        "square": "1024x1024 (Carré)",
+        "landscape": "1792x1024 (Paysage)",
+        "portrait": "1024x1792 (Portrait)"
+      }
     },
     "imageQuality": {
       "label": "Qualité de l'image",
-      "standard": "Standard",
-      "hd": "HD"
+      "options": {
+        "standard": "Standard",
+        "hd": "HD (DALL-E 3 uniquement)"
+      }
+    },
+    "aspectRatio": {
+      "label": "Rapport d'aspect",
+      "options": {
+        "square": "1:1 (Carré)",
+        "portrait23": "2:3 (Portrait)",
+        "landscape32": "3:2 (Paysage)",
+        "portrait34": "3:4 (Portrait)",
+        "landscape43": "4:3 (Paysage)",
+        "portrait45": "4:5 (Portrait)",
+        "landscape54": "5:4 (Paysage)",
+        "tall": "9:16 (Grand)",
+        "wide": "16:9 (Large)",
+        "ultraWide": "21:9 (Ultra large)"
+      }
+    },
+    "resolution": {
+      "label": "Résolution",
+      "options": {
+        "4k": "4K (Gemini 3 Pro uniquement)"
+      }
+    },
+    "webSearch": {
+      "title": "Recherche web"
     },
     "searchProvider": {
       "label": "Fournisseur de recherche",
-      "brave": "Brave Search",
-      "tavily": "Tavily",
-      "custom": "Personnalisé"
+      "options": {
+        "brave": "Brave Search",
+        "tavily": "Tavily AI",
+        "custom": "Personnalisé"
+      }
     },
     "searchApiKey": {
       "label": "Clé API de recherche",
-      "placeholder": "Entrez la clé API..."
+      "placeholder": "Entrez la clé API de recherche",
+      "help": "Requis pour Brave ou Tavily"
     },
-    "test": {
-      "button": "Tester la connexion",
+    "connectionTest": {
+      "title": "Test de connexion",
+      "description": "Vérifier vos paramètres API de chat",
+      "test": "Tester",
       "testing": "Test en cours...",
       "success": "Connexion réussie !",
-      "failed": "Échec du test de connexion : {message}"
+      "failed": "Échec de la connexion"
+    },
+    "errors": {
+      "endpointRequired": "Le point de terminaison API est requis",
+      "invalidUrl": "Veuillez entrer une URL valide",
+      "modelRequired": "Le nom du modèle est requis",
+      "tokenRequired": "Le jeton d'authentification est requis",
+      "removeBearerPrefix": "Supprimez le préfixe \"Bearer\" du jeton",
+      "tokenWhitespace": "Le jeton contient des espaces - veuillez vérifier les sauts de ligne ou les espaces"
     }
   },
   "pwa": {
