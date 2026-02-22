@@ -103,9 +103,12 @@
     },
     "colorTheme": {
       "label": "Thème de couleur",
-      "green": "Vert forêt",
-      "blue": "Bleu calme",
-      "slate": "Ardoise"
+      "description": "Choisissez votre couleur d'accentuation",
+      "options": {
+        "green": "Vert forêt",
+        "blue": "Bleu calme",
+        "slate": "Ardoise"
+      }
     },
     "darkMode": {
       "label": "Mode sombre",

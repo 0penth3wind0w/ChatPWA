@@ -79,7 +79,12 @@
     },
     "colorTheme": {
       "label": "Color Theme",
-      "description": "Choose your accent color"
+      "description": "Choose your accent color",
+      "options": {
+        "green": "Forest Green",
+        "blue": "Calm Blue",
+        "slate": "Slate"
+      }
     },
     "darkMode": {
       "label": "Dark Mode",

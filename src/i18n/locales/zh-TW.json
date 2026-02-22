@@ -79,7 +79,12 @@
     },
     "colorTheme": {
       "label": "配色主題",
-      "description": "選擇您的強調色"
+      "description": "選擇您的強調色",
+      "options": {
+        "green": "森林綠",
+        "blue": "沉靜藍",
+        "slate": "岩板灰"
+      }
     },
     "darkMode": {
       "label": "深色模式",

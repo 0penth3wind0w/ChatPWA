@@ -103,9 +103,12 @@
     },
     "colorTheme": {
       "label": "カラーテーマ",
-      "green": "フォレストグリーン",
-      "blue": "カームブルー",
-      "slate": "スレート"
+      "description": "アクセントカラーを選択",
+      "options": {
+        "green": "フォレストグリーン",
+        "blue": "カームブルー",
+        "slate": "スレート"
+      }
     },
     "darkMode": {
       "label": "ダークモード",
