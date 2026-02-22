@@ -1,5 +1,6 @@
 <script setup>
-import { ref, onMounted, onUnmounted, defineAsyncComponent } from 'vue'
+import { ref, onMounted, onUnmounted, nextTick, defineAsyncComponent } from 'vue'
+import ErrorBoundary from './components/ErrorBoundary.vue'
 import UpdatePrompt from './components/UpdatePrompt.vue'
 import { useStorage } from './composables/useStorage.js'
 import { useDarkMode } from './composables/useDarkMode.js'
@@ -46,23 +47,33 @@ onUnmounted(() => {
 
 const handleNavigate = (view) => {
   currentView.value = view
+
+  // Set focus to main content after navigation for accessibility
+  nextTick(() => {
+    const mainContent = document.getElementById('main-content')
+    if (mainContent) {
+      mainContent.focus()
+    }
+  })
 }
 </script>
 
 <template>
-  <WelcomeView
-    v-if="currentView === 'welcome'"
-    @navigate="handleNavigate"
-  />
-  <ChatView
-    v-else-if="currentView === 'chat'"
-    @navigate="handleNavigate"
-  />
-  <SettingsView
-    v-else-if="currentView === 'settings'"
-    @navigate="handleNavigate"
-  />
+  <ErrorBoundary>
+    <WelcomeView
+      v-if="currentView === 'welcome'"
+      @navigate="handleNavigate"
+    />
+    <ChatView
+      v-else-if="currentView === 'chat'"
+      @navigate="handleNavigate"
+    />
+    <SettingsView
+      v-else-if="currentView === 'settings'"
+      @navigate="handleNavigate"
+    />
 
-  <!-- PWA Update Prompt -->
-  <UpdatePrompt />
+    <!-- PWA Update Prompt -->
+    <UpdatePrompt />
+  </ErrorBoundary>
 </template>

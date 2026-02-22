@@ -8,6 +8,12 @@ db.version(1).stores({
   messages: 'id, timestamp, role, content, model'
 })
 
+// Fallback storage key for localStorage
+const FALLBACK_STORAGE_KEY = 'chatpwa_messages_fallback'
+
+// Track if IndexedDB is available
+let useIndexedDB = true
+
 // Shared state (singleton)
 const messages = ref([])
 const isLoading = ref(false)
@@ -15,47 +21,85 @@ const isLoading = ref(false)
 // Track pending database operations to avoid race conditions
 let pendingDbOperations = Promise.resolve()
 
-// Load messages from IndexedDB on module initialization
+// Load messages from IndexedDB or localStorage fallback
 const initMessages = async () => {
   try {
     const storedMessages = await db.messages.orderBy('timestamp').toArray()
     messages.value = storedMessages
   } catch (error) {
-    logger.error('Failed to load messages from IndexedDB:', error)
+    logger.error('Failed to load messages from IndexedDB, falling back to localStorage:', error)
+    useIndexedDB = false
+
+    // Try loading from localStorage fallback
+    try {
+      const fallbackData = localStorage.getItem(FALLBACK_STORAGE_KEY)
+      if (fallbackData) {
+        messages.value = JSON.parse(fallbackData)
+      }
+    } catch (fallbackError) {
+      logger.error('Failed to load from localStorage fallback:', fallbackError)
+    }
   }
 }
 
 // Initialize messages immediately
 initMessages()
 
-// Helper to save a single message to IndexedDB
+// Helper to save a single message to IndexedDB or localStorage
 const saveMessageToDb = async (message) => {
   // Queue the operation to prevent race conditions
   pendingDbOperations = pendingDbOperations.then(async () => {
-    try {
-      const plainMessage = {
-        id: message.id,
-        role: message.role,
-        content: message.content,
-        timestamp: message.timestamp,
-        model: message.model
+    const plainMessage = {
+      id: message.id,
+      role: message.role,
+      content: message.content,
+      timestamp: message.timestamp,
+      model: message.model
+    }
+
+    if (useIndexedDB) {
+      try {
+        await db.messages.put(plainMessage)
+      } catch (error) {
+        logger.error('Failed to save message to IndexedDB, falling back to localStorage:', error)
+        useIndexedDB = false
+        // Fall through to localStorage save
       }
-      await db.messages.put(plainMessage)
-    } catch (error) {
-      logger.error('Failed to save message to IndexedDB:', error)
+    }
+
+    // Use localStorage fallback if IndexedDB failed
+    if (!useIndexedDB) {
+      try {
+        localStorage.setItem(FALLBACK_STORAGE_KEY, JSON.stringify(messages.value))
+      } catch (fallbackError) {
+        logger.error('Failed to save to localStorage fallback:', fallbackError)
+      }
     }
   })
   return pendingDbOperations
 }
 
-// Helper to update an existing message in IndexedDB
+// Helper to update an existing message in IndexedDB or localStorage
 const updateMessageInDb = async (messageId, updates) => {
   // Queue the operation to prevent race conditions
   pendingDbOperations = pendingDbOperations.then(async () => {
-    try {
-      await db.messages.update(messageId, updates)
-    } catch (error) {
-      logger.error('Failed to update message in IndexedDB:', error)
+    if (useIndexedDB) {
+      try {
+        await db.messages.update(messageId, updates)
+      } catch (error) {
+        logger.error('Failed to update message in IndexedDB, falling back to localStorage:', error)
+        useIndexedDB = false
+        // Fall through to localStorage save
+      }
+    }
+
+    // Use localStorage fallback if IndexedDB failed
+    if (!useIndexedDB) {
+      try {
+        localStorage.setItem(FALLBACK_STORAGE_KEY, JSON.stringify(messages.value))
+      } catch (fallbackError) {
+        logger.error('Failed to save to localStorage fallback:', fallbackError)
+      }
     }
   })
   return pendingDbOperations
@@ -98,10 +142,21 @@ export function useChat() {
    */
   const clearMessages = async () => {
     messages.value = []
+
+    if (useIndexedDB) {
+      try {
+        await db.messages.clear()
+      } catch (error) {
+        logger.error('Failed to clear messages from IndexedDB:', error)
+        useIndexedDB = false
+      }
+    }
+
+    // Clear localStorage fallback as well
     try {
-      await db.messages.clear()
+      localStorage.removeItem(FALLBACK_STORAGE_KEY)
     } catch (error) {
-      logger.error('Failed to clear messages from IndexedDB:', error)
+      logger.error('Failed to clear localStorage fallback:', error)
     }
   }
 

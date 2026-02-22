@@ -3,10 +3,20 @@ import { ref, computed, watch } from 'vue'
 
 const emit = defineEmits(['send'])
 
+// Constants
+const MAX_MESSAGE_LENGTH = 10000
+
 const message = ref('')
 const textarea = ref(null)
 const showCommandMenu = ref(false)
 const selectedCommandIndex = ref(0)
+const validationError = ref('')
+let resizeFrame = null // Track RAF for resize
+
+// Computed character count and warning state
+const characterCount = computed(() => message.value.length)
+const showCharacterWarning = computed(() => characterCount.value > MAX_MESSAGE_LENGTH * 0.9)
+const isOverLimit = computed(() => characterCount.value > MAX_MESSAGE_LENGTH)
 
 // Available slash commands
 const availableCommands = [
@@ -33,6 +43,13 @@ const availableCommands = [
   }
 ]
 
+// Pre-compute lowercase commands for faster filtering
+const commandsLowercase = availableCommands.map(cmd => ({
+  ...cmd,
+  commandLower: cmd.command.toLowerCase(),
+  aliasLower: cmd.alias?.toLowerCase()
+}))
+
 // Filter commands based on user input
 const filteredCommands = computed(() => {
   if (!message.value.startsWith('/')) {
@@ -40,10 +57,19 @@ const filteredCommands = computed(() => {
   }
 
   const input = message.value.toLowerCase()
-  return availableCommands.filter(cmd =>
-    cmd.command.toLowerCase().startsWith(input) ||
-    (cmd.alias && cmd.alias.toLowerCase().startsWith(input))
-  )
+
+  // Early return for exact slash
+  if (input === '/') {
+    return availableCommands
+  }
+
+  // Optimized filter with pre-computed lowercase
+  return commandsLowercase
+    .filter(cmd =>
+      cmd.commandLower.startsWith(input) ||
+      (cmd.aliasLower && cmd.aliasLower.startsWith(input))
+    )
+    .map(cmd => availableCommands.find(original => original.command === cmd.command))
 })
 
 // Watch message for slash command detection
@@ -64,14 +90,28 @@ const selectCommand = (command) => {
 
 const handleSend = () => {
   const trimmed = message.value.trim()
-  if (trimmed) {
-    emit('send', trimmed)
-    message.value = ''
-    showCommandMenu.value = false
-    // Reset textarea height
-    if (textarea.value) {
-      textarea.value.style.height = 'auto'
-    }
+
+  // Validation
+  if (!trimmed) {
+    return
+  }
+
+  if (trimmed.length > MAX_MESSAGE_LENGTH) {
+    validationError.value = `Message is too long (${trimmed.length}/${MAX_MESSAGE_LENGTH} characters)`
+    setTimeout(() => {
+      validationError.value = ''
+    }, 3000)
+    return
+  }
+
+  // Clear validation error and send
+  validationError.value = ''
+  emit('send', trimmed)
+  message.value = ''
+  showCommandMenu.value = false
+  // Reset textarea height
+  if (textarea.value) {
+    textarea.value.style.height = 'auto'
   }
 }
 
@@ -112,16 +152,32 @@ const handleKeydown = (event) => {
 }
 
 const handleInput = () => {
-  // Auto-resize textarea
-  if (textarea.value) {
-    textarea.value.style.height = 'auto'
-    textarea.value.style.height = textarea.value.scrollHeight + 'px'
+  // Auto-resize textarea with requestAnimationFrame for better performance
+  if (resizeFrame) {
+    cancelAnimationFrame(resizeFrame)
   }
+
+  resizeFrame = requestAnimationFrame(() => {
+    if (textarea.value) {
+      textarea.value.style.height = 'auto'
+      textarea.value.style.height = textarea.value.scrollHeight + 'px'
+    }
+    resizeFrame = null
+  })
 }
 </script>
 
 <template>
   <div class="w-full px-6 pb-8 relative">
+    <!-- Validation Error -->
+    <div
+      v-if="validationError"
+      role="alert"
+      aria-live="assertive"
+      class="absolute bottom-full left-6 right-6 mb-2 bg-red-100 border border-red-300 rounded-lg px-4 py-2 text-sm text-red-700 animate-fade-in"
+    >
+      {{ validationError }}
+    </div>
     <!-- Command Menu -->
     <div
       v-if="showCommandMenu"
@@ -203,9 +259,20 @@ const handleInput = () => {
       <span id="input-help" class="sr-only">
         Press forward slash to open command menu. Press Enter to send message, Shift+Enter for new line.
       </span>
+
+      <!-- Character Counter (shown when approaching limit) -->
+      <div
+        v-if="showCharacterWarning"
+        class="text-xs px-2 py-1 rounded"
+        :class="isOverLimit ? 'text-red-600 font-semibold' : 'text-text-tertiary'"
+        aria-live="polite"
+      >
+        {{ characterCount }}/{{ MAX_MESSAGE_LENGTH }}
+      </div>
+
       <button
         @click="handleSend"
-        :disabled="!message.trim()"
+        :disabled="!message.trim() || isOverLimit"
         aria-label="Send message"
         class="w-12 h-12 bg-forest-green rounded-full flex items-center justify-center flex-shrink-0 hover:bg-dark-green hover:scale-105 transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100"
       >

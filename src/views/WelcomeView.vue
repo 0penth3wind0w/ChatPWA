@@ -9,7 +9,7 @@ const handleGetStarted = () => {
 <template>
   <div class="w-full flex flex-col bg-bg-primary overflow-y-auto" style="height: calc(var(--vh, 1vh) * 100)">
     <!-- Content Wrapper -->
-    <main id="main-content" role="main" class="flex-1 flex flex-col items-center px-6 pt-16 pb-24 gap-10" aria-label="Welcome to ChatPWA">
+    <main id="main-content" role="main" tabindex="-1" class="flex-1 flex flex-col items-center px-6 pt-16 pb-24 gap-10 focus:outline-none" aria-label="Welcome to ChatPWA">
       <!-- Logo -->
       <div class="w-24 h-24 bg-forest-green rounded-full flex items-center justify-center shadow-[0_8px_24px_rgba(61,138,90,0.2)]" aria-hidden="true">
         <svg class="w-11 h-11 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">

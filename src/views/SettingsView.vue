@@ -75,7 +75,7 @@ const handleBack = () => {
     </header>
 
     <!-- Scrollable Content -->
-    <main id="main-content" role="main" class="flex-1 overflow-y-auto px-6 min-h-0" aria-label="Settings configuration">
+    <main id="main-content" role="main" tabindex="-1" class="flex-1 overflow-y-auto px-6 min-h-0 focus:outline-none" aria-label="Settings configuration">
       <div class="flex flex-col gap-6 pb-24 pt-2">
         <!-- Clear Chat History Card -->
         <div class="card">

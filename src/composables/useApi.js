@@ -1,7 +1,14 @@
 import { ref } from 'vue'
 import { logger, sanitizeConfig } from '../utils/logger.js'
 
+// Constants for retry logic
+const MAX_RETRIES = 3
+const RETRY_DELAY_MS = 1000
+const RETRY_BACKOFF_MULTIPLIER = 2
+
 export function useApi() {
+  // Abort controller for canceling requests
+  let currentAbortController = null
   /**
    * Extract common optional parameters from config
    */
@@ -165,12 +172,73 @@ export function useApi() {
   }
 
   /**
+   * Cancel the current API request if one is in progress
+   */
+  const cancelRequest = () => {
+    if (currentAbortController) {
+      currentAbortController.abort()
+      currentAbortController = null
+    }
+  }
+
+  /**
+   * Check if error is retryable (network errors, 5xx errors, rate limits)
+   */
+  const isRetryableError = (error, response) => {
+    // Network errors (no response)
+    if (!response) return true
+
+    // Server errors (5xx)
+    if (response.status >= 500) return true
+
+    // Rate limit (429)
+    if (response.status === 429) return true
+
+    return false
+  }
+
+  /**
+   * Retry a function with exponential backoff
+   */
+  const withRetry = async (fn, retries = MAX_RETRIES) => {
+    let lastError
+
+    for (let attempt = 0; attempt <= retries; attempt++) {
+      try {
+        return await fn()
+      } catch (error) {
+        lastError = error
+
+        // Don't retry if abort was called
+        if (error.name === 'AbortError') {
+          throw new Error('Request cancelled')
+        }
+
+        // Don't retry on last attempt
+        if (attempt === retries) break
+
+        // Check if error is retryable
+        if (!isRetryableError(error, error.response)) break
+
+        // Wait with exponential backoff before retrying
+        const delay = RETRY_DELAY_MS * Math.pow(RETRY_BACKOFF_MULTIPLIER, attempt)
+        logger.warn(`Request failed, retrying in ${delay}ms... (attempt ${attempt + 1}/${retries})`)
+        await new Promise(resolve => setTimeout(resolve, delay))
+      }
+    }
+
+    throw lastError
+  }
+
+  /**
    * Handle API errors consistently
    */
   const handleApiError = async (response) => {
     const errorData = await response.json().catch(() => ({ error: { message: 'Unknown error' } }))
     const message = errorData.error?.message || errorData.message || `API Error: ${response.status} ${response.statusText}`
-    throw new Error(message)
+    const error = new Error(message)
+    error.response = response // Attach response for retry logic
+    throw error
   }
 
   /**
@@ -196,7 +264,15 @@ export function useApi() {
    * Send chat message to API
    */
   const sendChatMessage = async (messages, config) => {
-    try {
+    // Cancel any previous request
+    cancelRequest()
+
+    // Create new abort controller for this request
+    currentAbortController = new AbortController()
+    const signal = currentAbortController.signal
+
+    return await withRetry(async () => {
+      try {
       // Use provider from config
       const provider = config.provider || 'openai'
 
@@ -258,7 +334,8 @@ export function useApi() {
       const response = await fetch(endpoint, {
         method: 'POST',
         headers,
-        body: JSON.stringify(requestBody)
+        body: JSON.stringify(requestBody),
+        signal // Add abort signal
       })
 
       if (!response.ok) {
@@ -266,16 +343,25 @@ export function useApi() {
       }
 
       return await handleStandardResponse(response, provider)
-    } catch (err) {
-      throw err
-    }
+      } catch (err) {
+        throw err
+      }
+    })
   }
 
   /**
    * Generate image from prompt
    */
   const generateImage = async (prompt, config) => {
-    try {
+    // Cancel any previous request
+    cancelRequest()
+
+    // Create new abort controller for this request
+    currentAbortController = new AbortController()
+    const signal = currentAbortController.signal
+
+    return await withRetry(async () => {
+      try {
       logger.log('[Image API Request]', { prompt, config: sanitizeConfig(config) })
 
       // Build endpoint - replace {model} placeholder if present
@@ -307,7 +393,8 @@ export function useApi() {
       const response = await fetch(endpoint, {
         method: 'POST',
         headers,
-        body: JSON.stringify(requestBody)
+        body: JSON.stringify(requestBody),
+        signal // Add abort signal
       })
 
       if (!response.ok) {
@@ -355,9 +442,10 @@ export function useApi() {
         logger.log('[Image API Response]', JSON.stringify(data, null, 2))
         return result
       }
-    } catch (err) {
-      throw err
-    }
+      } catch (err) {
+        throw err
+      }
+    })
   }
 
   /**
@@ -378,6 +466,7 @@ export function useApi() {
   return {
     sendChatMessage,
     generateImage,
-    testConnection
+    testConnection,
+    cancelRequest
   }
 }

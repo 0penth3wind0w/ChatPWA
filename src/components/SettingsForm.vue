@@ -152,12 +152,20 @@ const handleTest = async () => {
   }
 }
 
-// Auto-resize textarea
+// Auto-resize textarea with requestAnimationFrame
+let resizeFrame = null
 const resizeTextarea = () => {
-  if (systemPromptTextarea.value) {
-    systemPromptTextarea.value.style.height = 'auto'
-    systemPromptTextarea.value.style.height = systemPromptTextarea.value.scrollHeight + 'px'
+  if (resizeFrame) {
+    cancelAnimationFrame(resizeFrame)
   }
+
+  resizeFrame = requestAnimationFrame(() => {
+    if (systemPromptTextarea.value) {
+      systemPromptTextarea.value.style.height = 'auto'
+      systemPromptTextarea.value.style.height = systemPromptTextarea.value.scrollHeight + 'px'
+    }
+    resizeFrame = null
+  })
 }
 
 // Watch systemPrompt for changes and resize
@@ -174,10 +182,13 @@ watch(systemPromptTextarea, async (newVal) => {
   }
 })
 
-// Cleanup timeout on unmount to prevent errors
+// Cleanup timeout and animation frame on unmount
 onUnmounted(() => {
   if (saveTimeout) {
     clearTimeout(saveTimeout)
+  }
+  if (resizeFrame) {
+    cancelAnimationFrame(resizeFrame)
   }
 })
 </script>

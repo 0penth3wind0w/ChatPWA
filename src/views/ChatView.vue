@@ -14,11 +14,26 @@ const emit = defineEmits(['navigate'])
 
 const { messages, hasMessages, addUserMessage, addAssistantMessage, scrollToBottom } = useChat()
 const { config } = useStorage()
-const { sendChatMessage, generateImage } = useApi()
+const { sendChatMessage, generateImage, cancelRequest } = useApi()
 const { searchWeb, fetchWebContent } = useWebTools()
 const messagesContainer = ref(null)
 const isTyping = ref(false)
 const fetchingStatus = ref('')
+const errorMessage = ref('')
+
+const handleCancelRequest = () => {
+  cancelRequest()
+  isTyping.value = false
+  fetchingStatus.value = ''
+}
+
+const showError = (message) => {
+  errorMessage.value = message
+  // Clear error after 5 seconds
+  setTimeout(() => {
+    errorMessage.value = ''
+  }, 5000)
+}
 
 // Handle scroll to bottom on resize/orientation change
 const handleResize = () => {
@@ -73,7 +88,9 @@ const handleSendMessage = async (content) => {
         addAssistantMessage(searchResults, config.value.model)
       } catch (err) {
         isTyping.value = false
-        addAssistantMessage(`Error searching: ${err.message}`, config.value.model)
+        const errorMsg = `Error searching: ${err.message}`
+        addAssistantMessage(errorMsg, config.value.model)
+        showError(errorMsg)
       }
     } else if (fetchCommandMatch) {
       // Handle web fetch
@@ -88,7 +105,9 @@ const handleSendMessage = async (content) => {
         addAssistantMessage(webContent, config.value.model)
       } catch (err) {
         isTyping.value = false
-        addAssistantMessage(`Error fetching: ${err.message}`, config.value.model)
+        const errorMsg = `Error fetching: ${err.message}`
+        addAssistantMessage(errorMsg, config.value.model)
+        showError(errorMsg)
       }
     } else if (imageCommandMatch) {
       // Handle image generation
@@ -182,7 +201,9 @@ const handleSendMessage = async (content) => {
   } catch (err) {
     logger.error('Failed to send message:', err)
     isTyping.value = false
-    addAssistantMessage(`Error: ${err.message || 'Failed to get response from AI'}`)
+    const errorMsg = `Error: ${err.message || 'Failed to get response from AI'}`
+    addAssistantMessage(errorMsg)
+    showError(errorMsg)
   }
 }
 
@@ -221,7 +242,8 @@ watch([messages, isTyping], () => {
       id="main-content"
       role="main"
       ref="messagesContainer"
-      class="flex-1 overflow-y-auto px-6 min-h-0"
+      tabindex="-1"
+      class="flex-1 overflow-y-auto px-6 min-h-0 focus:outline-none"
       aria-label="Chat messages"
     >
       <div role="log" aria-live="polite" aria-atomic="false" class="flex flex-col gap-5 pb-6 pt-2">
@@ -245,14 +267,33 @@ watch([messages, isTyping], () => {
           <p class="text-sm text-forest-green">{{ fetchingStatus }}</p>
         </div>
 
-        <!-- Typing Indicator -->
-        <TypingIndicator v-if="isTyping && !fetchingStatus" />
+        <!-- Typing Indicator with Cancel Button -->
+        <div v-if="isTyping && !fetchingStatus" class="flex items-center gap-3">
+          <TypingIndicator />
+          <button
+            @click="handleCancelRequest"
+            class="px-3 py-1.5 text-sm text-text-secondary hover:text-text-primary bg-bg-surface rounded-lg border border-border-subtle hover:border-border-strong transition-colors"
+            aria-label="Cancel request"
+          >
+            Cancel
+          </button>
+        </div>
       </div>
     </main>
 
     <!-- Fixed Message Input at Bottom -->
     <div class="flex-shrink-0">
       <MessageInput @send="handleSendMessage" />
+    </div>
+
+    <!-- ARIA live region for error announcements -->
+    <div
+      role="alert"
+      aria-live="assertive"
+      aria-atomic="true"
+      class="sr-only"
+    >
+      {{ errorMessage }}
     </div>
   </div>
 </template>
