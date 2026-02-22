@@ -6,15 +6,15 @@ An elegant Progressive Web App for AI chat with custom API endpoints. Connect to
 
 ## Features
 
-✨ **Multi-Provider Support** - Works with OpenAI, Anthropic (Claude), and Google Gemini APIs
-🎨 **Elegant Bubble Chat** - Left-aligned AI messages, right-aligned user messages with smooth animations
-💬 **Slash Commands** - `/image` command for AI image generation with autocomplete
-📝 **Markdown Support** - Full markdown rendering with code syntax highlighting
-🎯 **Smart Typing Indicator** - Animated dots show when AI is responding
-💾 **Auto-Save Everything** - Messages and settings persist automatically (IndexedDB + localStorage)
-🔒 **Privacy First** - All data stays on your device, no external tracking
-📱 **Install as App** - Add to home screen for native-like experience
-⚡ **Fast & Lightweight** - Built with Vue 3 + Vite + Tailwind CSS v4
+- ✨ **Multi-Provider Support** - Works with OpenAI, Anthropic (Claude), and Google Gemini APIs
+- 🎨 **Elegant Bubble Chat** - Left-aligned AI messages, right-aligned user messages with smooth animations
+- 💬 **Slash Commands** - `/image` command for AI image generation with autocomplete
+- 📝 **Markdown Support** - Full markdown rendering with code syntax highlighting
+- 🎯 **Smart Typing Indicator** - Animated dots show when AI is responding
+- 💾 **Auto-Save Everything** - Messages and settings persist automatically (IndexedDB + localStorage)
+- 🔒 **Privacy First** - All data stays on your device, no external tracking
+- 📱 **Install as App** - Add to home screen for native-like experience
+- ⚡ **Fast & Lightweight** - Built with Vue 3 + Vite + Tailwind CSS v4
 
 ## Tech Stack
 
