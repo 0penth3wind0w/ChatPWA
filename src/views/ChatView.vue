@@ -9,7 +9,7 @@ import { useChat } from '../composables/useChat.js'
 import { useStorage } from '../composables/useStorage.js'
 import { useApi } from '../composables/useApi.js'
 import { useWebTools } from '../composables/useWebTools.js'
-import { logger } from '../utils/logger.js'
+import { logger, sanitizeConfig } from '../utils/logger.js'
 
 const emit = defineEmits(['navigate'])
 const { t } = useI18n()
@@ -65,6 +65,8 @@ const handleSettings = () => {
 }
 
 const handleSendMessage = async (content) => {
+  logger.log('[handleSendMessage] Starting with content:', content)
+
   // Add user message
   addUserMessage(content)
 
@@ -206,23 +208,33 @@ const handleSendMessage = async (content) => {
         content: enhancedContent
       })
 
+      logger.log('[handleSendMessage] Prepared API messages:', apiMessages.length, 'messages')
+      logger.log('[handleSendMessage] Config:', sanitizeConfig(config.value))
+
       // Send message and get response
       isTyping.value = true
       scrollToBottom(messagesContainer)
 
+      logger.log('[handleSendMessage] Calling sendChatMessage...')
       const response = await sendChatMessage(apiMessages, config.value)
+      logger.log('[handleSendMessage] Received response:', response ? `${response.length} chars` : 'empty')
 
       isTyping.value = false
       addAssistantMessage(response, config.value.model)
     }
   } catch (err) {
-    logger.error('Failed to send message:', err)
+    logger.error('[handleSendMessage] Error occurred:', err)
+    logger.error('[handleSendMessage] Error name:', err.name)
+    logger.error('[handleSendMessage] Error message:', err.message)
+    logger.error('[handleSendMessage] Stack:', err.stack)
     isTyping.value = false
     // Don't show error if request was cancelled by user
     if (err.name !== 'AbortError') {
       const errorMsg = t('chat.errors.sendFailed', { message: err.message || t('chat.errors.defaultError') })
       addAssistantMessage(errorMsg)
       showError(errorMsg)
+    } else {
+      logger.log('[handleSendMessage] Request was aborted by user')
     }
   }
 }

@@ -265,6 +265,9 @@ export function useApi() {
    * Send chat message to API
    */
   const sendChatMessage = async (messages, config) => {
+    logger.log('[sendChatMessage] Called with', messages.length, 'messages')
+    logger.log('[sendChatMessage] Config:', sanitizeConfig(config))
+
     // Cancel any previous request
     cancelRequest()
 
@@ -276,6 +279,7 @@ export function useApi() {
       try {
       // Use provider from config
       const provider = config.provider || 'openai'
+      logger.log('[sendChatMessage] Using provider:', provider)
 
       // Add system prompt if configured
       let messagesWithSystem = [...messages]
@@ -332,12 +336,17 @@ export function useApi() {
         headers['anthropic-version'] = '2023-06-01'
       }
 
+      logger.log('[sendChatMessage] Making request to:', endpoint)
+      logger.log('[sendChatMessage] Request body:', JSON.stringify(requestBody, null, 2))
+
       const response = await fetch(endpoint, {
         method: 'POST',
         headers,
         body: JSON.stringify(requestBody),
         signal // Add abort signal
       })
+
+      logger.log('[sendChatMessage] Response status:', response.status, response.statusText)
 
       if (!response.ok) {
         await handleApiError(response)
