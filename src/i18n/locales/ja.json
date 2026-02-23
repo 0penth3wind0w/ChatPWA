@@ -266,6 +266,10 @@
     "version": {
       "title": "バージョン",
       "copy": "コピー"
+    },
+    "sourceCode": {
+      "title": "ソースコード",
+      "description": "GitHubで表示"
     }
   },
   "pwa": {

@@ -266,6 +266,10 @@
     "version": {
       "title": "Version",
       "copy": "Copier"
+    },
+    "sourceCode": {
+      "title": "Code source",
+      "description": "Voir sur GitHub"
     }
   },
   "pwa": {

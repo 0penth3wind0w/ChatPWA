@@ -260,6 +260,10 @@
     "version": {
       "title": "Version",
       "copy": "Copy"
+    },
+    "sourceCode": {
+      "title": "Source Code",
+      "description": "View on GitHub"
     }
   },
   "pwa": {

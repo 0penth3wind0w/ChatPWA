@@ -260,6 +260,10 @@
     "version": {
       "title": "版本",
       "copy": "複製"
+    },
+    "sourceCode": {
+      "title": "原始碼",
+      "description": "在 GitHub 查看"
     }
   },
   "pwa": {
