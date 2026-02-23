@@ -34,12 +34,22 @@
     "title": "AI Chat",
     "emptyState": {
       "title": "Start a Conversation",
+      "description": "Type a message below to begin chatting with your AI assistant",
       "tips": {
         "title": "Tips",
         "slashCommands": "Use / for slash commands (/img, /search, /fetch)"
       }
     },
+    "input": {
+      "placeholder": "Type your message...",
+      "send": "Send message",
+      "help": "Press forward slash to open command menu. Press Enter to send message, Shift+Enter for new line."
+    },
     "commands": {
+      "title": "Slash Commands",
+      "navigate": "navigate",
+      "select": "select",
+      "close": "close",
       "image": {
         "description": "Generate an image from text description",
         "example": "/img a sunset over mountains"
@@ -53,11 +63,18 @@
         "example": "/fetch https://example.com"
       }
     },
+    "validation": {
+      "tooLong": "Message is too long ({current}/{max} characters)"
+    },
     "typing": "AI Assistant is typing",
     "fetching": "Fetching content from {count} URL(s)...",
     "assistant": "AI Assistant",
     "you": "You",
     "model": "Model",
+    "image": {
+      "generatedCaption": "Generated image: {prompt}",
+      "noImagesReturned": "Failed to generate image. No images returned."
+    },
     "errors": {
       "searchFailed": "Error searching: {message}",
       "fetchFailed": "Error fetching: {message}",
@@ -254,7 +271,27 @@
   "errors": {
     "somethingWrong": "Something went wrong",
     "appError": "The application encountered an error",
+    "unknownError": "Unknown error",
     "dismiss": "Dismiss",
     "reloadApp": "Reload App"
+  },
+  "api": {
+    "errors": {
+      "unknown": "Unknown error",
+      "apiError": "API Error: {status} {statusText}",
+      "connectionTestMessage": "Hello, this is a connection test.",
+      "connectionTestFailed": "Connection test failed: {message}",
+      "searchProviderNotConfigured": "No search provider configured",
+      "braveSearchError": "Brave Search API error: {status}",
+      "tavilyError": "Tavily API error: {status}",
+      "customSearchError": "Custom search error: {status}",
+      "fetchWebContentFailed": "Failed to fetch web content: {status}"
+    },
+    "webContent": {
+      "title": "Web Content: {url}",
+      "searchResultsTitle": "Search Results for \"{query}\"",
+      "noResults": "No results found.",
+      "foundResults": "Found {count} results:"
+    }
   }
 }

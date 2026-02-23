@@ -34,12 +34,22 @@
     "title": "AI 聊天",
     "emptyState": {
       "title": "開始對話",
+      "description": "在下方輸入訊息，開始與您的 AI 助手對話",
       "tips": {
         "title": "提示",
         "slashCommands": "使用 / 進行斜線命令（/img、/search、/fetch）"
       }
     },
+    "input": {
+      "placeholder": "輸入您的訊息...",
+      "send": "發送訊息",
+      "help": "按斜線鍵開啟命令選單。按 Enter 發送訊息，Shift+Enter 換行。"
+    },
     "commands": {
+      "title": "斜線命令",
+      "navigate": "導覽",
+      "select": "選擇",
+      "close": "關閉",
       "image": {
         "description": "從文字描述生成圖片",
         "example": "/img 山上的日落"
@@ -53,11 +63,18 @@
         "example": "/fetch https://example.com"
       }
     },
+    "validation": {
+      "tooLong": "訊息過長（{current}/{max} 字元）"
+    },
     "typing": "AI 助手正在輸入",
     "fetching": "正在讀取 {count} 個網址的內容...",
     "assistant": "AI 助手",
     "you": "您",
     "model": "模型",
+    "image": {
+      "generatedCaption": "生成的圖片：{prompt}",
+      "noImagesReturned": "圖片生成失敗。未返回圖片。"
+    },
     "errors": {
       "searchFailed": "搜尋錯誤：{message}",
       "fetchFailed": "讀取錯誤：{message}",
@@ -254,7 +271,27 @@
   "errors": {
     "somethingWrong": "發生錯誤",
     "appError": "應用程式遇到錯誤",
+    "unknownError": "未知錯誤",
     "dismiss": "關閉",
     "reloadApp": "重新載入應用程式"
+  },
+  "api": {
+    "errors": {
+      "unknown": "未知錯誤",
+      "apiError": "API 錯誤：{status} {statusText}",
+      "connectionTestMessage": "您好，這是連線測試。",
+      "connectionTestFailed": "連線測試失敗：{message}",
+      "searchProviderNotConfigured": "未配置搜尋供應商",
+      "braveSearchError": "Brave 搜尋 API 錯誤：{status}",
+      "tavilyError": "Tavily API 錯誤：{status}",
+      "customSearchError": "自訂搜尋錯誤：{status}",
+      "fetchWebContentFailed": "讀取網頁內容失敗：{status}"
+    },
+    "webContent": {
+      "title": "網頁內容：{url}",
+      "searchResultsTitle": "「{query}」的搜尋結果",
+      "noResults": "未找到結果。",
+      "foundResults": "找到 {count} 個結果："
+    }
   }
 }

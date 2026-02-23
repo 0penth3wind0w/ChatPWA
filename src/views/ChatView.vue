@@ -131,12 +131,12 @@ const handleSendMessage = async (content) => {
         if (images && images.length > 0) {
           // Create markdown with image
           const imageMarkdown = images.map(img =>
-            `![${prompt}](${img.url})\n\n*Generated image: ${prompt}*`
+            `![${prompt}](${img.url})\n\n*${t('chat.image.generatedCaption', { prompt })}*`
           ).join('\n\n')
 
           addAssistantMessage(imageMarkdown, config.value.imageModel)
         } else {
-          addAssistantMessage('Failed to generate image. No images returned.', config.value.imageModel)
+          addAssistantMessage(t('chat.image.noImagesReturned'), config.value.imageModel)
         }
       } catch (err) {
         isTyping.value = false

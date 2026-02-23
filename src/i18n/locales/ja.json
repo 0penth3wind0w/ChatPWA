@@ -34,6 +34,7 @@
     "title": "AIチャット",
     "emptyState": {
       "title": "会話を開始",
+      "description": "下にメッセージを入力して、AIアシスタントとのチャットを開始してください",
       "tips": {
         "title": "ヒント",
         "slashCommands": "スラッシュコマンドは / を使用（/img、/search、/fetch）",
@@ -48,7 +49,9 @@
     },
     "commands": {
       "title": "スラッシュコマンド",
-      "navigate": "↑↓ ナビゲート • Tab 選択 • Esc 閉じる",
+      "navigate": "ナビゲート",
+      "select": "選択",
+      "close": "閉じる",
       "image": {
         "command": "/img",
         "description": "テキスト説明から画像を生成",
@@ -80,6 +83,10 @@
     },
     "validation": {
       "tooLong": "メッセージが長すぎます（{current}/{max}文字）"
+    },
+    "image": {
+      "generatedCaption": "生成された画像：{prompt}",
+      "noImagesReturned": "画像の生成に失敗しました。画像が返されませんでした。"
     }
   },
   "settings": {
@@ -270,7 +277,27 @@
   "errors": {
     "somethingWrong": "問題が発生しました",
     "appError": "アプリケーションでエラーが発生しました",
+    "unknownError": "不明なエラー",
     "dismiss": "閉じる",
     "reloadApp": "アプリをリロード"
+  },
+  "api": {
+    "errors": {
+      "unknown": "不明なエラー",
+      "apiError": "APIエラー：{status} {statusText}",
+      "connectionTestMessage": "こんにちは、これは接続テストです。",
+      "connectionTestFailed": "接続テストに失敗しました：{message}",
+      "searchProviderNotConfigured": "検索プロバイダーが設定されていません",
+      "braveSearchError": "Brave Search APIエラー：{status}",
+      "tavilyError": "Tavily APIエラー：{status}",
+      "customSearchError": "カスタム検索エラー：{status}",
+      "fetchWebContentFailed": "ウェブコンテンツの取得に失敗しました：{status}"
+    },
+    "webContent": {
+      "title": "ウェブコンテンツ：{url}",
+      "searchResultsTitle": "「{query}」の検索結果",
+      "noResults": "結果が見つかりませんでした。",
+      "foundResults": "{count}件の結果が見つかりました："
+    }
   }
 }

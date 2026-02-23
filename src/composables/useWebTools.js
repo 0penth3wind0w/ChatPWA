@@ -1,6 +1,8 @@
 import { logger } from '../utils/logger.js'
+import i18n from '../i18n/index.js'
 
 export function useWebTools() {
+  const { t } = i18n.global
   /**
    * Search the web using configured search provider
    */
@@ -18,7 +20,7 @@ export function useWebTools() {
         })
 
         if (!response.ok) {
-          throw new Error(`Brave Search API error: ${response.status}`)
+          throw new Error(t('api.errors.braveSearchError', { status: response.status }))
         }
 
         const data = await response.json()
@@ -47,7 +49,7 @@ export function useWebTools() {
         })
 
         if (!response.ok) {
-          throw new Error(`Tavily API error: ${response.status}`)
+          throw new Error(t('api.errors.tavilyError', { status: response.status }))
         }
 
         const data = await response.json()
@@ -64,14 +66,14 @@ export function useWebTools() {
         const response = await fetch(`${config.searchEndpoint}?q=${encodeURIComponent(query)}`)
 
         if (!response.ok) {
-          throw new Error(`Custom search error: ${response.status}`)
+          throw new Error(t('api.errors.customSearchError', { status: response.status }))
         }
 
         const data = await response.json()
         results = data.results || []
 
       } else {
-        throw new Error('No search provider configured')
+        throw new Error(t('api.errors.searchProviderNotConfigured'))
       }
 
       // Format results as markdown
@@ -98,13 +100,13 @@ export function useWebTools() {
       })
 
       if (!response.ok) {
-        throw new Error(`Failed to fetch web content: ${response.status}`)
+        throw new Error(t('api.errors.fetchWebContentFailed', { status: response.status }))
       }
 
       const content = await response.text()
 
       // Add metadata header
-      const result = `# Web Content: ${url}\n\n${content}`
+      const result = `# ${t('api.webContent.title', { url })}\n\n${content}`
       return result
 
     } catch (err) {
@@ -118,11 +120,11 @@ export function useWebTools() {
    */
   const formatSearchResults = (query, results) => {
     if (!results || results.length === 0) {
-      return `# Search Results for "${query}"\n\nNo results found.`
+      return `# ${t('api.webContent.searchResultsTitle', { query })}\n\n${t('api.webContent.noResults')}`
     }
 
-    let markdown = `# Search Results for "${query}"\n\n`
-    markdown += `Found ${results.length} results:\n\n`
+    let markdown = `# ${t('api.webContent.searchResultsTitle', { query })}\n\n`
+    markdown += `${t('api.webContent.foundResults', { count: results.length })}\n\n`
 
     results.forEach((result, index) => {
       markdown += `## ${index + 1}. ${result.title}\n`

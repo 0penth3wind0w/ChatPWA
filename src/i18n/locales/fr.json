@@ -34,6 +34,7 @@
     "title": "Chat IA",
     "emptyState": {
       "title": "Démarrer une conversation",
+      "description": "Tapez un message ci-dessous pour commencer à discuter avec votre assistant IA",
       "tips": {
         "title": "Conseils",
         "slashCommands": "Utilisez / pour les commandes (/img, /search, /fetch)",
@@ -48,7 +49,9 @@
     },
     "commands": {
       "title": "Commandes Slash",
-      "navigate": "↑↓ naviguer • Tab sélectionner • Échap fermer",
+      "navigate": "naviguer",
+      "select": "sélectionner",
+      "close": "fermer",
       "image": {
         "command": "/img",
         "description": "Générer une image à partir d'une description textuelle",
@@ -80,6 +83,10 @@
     },
     "validation": {
       "tooLong": "Message trop long ({current}/{max} caractères)"
+    },
+    "image": {
+      "generatedCaption": "Image générée : {prompt}",
+      "noImagesReturned": "Échec de la génération d'image. Aucune image retournée."
     }
   },
   "settings": {
@@ -270,7 +277,27 @@
   "errors": {
     "somethingWrong": "Quelque chose s'est mal passé",
     "appError": "L'application a rencontré une erreur",
+    "unknownError": "Erreur inconnue",
     "dismiss": "Fermer",
     "reloadApp": "Recharger l'application"
+  },
+  "api": {
+    "errors": {
+      "unknown": "Erreur inconnue",
+      "apiError": "Erreur API : {status} {statusText}",
+      "connectionTestMessage": "Bonjour, ceci est un test de connexion.",
+      "connectionTestFailed": "Échec du test de connexion : {message}",
+      "searchProviderNotConfigured": "Aucun fournisseur de recherche configuré",
+      "braveSearchError": "Erreur API Brave Search : {status}",
+      "tavilyError": "Erreur API Tavily : {status}",
+      "customSearchError": "Erreur de recherche personnalisée : {status}",
+      "fetchWebContentFailed": "Échec de la récupération du contenu web : {status}"
+    },
+    "webContent": {
+      "title": "Contenu Web : {url}",
+      "searchResultsTitle": "Résultats de recherche pour « {query} »",
+      "noResults": "Aucun résultat trouvé.",
+      "foundResults": "{count} résultats trouvés :"
+    }
   }
 }

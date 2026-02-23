@@ -14,7 +14,7 @@ import css from 'highlight.js/lib/languages/css'
 import DOMPurify from 'dompurify'
 import { logger } from '../utils/logger.js'
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 
 // Register only commonly used languages
 hljs.registerLanguage('javascript', javascript)
@@ -60,7 +60,7 @@ const isAssistant = computed(() => props.message.role === 'assistant')
 const formatTime = (timestamp) => {
   if (!timestamp) return ''
   const date = new Date(timestamp)
-  return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
+  return date.toLocaleTimeString(locale.value, { hour: '2-digit', minute: '2-digit' })
 }
 
 // Render and sanitize markdown for assistant messages

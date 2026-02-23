@@ -21,7 +21,7 @@ const { t } = useI18n()
 
       <!-- Description -->
       <p class="text-sm text-text-secondary leading-relaxed max-w-[300px]">
-        Type a message below to begin chatting with your AI assistant
+        {{ t('chat.emptyState.description') }}
       </p>
 
       <!-- Tips -->

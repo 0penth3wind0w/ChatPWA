@@ -91,7 +91,7 @@ const handleSend = () => {
   }
 
   if (trimmed.length > MAX_MESSAGE_LENGTH) {
-    validationError.value = `Message is too long (${trimmed.length}/${MAX_MESSAGE_LENGTH} characters)`
+    validationError.value = t('chat.validation.tooLong', { current: trimmed.length, max: MAX_MESSAGE_LENGTH })
     setTimeout(() => {
       validationError.value = ''
     }, 3000)
@@ -181,7 +181,7 @@ const handleInput = () => {
       class="absolute bottom-full left-6 right-6 mb-3 bg-bg-surface rounded-2xl shadow-elevated border border-border-subtle overflow-hidden animate-fade-in"
     >
       <div class="px-4 py-3 bg-bg-elevated border-b border-border-subtle">
-        <p class="text-xs font-semibold text-text-secondary">Slash Commands</p>
+        <p class="text-xs font-semibold text-text-secondary">{{ t('chat.commands.title') }}</p>
       </div>
       <div class="max-h-64 overflow-y-auto">
         <button
@@ -223,9 +223,9 @@ const handleInput = () => {
       </div>
       <div class="px-4 py-2.5 bg-bg-elevated border-t border-border-subtle">
         <p class="text-xs text-text-tertiary">
-          <kbd class="px-1.5 py-0.5 bg-bg-surface rounded text-forest-green font-medium">↑↓</kbd> navigate •
-          <kbd class="px-1.5 py-0.5 bg-bg-surface rounded text-forest-green font-medium">Tab</kbd> select •
-          <kbd class="px-1.5 py-0.5 bg-bg-surface rounded text-forest-green font-medium">Esc</kbd> close
+          <kbd class="px-1.5 py-0.5 bg-bg-surface rounded text-forest-green font-medium">↑↓</kbd> {{ t('chat.commands.navigate') }} •
+          <kbd class="px-1.5 py-0.5 bg-bg-surface rounded text-forest-green font-medium">Tab</kbd> {{ t('chat.commands.select') }} •
+          <kbd class="px-1.5 py-0.5 bg-bg-surface rounded text-forest-green font-medium">Esc</kbd> {{ t('chat.commands.close') }}
         </p>
       </div>
     </div>
@@ -237,9 +237,9 @@ const handleInput = () => {
         id="message-input"
         ref="textarea"
         v-model="message"
-        placeholder="Type your message..."
+        :placeholder="t('chat.input.placeholder')"
         rows="1"
-        aria-label="Message input"
+        :aria-label="t('chat.input.placeholder')"
         :aria-expanded="showCommandMenu"
         :aria-activedescendant="showCommandMenu ? `cmd-${selectedCommandIndex}` : undefined"
         aria-describedby="input-help"
@@ -251,7 +251,7 @@ const handleInput = () => {
         @input="handleInput"
       ></textarea>
       <span id="input-help" class="sr-only">
-        Press forward slash to open command menu. Press Enter to send message, Shift+Enter for new line.
+        {{ t('chat.input.help') }}
       </span>
 
       <!-- Character Counter (shown when approaching limit) -->
@@ -267,7 +267,7 @@ const handleInput = () => {
       <button
         @click="handleSend"
         :disabled="!(message || '').trim() || isOverLimit"
-        aria-label="Send message"
+        :aria-label="t('chat.input.send')"
         class="w-12 h-12 bg-forest-green rounded-full flex items-center justify-center flex-shrink-0 hover:bg-dark-green hover:scale-105 transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100"
       >
         <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">

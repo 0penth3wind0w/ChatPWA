@@ -1,6 +1,9 @@
 <script setup>
 import { onUnmounted } from 'vue'
 import { useRegisterSW } from 'virtual:pwa-register/vue'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 let visibilityHandler = null
 
@@ -68,10 +71,10 @@ const update = async () => {
     <div class="relative bg-bg-surface rounded-2xl shadow-elevated border border-border-subtle p-4 flex items-center gap-4 max-w-md mx-6">
       <div class="flex-1">
         <p class="text-sm font-semibold text-text-primary mb-1">
-          Update Available
+          {{ t('pwa.updateAvailable') }}
         </p>
         <p class="text-xs text-text-secondary">
-          A new version is ready. Reload to update.
+          {{ t('pwa.updateMessage') }}
         </p>
       </div>
       <div class="flex gap-2">
@@ -79,13 +82,13 @@ const update = async () => {
           @click="close"
           class="px-3 py-2 text-sm text-text-secondary hover:text-text-primary transition-colors"
         >
-          Later
+          {{ t('pwa.later') }}
         </button>
         <button
           @click="update"
           class="px-4 py-2 bg-forest-green text-white text-sm font-semibold rounded-lg hover:bg-dark-green transition-colors"
         >
-          Reload
+          {{ t('pwa.reload') }}
         </button>
       </div>
     </div>

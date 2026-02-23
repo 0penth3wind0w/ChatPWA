@@ -1,6 +1,9 @@
 <script setup>
 import { ref, onErrorCaptured } from 'vue'
 import { logger } from '../utils/logger.js'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 const error = ref(null)
 const errorInfo = ref(null)
@@ -42,17 +45,17 @@ const handleDismiss = () => {
         </div>
         <div>
           <h2 class="text-lg font-semibold text-text-primary">
-            Something went wrong
+            {{ t('errors.somethingWrong') }}
           </h2>
           <p class="text-sm text-text-secondary">
-            The application encountered an error
+            {{ t('errors.appError') }}
           </p>
         </div>
       </div>
 
       <div class="bg-bg-elevated rounded-lg p-4 mb-4">
         <p class="text-sm text-text-secondary font-mono break-words">
-          {{ error.message || 'Unknown error' }}
+          {{ error.message || t('errors.unknownError') }}
         </p>
       </div>
 
@@ -61,13 +64,13 @@ const handleDismiss = () => {
           @click="handleDismiss"
           class="flex-1 px-4 py-2.5 text-sm text-text-secondary hover:text-text-primary bg-bg-elevated rounded-lg border border-border-subtle hover:border-border-strong transition-colors"
         >
-          Dismiss
+          {{ t('errors.dismiss') }}
         </button>
         <button
           @click="handleReset"
           class="flex-1 px-4 py-2.5 bg-forest-green text-white text-sm font-semibold rounded-lg hover:bg-dark-green transition-colors"
         >
-          Reload App
+          {{ t('errors.reloadApp') }}
         </button>
       </div>
     </div>

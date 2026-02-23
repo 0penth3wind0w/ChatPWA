@@ -1,5 +1,6 @@
 import { ref } from 'vue'
 import { logger, sanitizeConfig } from '../utils/logger.js'
+import i18n from '../i18n/index.js'
 
 // Constants for retry logic
 const MAX_RETRIES = 3
@@ -235,8 +236,9 @@ export function useApi() {
    * Handle API errors consistently
    */
   const handleApiError = async (response) => {
-    const errorData = await response.json().catch(() => ({ error: { message: 'Unknown error' } }))
-    const message = errorData.error?.message || errorData.message || `API Error: ${response.status} ${response.statusText}`
+    const { t } = i18n.global
+    const errorData = await response.json().catch(() => ({ error: { message: t('api.errors.unknown') } }))
+    const message = errorData.error?.message || errorData.message || t('api.errors.apiError', { status: response.status, statusText: response.statusText })
     const error = new Error(message)
     error.response = response // Attach response for retry logic
     throw error
@@ -462,14 +464,15 @@ export function useApi() {
    * Test API connection
    */
   const testConnection = async (config) => {
+    const { t } = i18n.global
     try {
       const testMessages = [
-        { role: 'user', content: 'Hello, this is a connection test.' }
+        { role: 'user', content: t('api.errors.connectionTestMessage') }
       ]
       await sendChatMessage(testMessages, config)
       return true
     } catch (err) {
-      throw new Error(`Connection test failed: ${err.message}`)
+      throw new Error(t('api.errors.connectionTestFailed', { message: err.message }))
     }
   }
 
