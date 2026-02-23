@@ -8,9 +8,13 @@ An elegant Progressive Web App for AI chat with custom API endpoints. Connect to
 
 - ✨ **Multi-Provider Support** - Works with OpenAI, Anthropic (Claude), and Google Gemini APIs
 - 🎨 **Elegant Bubble Chat** - Left-aligned AI messages, right-aligned user messages with smooth animations
-- 💬 **Slash Commands** - `/image` command for AI image generation with autocomplete
+- 💬 **Slash Commands** - `/img`, `/search`, `/fetch` commands with autocomplete menu
+- 🔍 **Web Search** - Integrated Brave Search and Tavily AI support
+- 🌐 **Web Fetch** - Automatic URL content fetching via Jina AI Reader
+- 🖼️ **Image Generation** - DALL-E integration with customizable settings
 - 📝 **Markdown Support** - Full markdown rendering with code syntax highlighting
 - 🎯 **Smart Typing Indicator** - Animated dots show when AI is responding
+- 🛑 **Stop Generation** - Cancel ongoing requests with one click
 - 💾 **Auto-Save Everything** - Messages and settings persist automatically (IndexedDB + localStorage)
 - 🌍 **Internationalization** - Support for English, Traditional Chinese, French, and Japanese
 - 🌓 **Dark Mode** - System preference detection with manual toggle
@@ -21,7 +25,7 @@ An elegant Progressive Web App for AI chat with custom API endpoints. Connect to
 
 ## Tech Stack
 
-- **Vue 3.5.25** - Composition API with `<script setup>` syntax
+- **Vue 3.5.28** - Composition API with `<script setup>` syntax
 - **Vite 7.3.1** - Lightning-fast development and optimized builds
 - **Tailwind CSS 4.2.0** - Custom design system via `@tailwindcss/vite` plugin
 - **Vue I18n 11.2.8** - Internationalization support for 4 languages
@@ -30,19 +34,22 @@ An elegant Progressive Web App for AI chat with custom API endpoints. Connect to
 - **Highlight.js 11.11.1** - Code syntax highlighting
 - **DOMPurify 3.3.1** - XSS protection for user-generated content
 - **Vite PWA Plugin 1.2.0** - Service worker with auto-update support
+- **Jina AI Reader** - Web content extraction for URL fetching
+- **Brave Search API** - Web search integration (optional)
+- **Tavily AI API** - Web search integration (optional)
 
 ## Getting Started
 
 ### Prerequisites
 
-- Node.js 18+
+- Node.js 20.19+ or 22.12+
 - npm 9+
 
 ### Installation
 
 ```bash
 # Clone the repository
-git clone <repository-url>
+git clone https://github.com/0penth3wind0w/ChatPWA.git
 cd ChatPWA
 
 # Install dependencies
@@ -103,51 +110,83 @@ npm run preview
 
 ### Slash Commands
 
-Type `/` to see available commands:
-- `/image [prompt]` - Generate an image using DALL-E
-- `/img [prompt]` - Short alias for `/image`
+Type `/` to see available commands with autocomplete:
 
-Example: `/image a sunset over mountains`
+- **`/img [prompt]`** - Generate an image using DALL-E
+  - Example: `/img a sunset over mountains`
+
+- **`/search [query]`** - Search the web for information
+  - Requires Brave Search or Tavily API key (configured in Settings)
+  - Example: `/search latest Vue 3 features`
+
+- **`/fetch [url]`** - Fetch and read web page content
+  - Uses Jina AI Reader to convert web pages to clean markdown
+  - Example: `/fetch https://example.com`
+
+**Auto URL Detection:**
+- Paste any URL in a regular message - the app automatically fetches and includes the content
+- Supports multiple URLs in a single message
 
 ### Image Generation
 
-1. Go to Settings → Advanced Options → Image Generation Settings
+1. Go to Settings → Image Generation
 2. Configure:
    - **Image Model**: e.g., `dall-e-3`, `dall-e-2`
-   - **Image Size**: 256x256, 512x512, 1024x1024, etc.
-   - **Image Quality**: Standard or HD
-3. Use `/image` command in chat
+   - **Image Size**: 1024x1024 (Square), 1792x1024 (Landscape), 1024x1792 (Portrait)
+   - **Image Quality**: Standard or HD (DALL-E 3 only)
+   - **Aspect Ratio**: For Gemini models (1:1, 2:3, 3:2, 3:4, 4:3, etc.)
+   - **Resolution**: 4K option for Gemini 3 Pro
+3. Use `/img` command in chat
 4. Images display directly in chat as base64
+
+### Web Search
+
+1. Go to Settings → Web Search
+2. Choose a provider:
+   - **Brave Search**: Requires Brave Search API key
+   - **Tavily AI**: Requires Tavily API key
+   - **Custom**: Use your own search endpoint
+3. Enter your API key
+4. Use `/search` command in chat
+
+### Stop Generation
+
+- Click the "Stop Generating" button that appears while the AI is responding
+- Cancels the current request immediately
+- Cancelled messages are automatically removed from chat history
 
 ### Settings
 
 Click the ⚙️ icon in the chat header to access:
 
+**AI Settings:**
+- System Prompt: Customize AI behavior and personality
+- Message History Limit: Control how many messages are sent to the API
+
 **API Configuration:**
+- API Format: OpenAI/Anthropic/Gemini
 - Endpoint URL, model name, authentication token
-- Provider selection (OpenAI/Anthropic/Gemini)
 - Custom chat/image paths
-- Message history limit
-
-**Appearance:**
-- **Dark Mode**: Toggle or use system preference
-- **Color Themes**: Choose from 3 color palettes:
-  - **Green (Forest)**: Natural, calming (#3D8A5A)
-  - **Blue (Calm)**: Muted, peaceful (#5B8AA8)
-  - **Slate (Professional)**: Neutral, modern (#6B7F8C)
-
-**Language:**
-- English (en)
-- Traditional Chinese (zh-TW)
-- French (fr)
-- Japanese (ja)
 
 **Image Generation:**
-- Model, size, and quality settings
+- Image Model, Path, Size, Quality
+- Aspect Ratio and Resolution (for Gemini)
 
-**Actions:**
-- **Connection Test**: Verify your API configuration
-- **Clear Chat History**: Delete all messages (cannot be undone)
+**Web Search:**
+- Search Provider: Brave/Tavily/Custom
+- Search API Key configuration
+
+**Appearance:**
+- **Language**: English, Traditional Chinese, French, Japanese
+- **Color Theme**: Green (Forest), Blue (Calm), Slate (Professional)
+- **Dark Mode**: Toggle or use system preference
+
+**About:**
+- Connection Test: Verify your API configuration
+- PWA Update: Check for app updates manually
+- Version Information
+- Source Code: Link to GitHub repository
+- Clear Chat History: Delete all messages (cannot be undone)
 
 All settings auto-save on change.
 
@@ -158,14 +197,17 @@ ChatPWA/
 ├── src/
 │   ├── components/
 │   │   ├── ChatMessage.vue      # Bubble-style message with markdown
-│   │   ├── MessageInput.vue     # Input with slash command menu
+│   │   ├── MessageInput.vue     # Input with slash command autocomplete
 │   │   ├── TypingIndicator.vue  # Animated typing dots
 │   │   ├── EmptyState.vue       # Empty chat placeholder
-│   │   └── SettingsForm.vue     # API configuration form
+│   │   ├── SettingsForm.vue     # Settings configuration form
+│   │   ├── UpdatePrompt.vue     # PWA update notification
+│   │   └── ErrorBoundary.vue    # Error handling component
 │   ├── composables/
 │   │   ├── useApi.js            # Multi-provider API client
 │   │   ├── useChat.js           # Message state + IndexedDB
 │   │   ├── useStorage.js        # Config persistence (singleton)
+│   │   ├── useWebTools.js       # Web search and fetch utilities
 │   │   ├── useDarkMode.js       # Dark mode state management
 │   │   ├── useColorTheme.js     # Color theme management
 │   │   └── useLocale.js         # Language switching
@@ -173,16 +215,19 @@ ChatPWA/
 │   │   ├── index.js             # Vue I18n configuration
 │   │   └── locales/             # Translation files (en, zh-TW, fr, ja)
 │   ├── views/
-│   │   ├── WelcomeView.vue      # Onboarding screen
-│   │   ├── ChatView.vue         # Main chat with fixed header
-│   │   └── SettingsView.vue     # Settings with fixed header
+│   │   ├── WelcomeView.vue      # Onboarding screen with GitHub link
+│   │   ├── ChatView.vue         # Main chat with slash commands
+│   │   └── SettingsView.vue     # Settings with GitHub link
+│   ├── utils/
+│   │   └── logger.js            # Logging utility
 │   ├── style.css                # Tailwind v4 theme + animations
 │   ├── App.vue                  # Root component with routing
 │   └── main.js                  # Application entry point
 ├── public/
 │   ├── manifest.json            # PWA manifest
 │   └── icons/                   # App icons (192x192, 512x512)
-└── CLAUDE.md                    # Development guidance
+├── CLAUDE.md                    # Development guidance
+└── README.md                    # This file
 ```
 
 ## Design System
@@ -262,13 +307,33 @@ POST {endpoint}/models/{model}:generateContent
 Authorization: Bearer {token}
 Body: { contents, systemInstruction, generationConfig }
 
-// Image Generation
+// Image Generation (OpenAI DALL-E)
 POST {endpoint}/images/generations
 Authorization: Bearer {token}
 Body: { prompt, model, size, quality, response_format: 'b64_json' }
+
+// Image Generation (Gemini)
+POST {endpoint}/models/{model}:generateContent
+Authorization: Bearer {token}
+Body: { contents, generationConfig: { responseMimeType: 'image/png' } }
 ```
 
 **Provider Detection:** Automatically determined by `chatPath` pattern.
+
+**Web Tools Integration:**
+```javascript
+// Brave Search
+GET https://api.search.brave.com/res/v1/web/search?q={query}
+X-Subscription-Token: {apiKey}
+
+// Tavily AI
+POST https://api.tavily.com/search
+Body: { api_key, query, search_depth, max_results }
+
+// Jina AI Reader (Web Fetch)
+GET https://r.jina.ai/{url}
+Accept: text/plain
+```
 
 ## Storage
 
@@ -289,7 +354,7 @@ Body: { prompt, model, size, quality, response_format: 'b64_json' }
 - Optimized font loading (Google Fonts cached for 1 week)
 - Immediate activation of new service worker versions
 
-**Note:** This PWA requires an active internet connection. The service worker provides auto-update functionality and font caching, but does not support full offline mode.
+**Note:** This PWA requires an active internet connection to function. The service worker provides auto-update functionality and font caching (network-first strategy), but does not support full offline mode.
 
 ## Deploy to GitHub Pages
 
@@ -398,14 +463,30 @@ jobs:
 - **Blank page:** Verify GitHub Pages is enabled and the correct branch is selected
 - **CSS not loading:** Ensure `base` path includes the repository name with slashes: `'/repo-name/'`
 
-## Contributing
+## Development Guidelines
 
+**Key Conventions:**
 1. Use `<script setup>` syntax for all components
 2. Use Composition API (not Options API)
-3. Follow singleton pattern for shared state
+3. Follow singleton pattern for shared state (module-level refs)
 4. Use auto-save instead of manual save buttons
-5. Follow Tailwind utility-first approach
-6. Match the warm, minimal design system
+5. Add i18n translations for all user-facing text
+6. Follow Tailwind utility-first approach
+7. Match the warm, minimal design system
+8. Use specialized tools over bash commands (Read, Edit, Write instead of cat, sed, echo)
+
+## Recent Updates
+
+**Version 1.0.3:**
+- ✨ Complete i18n support for all UI text across 4 languages
+- 🔍 Added web search integration (Brave Search, Tavily AI)
+- 🌐 Added automatic URL content fetching with Jina AI Reader
+- 🛑 Added stop generation button with proper message cleanup
+- 🔗 Added GitHub repository link to Welcome and Settings pages
+- 🎨 Enhanced slash command autocomplete menu
+- 🐛 Fixed: Cancelled messages now properly removed from chat history
+- 🐛 Fixed: Time formatting now respects user's selected language
+- 🌍 All error messages and API responses now fully localized
 
 ## License
 
@@ -414,4 +495,14 @@ MIT
 ## Acknowledgments
 
 Built with Vue 3, Vite, and Tailwind CSS.
-Co-Authored-By: Claude Sonnet 4.5
+
+Special thanks to:
+- [Jina AI](https://jina.ai/) for the Reader API (web content extraction)
+- [Brave Search](https://brave.com/search/api/) for web search capabilities
+- [Tavily AI](https://tavily.com/) for AI-powered search
+
+## Support
+
+- 🐛 Report issues: [GitHub Issues](https://github.com/0penth3wind0w/ChatPWA/issues)
+- 📖 Documentation: This README
+- 💬 Discussions: [GitHub Discussions](https://github.com/0penth3wind0w/ChatPWA/discussions)
