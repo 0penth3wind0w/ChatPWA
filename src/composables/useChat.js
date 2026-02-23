@@ -138,6 +138,38 @@ export function useChat() {
   }
 
   /**
+   * Remove the last message (for cancellation scenarios)
+   */
+  const removeLastMessage = async () => {
+    if (messages.value.length === 0) return
+
+    const lastMessage = messages.value[messages.value.length - 1]
+    messages.value.pop()
+
+    // Remove from database
+    pendingDbOperations = pendingDbOperations.then(async () => {
+      if (useIndexedDB) {
+        try {
+          await db.messages.delete(lastMessage.id)
+        } catch (error) {
+          logger.error('Failed to delete message from IndexedDB:', error)
+          useIndexedDB = false
+        }
+      }
+
+      // Update localStorage fallback
+      if (!useIndexedDB) {
+        try {
+          localStorage.setItem(FALLBACK_STORAGE_KEY, JSON.stringify(messages.value))
+        } catch (fallbackError) {
+          logger.error('Failed to update localStorage fallback:', fallbackError)
+        }
+      }
+    })
+    return pendingDbOperations
+  }
+
+  /**
    * Clear all messages
    */
   const clearMessages = async () => {
@@ -199,6 +231,7 @@ export function useChat() {
     addMessage,
     addUserMessage,
     addAssistantMessage,
+    removeLastMessage,
     clearMessages,
     getConversationHistory,
     scrollToBottom

@@ -14,7 +14,7 @@ import { logger, sanitizeConfig } from '../utils/logger.js'
 const emit = defineEmits(['navigate'])
 const { t } = useI18n()
 
-const { messages, hasMessages, addUserMessage, addAssistantMessage, scrollToBottom } = useChat()
+const { messages, hasMessages, addUserMessage, addAssistantMessage, removeLastMessage, scrollToBottom } = useChat()
 const { config } = useStorage()
 const { sendChatMessage, generateImage, cancelRequest } = useApi()
 const { searchWeb, fetchWebContent } = useWebTools()
@@ -97,6 +97,9 @@ const handleSendMessage = async (content) => {
           const errorMsg = t('chat.errors.searchFailed', { message: err.message })
           addAssistantMessage(errorMsg, config.value.model)
           showError(errorMsg)
+        } else {
+          // Remove user message on cancellation
+          await removeLastMessage()
         }
       }
     } else if (fetchCommandMatch) {
@@ -117,6 +120,9 @@ const handleSendMessage = async (content) => {
           const errorMsg = t('chat.errors.fetchFailed', { message: err.message })
           addAssistantMessage(errorMsg, config.value.model)
           showError(errorMsg)
+        } else {
+          // Remove user message on cancellation
+          await removeLastMessage()
         }
       }
     } else if (imageCommandMatch) {
@@ -145,6 +151,9 @@ const handleSendMessage = async (content) => {
           const errorMsg = t('chat.errors.imageFailed', { message: err.message })
           addAssistantMessage(errorMsg, config.value.imageModel)
           showError(errorMsg)
+        } else {
+          // Remove user message on cancellation
+          await removeLastMessage()
         }
       }
     } else {
@@ -235,6 +244,8 @@ const handleSendMessage = async (content) => {
       showError(errorMsg)
     } else {
       logger.log('[handleSendMessage] Request was aborted by user')
+      // Remove user message on cancellation
+      await removeLastMessage()
     }
   }
 }
