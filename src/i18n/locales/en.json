@@ -15,8 +15,8 @@
         "description": "Your API keys and conversations stay on your device"
       },
       "offline": {
-        "title": "Works Offline",
-        "description": "Install as a PWA and access your chat history anytime"
+        "title": "Install as App",
+        "description": "Add to your home screen for a native app experience on any device"
       }
     },
     "getStarted": "Get Started"

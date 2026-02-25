@@ -15,8 +15,8 @@
         "description": "您的API金鑰和對話記錄都保存在您的裝置上"
       },
       "offline": {
-        "title": "離線使用",
-        "description": "安裝為PWA，隨時存取您的聊天記錄"
+        "title": "安裝為應用程式",
+        "description": "加入主畫面，在任何裝置上享有原生應用程式體驗"
       }
     },
     "getStarted": "開始使用"

@@ -15,8 +15,8 @@
         "description": "Vos clés API et conversations restent sur votre appareil"
       },
       "offline": {
-        "title": "Fonctionne hors ligne",
-        "description": "Installez en tant que PWA et accédez à votre historique à tout moment"
+        "title": "Installer comme app",
+        "description": "Ajoutez à votre écran d'accueil pour une expérience native sur n'importe quel appareil"
       }
     },
     "getStarted": "Commencer"
