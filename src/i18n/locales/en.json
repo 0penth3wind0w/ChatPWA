@@ -71,6 +71,8 @@
     "assistant": "AI Assistant",
     "you": "You",
     "model": "Model",
+    "copy": "Copy",
+    "copied": "Copied!",
     "image": {
       "generatedCaption": "Generated image: {prompt}",
       "noImagesReturned": "Failed to generate image. No images returned."

@@ -1,5 +1,5 @@
 <script setup>
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { marked } from 'marked'
 import hljs from 'highlight.js/lib/core'
@@ -57,6 +57,26 @@ const props = defineProps({
 const isUser = computed(() => props.message.role === 'user')
 const isAssistant = computed(() => props.message.role === 'assistant')
 
+const copied = ref(false)
+const contentEl = ref(null)
+
+const copyToClipboard = async () => {
+  try {
+    const html = contentEl.value?.innerHTML ?? ''
+    const text = contentEl.value?.innerText ?? props.message.content
+    await navigator.clipboard.write([
+      new ClipboardItem({
+        'text/html': new Blob([html], { type: 'text/html' }),
+        'text/plain': new Blob([text], { type: 'text/plain' }),
+      })
+    ])
+    copied.value = true
+    setTimeout(() => { copied.value = false }, 2000)
+  } catch (err) {
+    logger.error('Copy failed:', err)
+  }
+}
+
 const formatTime = (timestamp) => {
   if (!timestamp) return ''
   const date = new Date(timestamp)
@@ -109,13 +129,28 @@ const renderedContent = computed(() => {
       </div>
       <div class="bg-bg-surface rounded-2xl rounded-tl-sm shadow-soft p-5 border border-border-subtle">
         <div
+          ref="contentEl"
           class="markdown-content text-base text-text-primary"
           v-html="renderedContent"
         />
-        <div v-if="message.model" class="mt-4 pt-3 border-t border-border-subtle">
-          <p class="text-xs text-text-tertiary">
+        <div class="mt-4 pt-3 border-t border-border-subtle flex items-center justify-between">
+          <p v-if="message.model" class="text-xs text-text-tertiary">
             <span class="font-medium text-text-secondary">{{ t('chat.model') }}:</span> {{ message.model }}
           </p>
+          <p v-else class="text-xs text-text-tertiary" />
+          <button
+            @click="copyToClipboard"
+            class="flex items-center gap-1 text-xs text-text-tertiary hover:text-forest-green transition-colors duration-150 ml-auto"
+            :aria-label="t('chat.copy')"
+          >
+            <svg v-if="!copied" class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+            </svg>
+            <svg v-else class="w-3.5 h-3.5 text-forest-green" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+            </svg>
+            <span>{{ copied ? t('chat.copied') : t('chat.copy') }}</span>
+          </button>
         </div>
       </div>
     </div>

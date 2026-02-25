@@ -74,6 +74,8 @@
     "assistant": "Assistant IA",
     "you": "Vous",
     "model": "Modèle",
+    "copy": "Copier",
+    "copied": "Copié !",
     "errors": {
       "searchFailed": "Erreur de recherche : {message}",
       "fetchFailed": "Erreur de récupération : {message}",

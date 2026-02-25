@@ -71,6 +71,8 @@
     "assistant": "AI 助手",
     "you": "您",
     "model": "模型",
+    "copy": "複製",
+    "copied": "已複製！",
     "image": {
       "generatedCaption": "生成的圖片：{prompt}",
       "noImagesReturned": "圖片生成失敗。未返回圖片。"

@@ -74,6 +74,8 @@
     "assistant": "AIアシスタント",
     "you": "あなた",
     "model": "モデル",
+    "copy": "コピー",
+    "copied": "コピーしました！",
     "errors": {
       "searchFailed": "検索エラー：{message}",
       "fetchFailed": "取得エラー：{message}",
