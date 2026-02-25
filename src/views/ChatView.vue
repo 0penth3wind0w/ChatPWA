@@ -1,5 +1,5 @@
 <script setup>
-import { ref, watch, onMounted, onUnmounted } from 'vue'
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import ChatMessage from '../components/ChatMessage.vue'
 import MessageInput from '../components/MessageInput.vue'
@@ -14,6 +14,9 @@ import { logger, sanitizeConfig } from '../utils/logger.js'
 const emit = defineEmits(['navigate'])
 const { t } = useI18n()
 
+// Compiled once at setup scope, not per-call
+const URL_REGEX = /(https?:\/\/[^\s]+)/gi
+
 const { messages, hasMessages, addUserMessage, addAssistantMessage, removeLastMessage, scrollToBottom } = useChat()
 const { config } = useStorage()
 const { sendChatMessage, generateImage, cancelRequest } = useApi()
@@ -22,6 +25,7 @@ const messagesContainer = ref(null)
 const isTyping = ref(false)
 const fetchingStatus = ref('')
 const errorMessage = ref('')
+let errorTimer = null
 
 const handleCancelRequest = () => {
   cancelRequest()
@@ -30,9 +34,9 @@ const handleCancelRequest = () => {
 }
 
 const showError = (message) => {
+  clearTimeout(errorTimer)
   errorMessage.value = message
-  // Clear error after 5 seconds
-  setTimeout(() => {
+  errorTimer = setTimeout(() => {
     errorMessage.value = ''
   }, 5000)
 }
@@ -57,6 +61,7 @@ onMounted(() => {
 onUnmounted(() => {
   window.removeEventListener('resize', handleResize)
   window.removeEventListener('orientationchange', handleResize)
+  clearTimeout(errorTimer)
 })
 
 
@@ -159,8 +164,8 @@ const handleSendMessage = async (content) => {
     } else {
       // Handle regular chat message
       // Detect URLs in the message and fetch their content
-      const urlRegex = /(https?:\/\/[^\s]+)/gi
-      const urls = content.match(urlRegex)
+      URL_REGEX.lastIndex = 0
+      const urls = content.match(URL_REGEX)
 
       let enhancedContent = content
 
@@ -250,11 +255,13 @@ const handleSendMessage = async (content) => {
   }
 }
 
-// Watch for new messages and typing indicator changes, auto-scroll
-// Consolidate watchers and use flush: 'post' to batch DOM updates
-watch([messages, isTyping], () => {
+// Track message count to avoid deep-watching large message objects
+const messageCount = computed(() => messages.value.length)
+
+// Auto-scroll when a new message is added or typing indicator changes
+watch([messageCount, isTyping], () => {
   scrollToBottom(messagesContainer)
-}, { deep: true, flush: 'post' })
+}, { flush: 'post' })
 </script>
 
 <template>

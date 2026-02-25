@@ -20,27 +20,22 @@ const characterCount = computed(() => message.value.length)
 const showCharacterWarning = computed(() => characterCount.value > MAX_MESSAGE_LENGTH * 0.9)
 const isOverLimit = computed(() => characterCount.value > MAX_MESSAGE_LENGTH)
 
-// Available slash commands
-const availableCommands = computed(() => [
-  {
-    command: '/img',
-    description: t('chat.commands.image.description'),
-    example: t('chat.commands.image.example'),
-    icon: 'image'
-  },
-  {
-    command: '/search',
-    description: t('chat.commands.search.description'),
-    example: t('chat.commands.search.example'),
-    icon: 'search'
-  },
-  {
-    command: '/fetch',
-    description: t('chat.commands.fetch.description'),
-    example: t('chat.commands.fetch.example'),
-    icon: 'globe'
-  }
-])
+// Static command metadata (command + icon never change)
+const COMMAND_DEFS = [
+  { command: '/img',    icon: 'image',  descKey: 'chat.commands.image.description',  exKey: 'chat.commands.image.example' },
+  { command: '/search', icon: 'search', descKey: 'chat.commands.search.description', exKey: 'chat.commands.search.example' },
+  { command: '/fetch',  icon: 'globe',  descKey: 'chat.commands.fetch.description',  exKey: 'chat.commands.fetch.example' }
+]
+
+// Only re-runs when locale changes, not on every keystroke
+const availableCommands = computed(() =>
+  COMMAND_DEFS.map(def => ({
+    command: def.command,
+    icon: def.icon,
+    description: t(def.descKey),
+    example: t(def.exKey)
+  }))
+)
 
 // Filter commands based on user input
 const filteredCommands = computed(() => {

@@ -1,4 +1,4 @@
-import { ref, computed, nextTick } from 'vue'
+import { shallowRef, computed, nextTick } from 'vue'
 import Dexie from 'dexie'
 import { logger } from '../utils/logger.js'
 
@@ -11,11 +11,18 @@ db.version(1).stores({
 // Fallback storage key for localStorage
 const FALLBACK_STORAGE_KEY = 'chatpwa_messages_fallback'
 
+// Max messages loaded into memory at startup to avoid loading unbounded history
+const MAX_LOADED_MESSAGES = 200
+
 // Track if IndexedDB is available
 let useIndexedDB = true
 
 // Shared state (singleton)
-const messages = ref([])
+// shallowRef: Vue only tracks array reference changes, not deep message property mutations
+const messages = shallowRef([])
+
+// Module-level singleton computed — created once, shared across all useChat() calls
+const hasMessages = computed(() => messages.value.length > 0)
 
 // Track pending database operations to avoid race conditions
 let pendingDbOperations = Promise.resolve()
@@ -23,7 +30,11 @@ let pendingDbOperations = Promise.resolve()
 // Load messages from IndexedDB or localStorage fallback
 const initMessages = async () => {
   try {
-    const storedMessages = await db.messages.orderBy('timestamp').toArray()
+    const total = await db.messages.count()
+    const storedMessages = await db.messages
+      .orderBy('timestamp')
+      .offset(Math.max(0, total - MAX_LOADED_MESSAGES))
+      .toArray()
     messages.value = storedMessages
   } catch (error) {
     logger.error('Failed to load messages from IndexedDB, falling back to localStorage:', error)
@@ -84,13 +95,13 @@ export function useChat() {
    */
   const addMessage = (role, content, model = null) => {
     const message = {
-      id: Date.now().toString() + Math.random().toString(36).substr(2, 9), // More unique ID
+      id: Date.now().toString() + Math.random().toString(36).substring(2, 11), // More unique ID
       role, // 'user' or 'assistant'
       content,
       timestamp: Date.now(),
       model // Model name for assistant messages
     }
-    messages.value.push(message)
+    messages.value = [...messages.value, message]
     // Save to IndexedDB incrementally
     saveMessageToDb(message)
     return message
@@ -117,7 +128,7 @@ export function useChat() {
     if (messages.value.length === 0) return
 
     const lastMessage = messages.value[messages.value.length - 1]
-    messages.value.pop()
+    messages.value = messages.value.slice(0, -1)
 
     // Remove from database
     pendingDbOperations = pendingDbOperations.then(async () => {
@@ -148,27 +159,26 @@ export function useChat() {
   const clearMessages = async () => {
     messages.value = []
 
-    if (useIndexedDB) {
-      try {
-        await db.messages.clear()
-      } catch (error) {
-        logger.error('Failed to clear messages from IndexedDB:', error)
-        useIndexedDB = false
+    // Queue clear after any pending saves/deletes to avoid race conditions
+    pendingDbOperations = pendingDbOperations.then(async () => {
+      if (useIndexedDB) {
+        try {
+          await db.messages.clear()
+        } catch (error) {
+          logger.error('Failed to clear messages from IndexedDB:', error)
+          useIndexedDB = false
+        }
       }
-    }
 
-    // Clear localStorage fallback as well
-    try {
-      localStorage.removeItem(FALLBACK_STORAGE_KEY)
-    } catch (error) {
-      logger.error('Failed to clear localStorage fallback:', error)
-    }
+      // Clear localStorage fallback as well
+      try {
+        localStorage.removeItem(FALLBACK_STORAGE_KEY)
+      } catch (error) {
+        logger.error('Failed to clear localStorage fallback:', error)
+      }
+    })
+    return pendingDbOperations
   }
-
-  /**
-   * Check if there are any messages
-   */
-  const hasMessages = computed(() => messages.value.length > 0)
 
   /**
    * Scroll to bottom of messages
@@ -176,7 +186,6 @@ export function useChat() {
    */
   const scrollToBottom = async (containerRef) => {
     await nextTick()
-    // Use requestAnimationFrame for smoother scrolling
     requestAnimationFrame(() => {
       if (containerRef && containerRef.value) {
         containerRef.value.scrollTo({

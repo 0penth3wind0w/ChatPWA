@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, watch, nextTick, onUnmounted } from 'vue'
+import { ref, computed, watch, nextTick, onMounted, onUnmounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useStorage } from '../composables/useStorage.js'
 
@@ -94,16 +94,9 @@ const debouncedAutoSave = () => {
 
 // Update chat path when provider changes
 watch(provider, (newProvider) => {
-  if (newProvider === 'openai') {
-    chatPath.value = '/chat/completions'
-    imagePath.value = '/images/generations'
-  } else if (newProvider === 'anthropic') {
-    chatPath.value = '/messages'
-    imagePath.value = '/images/generations'
-  } else if (newProvider === 'gemini') {
-    chatPath.value = '/models/{model}:generateContent'
-    imagePath.value = '/models/{model}:generateContent'
-  }
+  const paths = getDefaultPaths(newProvider)
+  chatPath.value = paths.chatPath
+  imagePath.value = paths.imagePath
 })
 
 // Clear search API key when search provider changes
@@ -213,18 +206,16 @@ const resizeTextarea = () => {
   })
 }
 
-// Watch systemPrompt for changes and resize
+// Resize textarea when systemPrompt content changes
 watch(systemPrompt, async () => {
   await nextTick()
   resizeTextarea()
 })
 
-// Initial resize on mount
-watch(systemPromptTextarea, async (newVal) => {
-  if (newVal) {
-    await nextTick()
-    resizeTextarea()
-  }
+// Initial resize when textarea mounts
+onMounted(async () => {
+  await nextTick()
+  resizeTextarea()
 })
 
 // Cleanup timeout and animation frame on unmount

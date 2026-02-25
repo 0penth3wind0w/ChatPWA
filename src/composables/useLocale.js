@@ -1,6 +1,14 @@
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 
+// Static — never changes, no need to recreate per call
+const localeOptions = [
+  { value: 'en', nativeName: 'English' },
+  { value: 'zh-TW', nativeName: '繁體中文' },
+  { value: 'fr', nativeName: 'Français' },
+  { value: 'ja', nativeName: '日本語' }
+]
+
 export function useLocale() {
   const { locale } = useI18n()
 
@@ -11,13 +19,6 @@ export function useLocale() {
       localStorage.setItem('chatpwa_locale', newLocale)
     }
   })
-
-  const localeOptions = [
-    { value: 'en', nativeName: 'English' },
-    { value: 'zh-TW', nativeName: '繁體中文' },
-    { value: 'fr', nativeName: 'Français' },
-    { value: 'ja', nativeName: '日本語' }
-  ]
 
   return {
     currentLocale,

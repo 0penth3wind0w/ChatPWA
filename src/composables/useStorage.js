@@ -1,4 +1,4 @@
-import { ref } from 'vue'
+import { shallowRef } from 'vue'
 import { logger } from '../utils/logger.js'
 
 const STORAGE_KEYS = {
@@ -29,7 +29,8 @@ const DEFAULT_CONFIG = {
 }
 
 // Shared config state (singleton)
-const config = ref({ ...DEFAULT_CONFIG })
+// shallowRef: config is a flat object, no nested reactivity needed
+const config = shallowRef({ ...DEFAULT_CONFIG })
 
 // Load config from localStorage on module initialization
 const initConfig = () => {

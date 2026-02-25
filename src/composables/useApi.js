@@ -6,6 +6,22 @@ const MAX_RETRIES = 3
 const RETRY_DELAY_MS = 1000
 const RETRY_BACKOFF_MULTIPLIER = 2
 
+/**
+ * Build request headers for the given provider and token
+ */
+const buildHeaders = (provider, token, path = '') => {
+  const headers = { 'Content-Type': 'application/json' }
+  if (provider === 'gemini' && !path.includes('/chat/completions') && (path.includes('generateContent') || path.includes('/models/'))) {
+    headers['x-goog-api-key'] = token
+  } else {
+    headers['Authorization'] = `Bearer ${token}`
+  }
+  if (provider === 'anthropic') {
+    headers['anthropic-version'] = '2023-06-01'
+  }
+  return headers
+}
+
 export function useApi() {
   // Abort controller for canceling requests
   let currentAbortController = null
@@ -268,23 +284,7 @@ export function useApi() {
         requestBody = buildOpenAIRequest(messagesWithSystem, config)
       }
 
-      // Build headers based on provider and endpoint
-      const headers = {
-        'Content-Type': 'application/json'
-      }
-
-      // Use appropriate authentication header
-      if (provider === 'gemini' && !config.chatPath?.includes('/chat/completions')) {
-        // Native Gemini API uses x-goog-api-key
-        headers['x-goog-api-key'] = token
-      } else {
-        // OpenAI, Anthropic, and LiteLLM proxy use Authorization Bearer
-        headers['Authorization'] = `Bearer ${token}`
-      }
-
-      if (provider === 'anthropic') {
-        headers['anthropic-version'] = '2023-06-01'
-      }
+      const headers = buildHeaders(provider, token, config.chatPath || '')
 
       logger.log('[sendChatMessage] Making request to:', endpoint)
       logger.log('[sendChatMessage] Request body:', JSON.stringify(requestBody, null, 2))
@@ -332,19 +332,10 @@ export function useApi() {
 
       const requestBody = buildImageRequest(prompt, config, provider)
 
-      // Build headers based on provider
-      const headers = {
-        'Content-Type': 'application/json'
-      }
+      // Validate and clean token
+      const token = (config.token || '').trim()
 
-      // Use appropriate authentication header
-      if (provider === 'gemini' && imagePath.includes('generateContent')) {
-        // Native Gemini API uses x-goog-api-key
-        headers['x-goog-api-key'] = config.token
-      } else {
-        // OpenAI and LiteLLM proxy use Authorization Bearer
-        headers['Authorization'] = `Bearer ${config.token}`
-      }
+      const headers = buildHeaders(provider, token, imagePath)
 
       const response = await fetch(endpoint, {
         method: 'POST',

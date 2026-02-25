@@ -1,48 +1,11 @@
 <script setup>
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { marked } from 'marked'
-import hljs from 'highlight.js/lib/core'
-import javascript from 'highlight.js/lib/languages/javascript'
-import typescript from 'highlight.js/lib/languages/typescript'
-import python from 'highlight.js/lib/languages/python'
-import json from 'highlight.js/lib/languages/json'
-import bash from 'highlight.js/lib/languages/bash'
-import markdown from 'highlight.js/lib/languages/markdown'
-import xml from 'highlight.js/lib/languages/xml'
-import css from 'highlight.js/lib/languages/css'
+import { marked } from '../utils/markdown.js'
 import DOMPurify from 'dompurify'
 import { logger } from '../utils/logger.js'
 
 const { t, locale } = useI18n()
-
-// Register only commonly used languages
-hljs.registerLanguage('javascript', javascript)
-hljs.registerLanguage('typescript', typescript)
-hljs.registerLanguage('python', python)
-hljs.registerLanguage('json', json)
-hljs.registerLanguage('bash', bash)
-hljs.registerLanguage('shell', bash)
-hljs.registerLanguage('markdown', markdown)
-hljs.registerLanguage('xml', xml)
-hljs.registerLanguage('html', xml)
-hljs.registerLanguage('css', css)
-
-// Configure marked to use highlight.js for code blocks
-marked.setOptions({
-  highlight: function(code, lang) {
-    if (lang && hljs.getLanguage(lang)) {
-      try {
-        return hljs.highlight(code, { language: lang }).value
-      } catch (err) {
-        logger.error('Highlight error:', err)
-      }
-    }
-    return hljs.highlightAuto(code).value
-  },
-  breaks: true,
-  gfm: true
-})
 
 const props = defineProps({
   message: {
@@ -55,7 +18,7 @@ const props = defineProps({
 })
 
 const isUser = computed(() => props.message.role === 'user')
-const isAssistant = computed(() => props.message.role === 'assistant')
+const isAssistant = computed(() => !isUser.value)
 
 const copied = ref(false)
 const contentEl = ref(null)
@@ -77,11 +40,14 @@ const copyToClipboard = async () => {
   }
 }
 
-const formatTime = (timestamp) => {
-  if (!timestamp) return ''
-  const date = new Date(timestamp)
-  return date.toLocaleTimeString(locale.value, { hour: '2-digit', minute: '2-digit' })
-}
+const formattedTime = computed(() => {
+  if (!props.message.timestamp) return ''
+  return new Date(props.message.timestamp).toLocaleTimeString(locale.value, { hour: '2-digit', minute: '2-digit' })
+})
+
+const formattedDatetime = computed(() =>
+  props.message.timestamp ? new Date(props.message.timestamp).toISOString() : ''
+)
 
 // Render and sanitize markdown for assistant messages
 const renderedContent = computed(() => {
@@ -110,7 +76,7 @@ const renderedContent = computed(() => {
       v-if="isAssistant"
       class="max-w-[88%] flex flex-col gap-1.5 animate-fade-in"
       role="article"
-      :aria-label="`AI Assistant message${message.timestamp ? ' from ' + formatTime(message.timestamp) : ''}`"
+      :aria-label="`AI Assistant message${formattedTime ? ' from ' + formattedTime : ''}`"
     >
       <div class="flex items-center gap-2 px-1">
         <div class="w-7 h-7 bg-light-green rounded-full flex items-center justify-center flex-shrink-0" aria-hidden="true" v-once>
@@ -121,9 +87,9 @@ const renderedContent = computed(() => {
         <p class="text-xs font-semibold text-forest-green" v-once>
           {{ t('chat.assistant') }}
         </p>
-        <p v-if="message.timestamp" class="text-xs text-text-tertiary">
-          <time :datetime="new Date(message.timestamp).toISOString()">
-            {{ formatTime(message.timestamp) }}
+        <p v-if="formattedTime" class="text-xs text-text-tertiary">
+          <time :datetime="formattedDatetime">
+            {{ formattedTime }}
           </time>
         </p>
       </div>
@@ -160,12 +126,12 @@ const renderedContent = computed(() => {
       v-else-if="isUser"
       class="max-w-[88%] flex flex-col gap-1.5 animate-fade-in"
       role="article"
-      :aria-label="`Your message${message.timestamp ? ' from ' + formatTime(message.timestamp) : ''}`"
+      :aria-label="`Your message${formattedTime ? ' from ' + formattedTime : ''}`"
     >
       <div class="flex items-center gap-2 px-1 justify-end">
-        <p v-if="message.timestamp" class="text-xs text-text-tertiary">
-          <time :datetime="new Date(message.timestamp).toISOString()">
-            {{ formatTime(message.timestamp) }}
+        <p v-if="formattedTime" class="text-xs text-text-tertiary">
+          <time :datetime="formattedDatetime">
+            {{ formattedTime }}
           </time>
         </p>
         <p class="text-xs font-semibold text-forest-green" v-once>

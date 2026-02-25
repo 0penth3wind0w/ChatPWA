@@ -124,7 +124,6 @@ body {
 
 #app {
   height: 100vh;
-  overflow: hidden;
 }
 
 /* Button component */
@@ -295,10 +294,6 @@ select.input-field {
   background-color: #161b22;
 }
 
-:root.dark .markdown-content pre code {
-  background-color: transparent;
-}
-
 /* Screen reader only content */
 .sr-only {
   position: absolute;
@@ -318,12 +313,6 @@ select.input-field {
 }
 
 *:focus-visible {
-  outline: 3px solid var(--color-forest-green);
-  outline-offset: 2px;
-}
-
-button:focus-visible,
-.btn-primary:focus-visible {
   outline: 3px solid var(--color-forest-green);
   outline-offset: 2px;
 }

@@ -1,8 +1,8 @@
+import { useI18n } from 'vue-i18n'
 import { logger } from '../utils/logger.js'
-import i18n from '../i18n/index.js'
 
 export function useWebTools() {
-  const { t } = i18n.global
+  const { t } = useI18n()
   /**
    * Search the web using configured search provider
    */
