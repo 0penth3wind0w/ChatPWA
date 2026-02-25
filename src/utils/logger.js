@@ -49,9 +49,4 @@ export const logger = {
     }
   },
 
-  info: (...args) => {
-    if (isDevelopment) {
-      console.info(...args)
-    }
-  }
 }

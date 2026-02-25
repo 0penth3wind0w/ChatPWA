@@ -1,4 +1,3 @@
-import { ref } from 'vue'
 import { logger, sanitizeConfig } from '../utils/logger.js'
 import i18n from '../i18n/index.js'
 
@@ -11,49 +10,13 @@ export function useApi() {
   // Abort controller for canceling requests
   let currentAbortController = null
   /**
-   * Extract common optional parameters from config
-   */
-  const buildCommonParams = (config, keyMap = {}) => {
-    const params = {}
-
-    if (config.temperature !== undefined && config.temperature !== null) {
-      params[keyMap.temperature || 'temperature'] = config.temperature
-    }
-
-    if (config.maxTokens) {
-      params[keyMap.maxTokens || 'maxTokens'] = config.maxTokens
-    }
-
-    if (config.topP) {
-      params[keyMap.topP || 'topP'] = config.topP
-    }
-
-    return params
-  }
-
-  /**
    * Build OpenAI-compatible request body
    */
   const buildOpenAIRequest = (messages, config) => {
-    const request = {
+    return {
       model: config.model,
-      messages: messages,
-      ...buildCommonParams(config, {
-        temperature: 'temperature',
-        maxTokens: 'max_tokens',
-        topP: 'top_p'
-      })
+      messages: messages
     }
-
-    if (config.presencePenalty) {
-      request.presence_penalty = config.presencePenalty
-    }
-
-    if (config.frequencyPenalty) {
-      request.frequency_penalty = config.frequencyPenalty
-    }
-
-    return request
   }
 
   /**
@@ -66,17 +29,12 @@ export function useApi() {
 
     const request = {
       model: config.model,
-      max_tokens: config.maxTokens || 2000,
-      messages: conversationMessages,
-      temperature: config.temperature || 1.0
+      max_tokens: 2000,
+      messages: conversationMessages
     }
 
     if (systemMessage) {
       request.system = systemMessage.content
-    }
-
-    if (config.topP) {
-      request.top_p = config.topP
     }
 
     return request
@@ -85,7 +43,7 @@ export function useApi() {
   /**
    * Build Gemini-compatible request body
    */
-  const buildGeminiRequest = (messages, config) => {
+  const buildGeminiRequest = (messages) => {
     // Convert messages to Gemini's contents format
     // Filter out system messages as Gemini handles them differently
     const contents = messages
@@ -107,15 +65,6 @@ export function useApi() {
       request.systemInstruction = {
         parts: [{ text: systemMessage.content }]
       }
-    }
-
-    // Add generation config with optional parameters
-    const generationConfig = buildCommonParams(config, {
-      maxTokens: 'maxOutputTokens'
-    })
-
-    if (Object.keys(generationConfig).length > 0) {
-      request.generationConfig = generationConfig
     }
 
     return request
@@ -185,7 +134,7 @@ export function useApi() {
   /**
    * Check if error is retryable (network errors, 5xx errors, rate limits)
    */
-  const isRetryableError = (error, response) => {
+  const isRetryableError = (response) => {
     // Network errors (no response)
     if (!response) return true
 
@@ -220,7 +169,7 @@ export function useApi() {
         if (attempt === retries) break
 
         // Check if error is retryable
-        if (!isRetryableError(error, error.response)) break
+        if (!isRetryableError(error.response)) break
 
         // Wait with exponential backoff before retrying
         const delay = RETRY_DELAY_MS * Math.pow(RETRY_BACKOFF_MULTIPLIER, attempt)
@@ -278,7 +227,6 @@ export function useApi() {
     const signal = currentAbortController.signal
 
     return await withRetry(async () => {
-      try {
       // Use provider from config
       const provider = config.provider || 'openai'
       logger.log('[sendChatMessage] Using provider:', provider)
@@ -315,7 +263,7 @@ export function useApi() {
       } else if (provider === 'anthropic') {
         requestBody = buildAnthropicRequest(messagesWithSystem, config)
       } else if (provider === 'gemini') {
-        requestBody = buildGeminiRequest(messagesWithSystem, config)
+        requestBody = buildGeminiRequest(messagesWithSystem)
       } else {
         requestBody = buildOpenAIRequest(messagesWithSystem, config)
       }
@@ -355,9 +303,6 @@ export function useApi() {
       }
 
       return await handleStandardResponse(response, provider)
-      } catch (err) {
-        throw err
-      }
     })
   }
 
@@ -373,7 +318,6 @@ export function useApi() {
     const signal = currentAbortController.signal
 
     return await withRetry(async () => {
-      try {
       logger.log('[Image API Request]', { prompt, config: sanitizeConfig(config) })
 
       // Build endpoint - replace {model} placeholder if present
@@ -453,9 +397,6 @@ export function useApi() {
 
         logger.log('[Image API Response]', JSON.stringify(data, null, 2))
         return result
-      }
-      } catch (err) {
-        throw err
       }
     })
   }

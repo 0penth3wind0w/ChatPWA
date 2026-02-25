@@ -27,7 +27,7 @@ const setViewportHeight = () => {
 onMounted(() => {
   // Config is already loaded on module init
   // If already configured, go directly to chat
-  // DEV: Commented out to show welcome page
+  // Commented out to show welcome page
   if (isConfigured()) {
     currentView.value = 'chat'
   }

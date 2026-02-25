@@ -1,18 +1,9 @@
 {
   "common": {
-    "cancel": "取消",
-    "save": "儲存",
-    "delete": "刪除",
-    "close": "關閉",
-    "back": "返回",
-    "settings": "設定",
-    "loading": "載入中...",
-    "error": "錯誤",
-    "success": "成功"
+    "settings": "設定"
   },
   "welcome": {
     "title": "ChatPWA",
-    "subtitle": "您的個人AI助手",
     "description": "連接任何AI供應商，與強大的語言模型對話。配置自己的API端點，完全掌控和保護隱私。",
     "features": {
       "custom": {
@@ -226,8 +217,7 @@
       "label": "搜尋供應商",
       "options": {
         "brave": "Brave 搜尋",
-        "tavily": "Tavily AI",
-        "custom": "自訂"
+        "tavily": "Tavily AI"
       }
     },
     "searchApiKey": {
@@ -290,7 +280,6 @@
       "searchProviderNotConfigured": "未配置搜尋供應商",
       "braveSearchError": "Brave 搜尋 API 錯誤：{status}",
       "tavilyError": "Tavily API 錯誤：{status}",
-      "customSearchError": "自訂搜尋錯誤：{status}",
       "fetchWebContentFailed": "讀取網頁內容失敗：{status}"
     },
     "webContent": {

@@ -29,8 +29,7 @@ export function useWebTools() {
         results = (data.web?.results || []).slice(0, 5).map(result => ({
           title: result.title,
           url: result.url,
-          description: result.description,
-          snippet: result.description
+          description: result.description
         }))
 
       } else if (config.searchProvider === 'tavily' && config.searchApiKey) {
@@ -57,20 +56,8 @@ export function useWebTools() {
         results = (data.results || []).map(result => ({
           title: result.title,
           url: result.url,
-          description: result.content,
-          snippet: result.content
+          description: result.content
         }))
-
-      } else if (config.searchProvider === 'custom' && config.searchEndpoint) {
-        // Custom search endpoint
-        const response = await fetch(`${config.searchEndpoint}?q=${encodeURIComponent(query)}`)
-
-        if (!response.ok) {
-          throw new Error(t('api.errors.customSearchError', { status: response.status }))
-        }
-
-        const data = await response.json()
-        results = data.results || []
 
       } else {
         throw new Error(t('api.errors.searchProviderNotConfigured'))
@@ -129,7 +116,7 @@ export function useWebTools() {
     results.forEach((result, index) => {
       markdown += `## ${index + 1}. ${result.title}\n`
       markdown += `**URL:** ${result.url}\n\n`
-      markdown += `${result.description || result.snippet}\n\n`
+      markdown += `${result.description}\n\n`
       markdown += '---\n\n'
     })
 

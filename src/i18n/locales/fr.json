@@ -1,18 +1,9 @@
 {
   "common": {
-    "cancel": "Annuler",
-    "save": "Enregistrer",
-    "delete": "Supprimer",
-    "close": "Fermer",
-    "back": "Retour",
-    "settings": "Paramètres",
-    "loading": "Chargement...",
-    "error": "Erreur",
-    "success": "Succès"
+    "settings": "Paramètres"
   },
   "welcome": {
     "title": "ChatPWA",
-    "subtitle": "Votre assistant IA personnel",
     "description": "Connectez-vous à n'importe quel fournisseur d'IA et discutez avec de puissants modèles de langage. Configurez vos propres points de terminaison API pour un contrôle et une confidentialité complets.",
     "features": {
       "custom": {
@@ -37,9 +28,7 @@
       "description": "Tapez un message ci-dessous pour commencer à discuter avec votre assistant IA",
       "tips": {
         "title": "Conseils",
-        "slashCommands": "Utilisez / pour les commandes (/img, /search, /fetch)",
-        "urls": "Collez des URL pour récupérer automatiquement leur contenu",
-        "shiftEnter": "Appuyez sur Maj+Entrée pour de nouvelles lignes"
+        "slashCommands": "Utilisez / pour les commandes (/img, /search, /fetch)"
       }
     },
     "input": {
@@ -53,23 +42,19 @@
       "select": "sélectionner",
       "close": "fermer",
       "image": {
-        "command": "/img",
         "description": "Générer une image à partir d'une description textuelle",
         "example": "/img un coucher de soleil sur les montagnes"
       },
       "search": {
-        "command": "/search",
         "description": "Rechercher des informations sur le web",
         "example": "/search dernières fonctionnalités Vue 3"
       },
       "fetch": {
-        "command": "/fetch",
         "description": "Récupérer et lire le contenu d'une page web",
         "example": "/fetch https://example.com"
       }
     },
     "typing": "L'Assistant IA écrit",
-    "stopGenerating": "Arrêter la génération",
     "fetching": "Récupération du contenu de {count} URL...",
     "assistant": "Assistant IA",
     "you": "Vous",
@@ -232,8 +217,7 @@
       "label": "Fournisseur de recherche",
       "options": {
         "brave": "Brave Search",
-        "tavily": "Tavily AI",
-        "custom": "Personnalisé"
+        "tavily": "Tavily AI"
       }
     },
     "searchApiKey": {
@@ -296,7 +280,6 @@
       "searchProviderNotConfigured": "Aucun fournisseur de recherche configuré",
       "braveSearchError": "Erreur API Brave Search : {status}",
       "tavilyError": "Erreur API Tavily : {status}",
-      "customSearchError": "Erreur de recherche personnalisée : {status}",
       "fetchWebContentFailed": "Échec de la récupération du contenu web : {status}"
     },
     "webContent": {

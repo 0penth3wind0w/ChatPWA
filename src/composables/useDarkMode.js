@@ -56,16 +56,8 @@ export function useDarkMode() {
     isDark.value = !isDark.value
   }
 
-  /**
-   * Set dark mode explicitly
-   */
-  const setDarkMode = (value) => {
-    isDark.value = value
-  }
-
   return {
     isDark,
-    toggleDarkMode,
-    setDarkMode
+    toggleDarkMode
   }
 }

@@ -16,7 +16,6 @@ let useIndexedDB = true
 
 // Shared state (singleton)
 const messages = ref([])
-const isLoading = ref(false)
 
 // Track pending database operations to avoid race conditions
 let pendingDbOperations = Promise.resolve()
@@ -62,32 +61,6 @@ const saveMessageToDb = async (message) => {
         await db.messages.put(plainMessage)
       } catch (error) {
         logger.error('Failed to save message to IndexedDB, falling back to localStorage:', error)
-        useIndexedDB = false
-        // Fall through to localStorage save
-      }
-    }
-
-    // Use localStorage fallback if IndexedDB failed
-    if (!useIndexedDB) {
-      try {
-        localStorage.setItem(FALLBACK_STORAGE_KEY, JSON.stringify(messages.value))
-      } catch (fallbackError) {
-        logger.error('Failed to save to localStorage fallback:', fallbackError)
-      }
-    }
-  })
-  return pendingDbOperations
-}
-
-// Helper to update an existing message in IndexedDB or localStorage
-const updateMessageInDb = async (messageId, updates) => {
-  // Queue the operation to prevent race conditions
-  pendingDbOperations = pendingDbOperations.then(async () => {
-    if (useIndexedDB) {
-      try {
-        await db.messages.update(messageId, updates)
-      } catch (error) {
-        logger.error('Failed to update message in IndexedDB, falling back to localStorage:', error)
         useIndexedDB = false
         // Fall through to localStorage save
       }
@@ -193,16 +166,6 @@ export function useChat() {
   }
 
   /**
-   * Get messages as conversation history for API
-   */
-  const getConversationHistory = () => {
-    return messages.value.map(msg => ({
-      role: msg.role,
-      content: msg.content
-    }))
-  }
-
-  /**
    * Check if there are any messages
    */
   const hasMessages = computed(() => messages.value.length > 0)
@@ -226,14 +189,11 @@ export function useChat() {
 
   return {
     messages,
-    isLoading,
     hasMessages,
-    addMessage,
     addUserMessage,
     addAssistantMessage,
     removeLastMessage,
     clearMessages,
-    getConversationHistory,
     scrollToBottom
   }
 }

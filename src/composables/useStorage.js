@@ -14,9 +14,6 @@ const DEFAULT_CONFIG = {
   imagePath: '/images/generations',
   provider: 'openai', // 'openai', 'anthropic', or 'gemini'
   systemPrompt: '', // Custom system prompt for AI behavior
-  temperature: null, // null means don't send this parameter
-  maxTokens: null, // null means don't send this parameter
-  topP: null,
   imageModel: 'dall-e-3',
   imageSize: '1024x1024',
   imageQuality: 'standard',
@@ -25,11 +22,10 @@ const DEFAULT_CONFIG = {
   // Chat Configuration
   maxHistoryMessages: 10, // Number of messages to send to API (0 = unlimited)
   // Web Tools Configuration
-  searchProvider: 'brave', // 'brave', 'tavily', or 'custom'
+  searchProvider: 'brave', // 'brave' or 'tavily'
   searchApiKey: '',
-  searchEndpoint: '', // For custom search provider
   // Appearance
-  colorTheme: 'green' // 'green', 'blue', 'purple', 'orange'
+  colorTheme: 'green' // 'green', 'blue', or 'slate'
 }
 
 // Shared config state (singleton)
@@ -74,20 +70,6 @@ export function useStorage() {
   }
 
   /**
-   * Clear API configuration from localStorage
-   */
-  const clearConfig = () => {
-    try {
-      config.value = { ...DEFAULT_CONFIG }
-      localStorage.removeItem(STORAGE_KEYS.API_CONFIG)
-      return true
-    } catch (error) {
-      logger.error('Failed to clear configuration:', error)
-      return false
-    }
-  }
-
-  /**
    * Check if configuration is complete
    */
   const isConfigured = () => {
@@ -97,7 +79,6 @@ export function useStorage() {
   return {
     config,
     saveConfig,
-    clearConfig,
     isConfigured
   }
 }

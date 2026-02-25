@@ -24,21 +24,18 @@ const isOverLimit = computed(() => characterCount.value > MAX_MESSAGE_LENGTH)
 const availableCommands = computed(() => [
   {
     command: '/img',
-    alias: null,
     description: t('chat.commands.image.description'),
     example: t('chat.commands.image.example'),
     icon: 'image'
   },
   {
     command: '/search',
-    alias: null,
     description: t('chat.commands.search.description'),
     example: t('chat.commands.search.example'),
     icon: 'search'
   },
   {
     command: '/fetch',
-    alias: null,
     description: t('chat.commands.fetch.description'),
     example: t('chat.commands.fetch.example'),
     icon: 'globe'
@@ -60,8 +57,7 @@ const filteredCommands = computed(() => {
 
   // Filter commands
   return availableCommands.value.filter(cmd =>
-    cmd.command.toLowerCase().startsWith(input) ||
-    (cmd.alias && cmd.alias.toLowerCase().startsWith(input))
+    cmd.command.toLowerCase().startsWith(input)
   )
 })
 
@@ -213,7 +209,6 @@ const handleInput = () => {
             <div class="flex-1">
               <div class="flex items-center gap-2">
                 <code class="text-sm font-semibold text-forest-green">{{ cmd.command }}</code>
-                <span v-if="cmd.alias" class="text-xs text-text-tertiary">or {{ cmd.alias }}</span>
               </div>
               <p class="text-xs text-text-secondary mt-1">{{ cmd.description }}</p>
               <p class="text-xs text-text-tertiary mt-1.5 font-mono bg-bg-elevated px-2 py-1 rounded inline-block">{{ cmd.example }}</p>

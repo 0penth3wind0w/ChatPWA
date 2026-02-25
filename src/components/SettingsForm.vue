@@ -511,7 +511,6 @@ onUnmounted(() => {
         <select id="search-provider" v-model="searchProvider" class="input-field">
           <option value="brave">{{ t('settings.searchProvider.options.brave') }}</option>
           <option value="tavily">{{ t('settings.searchProvider.options.tavily') }}</option>
-          <option value="custom">{{ t('settings.searchProvider.options.custom') }}</option>
         </select>
       </div>
 
