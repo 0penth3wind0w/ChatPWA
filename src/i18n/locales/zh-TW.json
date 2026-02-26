@@ -70,8 +70,13 @@
       "tooLong": "訊息過長（{current}/{max} 字元）"
     },
     "typing": "AI 助手正在輸入",
-    "fetching": "正在讀取 {count} 個網址的內容...",
-    "assistant": "AI 助手",
+    "cancel": "停止",
+    "tools": {
+      "searching": "正在搜尋「{query}」...",
+      "fetching": "正在讀取 {url}...",
+      "generatingImage": "正在產生圖片..."
+    },
+"assistant": "AI 助手",
     "you": "您",
     "model": "模型",
     "copy": "複製",

@@ -15,25 +15,22 @@ import { logger, sanitizeConfig } from '../utils/logger.js'
 const emit = defineEmits(['navigate'])
 const { t } = useI18n()
 
-// Compiled once at setup scope, not per-call
-const URL_REGEX = /(https?:\/\/[^\s]+)/gi
-
 const { messages, hasMessages, currentConversationId, addUserMessage, addAssistantMessage, removeLastMessage, scrollToBottom, setConversationTitle } = useChat()
 
 const isSidebarOpen = ref(false)
 const { config } = useStorage()
-const { sendChatMessage, generateImage, cancelRequest } = useApi()
+const { sendChatMessage, continueWithToolResults, generateImage, cancelRequest } = useApi()
 const { searchWeb, fetchWebContent } = useWebTools()
 const messagesContainer = ref(null)
 const isTyping = ref(false)
-const fetchingStatus = ref('')
+const toolStatus = ref('')
 const errorMessage = ref('')
 let errorTimer = null
 
 const handleCancelRequest = () => {
   cancelRequest()
   isTyping.value = false
-  fetchingStatus.value = ''
+  toolStatus.value = ''
 }
 
 const showError = (message) => {
@@ -70,6 +67,87 @@ onUnmounted(() => {
 
 const handleSettings = () => {
   emit('navigate', 'settings')
+}
+
+/**
+ * Execute the LLM + tool loop.
+ * Calls sendChatMessage with tools enabled, then if the LLM requests tool calls,
+ * executes them and feeds results back until a plain text response is received.
+ */
+const runToolLoop = async (apiMessages) => {
+  const MAX_TOOL_ROUNDS = 5
+  let lastSentMessages = null
+  let lastRawData = null
+  let lastResults = null
+
+  for (let round = 0; round < MAX_TOOL_ROUNDS; round++) {
+    let result
+    if (round === 0) {
+      result = await sendChatMessage(apiMessages, config.value)
+    } else {
+      result = await continueWithToolResults(lastSentMessages, config.value, lastRawData, lastResults)
+    }
+
+    if (!result.toolCalls) {
+      // Plain text response — display and stop
+      isTyping.value = false
+      toolStatus.value = ''
+      addAssistantMessage(result.text, config.value.model)
+      return
+    }
+
+    // Execute each tool call
+    lastSentMessages = result.sentMessages
+    lastRawData = result.rawData
+    lastResults = []
+
+    for (const call of result.toolCalls) {
+      logger.log('[runToolLoop] Executing tool:', call.name, call.args)
+      let toolResult = ''
+
+      try {
+        if (call.name === 'web_search') {
+          toolStatus.value = t('chat.tools.searching', { query: call.args.query })
+          toolResult = await searchWeb(call.args.query, config.value)
+          toolStatus.value = ''
+        } else if (call.name === 'fetch_url') {
+          toolStatus.value = t('chat.tools.fetching', { url: call.args.url })
+          toolResult = await fetchWebContent(call.args.url)
+          toolStatus.value = ''
+        } else if (call.name === 'generate_image') {
+          toolStatus.value = t('chat.tools.generatingImage')
+          const images = await generateImage(call.args.prompt, config.value)
+          if (images && images.length > 0) {
+            const prompt = call.args.prompt
+            const imageMarkdown = images.map(img =>
+              `![${prompt}](${img.url})\n\n*${t('chat.image.generatedCaption', { prompt })}*`
+            ).join('\n\n')
+            // Show image immediately in chat
+            toolStatus.value = ''
+            isTyping.value = false
+            addAssistantMessage(imageMarkdown, config.value.imageModel)
+            isTyping.value = true
+            toolResult = 'Image generated and displayed to the user.'
+          } else {
+            toolStatus.value = ''
+            toolResult = t('chat.image.noImagesReturned')
+          }
+        }
+      } catch (err) {
+        toolStatus.value = ''
+        toolResult = `Tool error: ${err.message}`
+      }
+
+      lastResults.push({ id: call.id, name: call.name, result: toolResult })
+    }
+
+    // Safety cap — stop after max rounds without a text response
+    if (round === MAX_TOOL_ROUNDS - 1) {
+      isTyping.value = false
+      toolStatus.value = ''
+      break
+    }
+  }
 }
 
 const handleSendMessage = async (content) => {
@@ -172,50 +250,7 @@ const handleSendMessage = async (content) => {
       }
     } else {
       // Handle regular chat message
-      // Detect URLs in the message and fetch their content
-      URL_REGEX.lastIndex = 0
-      const urls = content.match(URL_REGEX)
-
-      let enhancedContent = content
-
-      // If URLs are detected, fetch their content
-      if (urls && urls.length > 0) {
-        isTyping.value = true
-        fetchingStatus.value = t('chat.fetching', { count: urls.length })
-        scrollToBottom(messagesContainer)
-
-        try {
-          // Fetch content from all URLs (use allSettled to handle partial failures)
-          const fetchPromises = urls.map(url => fetchWebContent(url.trim()))
-          const results = await Promise.allSettled(fetchPromises)
-
-          // Extract successful fetches, log failures
-          const fetchedContents = results
-            .filter(result => result.status === 'fulfilled')
-            .map(result => result.value)
-
-          const failedCount = results.filter(r => r.status === 'rejected').length
-          if (failedCount > 0) {
-            logger.warn(`Failed to fetch ${failedCount} of ${urls.length} URLs`)
-          }
-
-          // Enhance the user message with successfully fetched content
-          if (fetchedContents.length > 0) {
-            enhancedContent = content + '\n\n' + fetchedContents.join('\n\n---\n\n')
-          }
-
-          fetchingStatus.value = ''
-          isTyping.value = false
-        } catch (err) {
-          logger.error('Error fetching URLs:', err)
-          fetchingStatus.value = ''
-          // Continue with original message if fetch fails
-          isTyping.value = false
-        }
-      }
-
-      // Prepare messages for API (convert to OpenAI/Anthropic format)
-      // Limit history based on config to reduce token usage
+      // Prepare messages for API
       const allMessages = messages.value.slice(0, -1)
       const historyLimit = config.value.maxHistoryMessages || 0
       const recentMessages = historyLimit > 0 ? allMessages.slice(-historyLimit) : allMessages
@@ -225,25 +260,16 @@ const handleSendMessage = async (content) => {
         content: msg.content
       }))
 
-      // Add the current message with enhanced content (if URLs were fetched)
-      apiMessages.push({
-        role: 'user',
-        content: enhancedContent
-      })
+      apiMessages.push({ role: 'user', content })
 
       logger.log('[handleSendMessage] Prepared API messages:', apiMessages.length, 'messages')
       logger.log('[handleSendMessage] Config:', sanitizeConfig(config.value))
 
-      // Send message and get response
       isTyping.value = true
       scrollToBottom(messagesContainer)
 
-      logger.log('[handleSendMessage] Calling sendChatMessage...')
-      const response = await sendChatMessage(apiMessages, config.value)
-      logger.log('[handleSendMessage] Received response:', response ? `${response.length} chars` : 'empty')
-
-      isTyping.value = false
-      addAssistantMessage(response, config.value.model)
+      // Tool-execution loop: available tools are determined inside useApi based on config
+      await runToolLoop(apiMessages)
     }
   } catch (err) {
     logger.error('[handleSendMessage] Error occurred:', err)
@@ -251,6 +277,7 @@ const handleSendMessage = async (content) => {
     logger.error('[handleSendMessage] Error message:', err.message)
     logger.error('[handleSendMessage] Stack:', err.stack)
     isTyping.value = false
+    toolStatus.value = ''
     // Don't show error if request was cancelled by user
     if (err.name !== 'AbortError') {
       const errorMsg = t('chat.errors.sendFailed', { message: err.message || t('chat.errors.defaultError') })
@@ -330,29 +357,23 @@ watch([messageCount, isTyping], () => {
           :message="message"
         />
 
-        <!-- Fetching Status -->
-        <div v-if="fetchingStatus" class="flex items-center gap-2 px-4 py-3 bg-light-green/30 rounded-2xl w-fit" role="status" aria-live="polite">
-          <div class="flex gap-1" aria-hidden="true">
-            <div class="w-2 h-2 bg-forest-green rounded-full typing-dot"></div>
-            <div class="w-2 h-2 bg-forest-green rounded-full typing-dot"></div>
-            <div class="w-2 h-2 bg-forest-green rounded-full typing-dot"></div>
-          </div>
-          <p class="text-sm text-forest-green">{{ fetchingStatus }}</p>
-        </div>
-
         <!-- Typing Indicator with Cancel Button -->
-        <div v-if="isTyping && !fetchingStatus" class="flex items-center gap-3">
+        <div v-if="isTyping" class="flex flex-col gap-1">
           <TypingIndicator />
-          <button
-            @click="handleCancelRequest"
-            class="w-8 h-8 flex items-center justify-center rounded-full bg-bg-surface border border-border-subtle text-text-secondary hover:text-text-primary hover:border-border-strong hover:bg-bg-elevated transition-colors shadow-soft"
-            aria-label="Stop generating"
-            style="-webkit-appearance: none; appearance: none;"
-          >
-            <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-              <rect x="6" y="6" width="12" height="12" rx="1"/>
-            </svg>
-          </button>
+          <p v-if="toolStatus" class="text-xs text-text-tertiary px-1">{{ toolStatus }}</p>
+          <div class="flex justify-start px-1">
+            <button
+              @click="handleCancelRequest"
+              class="flex items-center gap-1.5 px-2 py-1 text-xs text-text-tertiary hover:text-warm-red transition-colors"
+              aria-label="Stop generating"
+              style="-webkit-appearance: none; appearance: none;"
+            >
+              <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <rect x="6" y="6" width="12" height="12" rx="2"/>
+              </svg>
+              {{ t('chat.cancel') }}
+            </button>
+          </div>
         </div>
       </div>
     </main>

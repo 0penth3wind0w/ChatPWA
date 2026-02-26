@@ -6,6 +6,206 @@ const MAX_RETRIES = 3
 const RETRY_DELAY_MS = 1000
 const RETRY_BACKOFF_MULTIPLIER = 2
 
+// Tool definitions — canonical format, converted per provider below
+const TOOL_DEFINITIONS = [
+  {
+    name: 'web_search',
+    description: 'Search the web for current information. Use this when the user asks you to search for something, or when you need up-to-date information not in your training data.',
+    parameters: {
+      type: 'object',
+      properties: {
+        query: { type: 'string', description: 'The search query' }
+      },
+      required: ['query']
+    }
+  },
+  {
+    name: 'fetch_url',
+    description: 'Fetch and read the content of a web page. Use this when the user provides a URL or asks you to read a specific web page.',
+    parameters: {
+      type: 'object',
+      properties: {
+        url: { type: 'string', description: 'The URL to fetch' }
+      },
+      required: ['url']
+    }
+  },
+  {
+    name: 'generate_image',
+    description: 'Generate an image from a text description. Use this when the user asks you to create, draw, or generate an image.',
+    parameters: {
+      type: 'object',
+      properties: {
+        prompt: { type: 'string', description: 'Detailed description of the image to generate' }
+      },
+      required: ['prompt']
+    }
+  }
+]
+
+/**
+ * Return the subset of tool definitions available given the current config.
+ */
+const getAvailableTools = (config) => {
+  const tools = []
+  // web_search: requires a search provider and a non-empty API key
+  if (config.searchProvider && config.searchApiKey && config.searchApiKey.trim()) {
+    tools.push(TOOL_DEFINITIONS.find(t => t.name === 'web_search'))
+  }
+  // fetch_url: always available (uses Jina, no key needed)
+  tools.push(TOOL_DEFINITIONS.find(t => t.name === 'fetch_url'))
+  // generate_image: requires an imageModel to be set
+  if (config.imageModel && config.imageModel.trim()) {
+    tools.push(TOOL_DEFINITIONS.find(t => t.name === 'generate_image'))
+  }
+  return tools
+}
+
+/**
+ * Convert canonical tool definitions to OpenAI format
+ */
+const buildOpenAITools = (tools) =>
+  tools.map(tool => ({
+    type: 'function',
+    function: {
+      name: tool.name,
+      description: tool.description,
+      parameters: tool.parameters
+    }
+  }))
+
+/**
+ * Convert canonical tool definitions to Anthropic format
+ */
+const buildAnthropicTools = (tools) =>
+  tools.map(tool => ({
+    name: tool.name,
+    description: tool.description,
+    input_schema: tool.parameters
+  }))
+
+/**
+ * Convert canonical tool definitions to Gemini format
+ */
+const buildGeminiTools = (tools) => [{
+  functionDeclarations: tools.map(tool => ({
+    name: tool.name,
+    description: tool.description,
+    parameters: tool.parameters
+  }))
+}]
+
+/**
+ * Attach Gemini tools to a request body if any are available.
+ */
+const attachGeminiTools = (request, config) => {
+  const tools = buildGeminiTools(getAvailableTools(config))
+  if (tools[0].functionDeclarations.length > 0) request.tools = tools
+}
+
+/**
+ * Parse tool calls from an OpenAI response.
+ * Returns null if no tool calls, or [{id, name, args}]
+ */
+const parseOpenAIToolCalls = (data) => {
+  const toolCalls = data.choices?.[0]?.message?.tool_calls
+  if (!toolCalls || toolCalls.length === 0) return null
+  return toolCalls.map(tc => ({
+    id: tc.id,
+    name: tc.function.name,
+    args: JSON.parse(tc.function.arguments)
+  }))
+}
+
+/**
+ * Parse tool calls from an Anthropic response.
+ * Returns null if no tool calls, or [{id, name, args}]
+ */
+const parseAnthropicToolCalls = (data) => {
+  const toolUseBlocks = (data.content || []).filter(b => b.type === 'tool_use')
+  if (toolUseBlocks.length === 0) return null
+  return toolUseBlocks.map(b => ({
+    id: b.id,
+    name: b.name,
+    args: b.input
+  }))
+}
+
+/**
+ * Parse tool calls from a Gemini response.
+ * Returns null if no tool calls, or [{id, name, args}]
+ */
+const parseGeminiToolCalls = (data) => {
+  const parts = data.candidates?.[0]?.content?.parts || []
+  const fnCalls = parts.filter(p => p.functionCall)
+  if (fnCalls.length === 0) return null
+  return fnCalls.map((p, i) => ({
+    id: `gemini_tool_${i}`,
+    name: p.functionCall.name,
+    args: p.functionCall.args || {}
+  }))
+}
+
+/**
+ * Append a tool-call turn + tool results to an OpenAI message array.
+ * assistantData: the raw response JSON from the API
+ * results: [{id, name, result}]
+ */
+const appendOpenAIToolResults = (messages, assistantData, results) => {
+  // Append the assistant message that contained the tool calls
+  const assistantMsg = assistantData.choices[0].message
+  const updated = [
+    ...messages,
+    { role: 'assistant', content: assistantMsg.content || null, tool_calls: assistantMsg.tool_calls }
+  ]
+  // Append one tool result message per call
+  for (const r of results) {
+    updated.push({ role: 'tool', tool_call_id: r.id, content: r.result })
+  }
+  return updated
+}
+
+/**
+ * Append a tool-call turn + tool results to an Anthropic message array.
+ */
+const appendAnthropicToolResults = (messages, assistantData, results) => {
+  const updated = [
+    ...messages,
+    { role: 'assistant', content: assistantData.content }
+  ]
+  updated.push({
+    role: 'user',
+    content: results.map(r => ({
+      type: 'tool_result',
+      tool_use_id: r.id,
+      content: r.result
+    }))
+  })
+  return updated
+}
+
+/**
+ * Append a tool-call turn + tool results to a Gemini contents array.
+ * geminiMessages: the current contents array
+ */
+const appendGeminiToolResults = (geminiMessages, assistantData, results) => {
+  const modelParts = assistantData.candidates[0].content.parts
+  const updated = [
+    ...geminiMessages,
+    { role: 'model', parts: modelParts }
+  ]
+  updated.push({
+    role: 'user',
+    parts: results.map(r => ({
+      functionResponse: {
+        name: r.name,
+        response: { content: r.result }
+      }
+    }))
+  })
+  return updated
+}
+
 /**
  * Build request headers for the given provider and token
  */
@@ -29,10 +229,13 @@ export function useApi() {
    * Build OpenAI-compatible request body
    */
   const buildOpenAIRequest = (messages, config) => {
-    return {
+    const body = {
       model: config.model,
       messages: messages
     }
+    const tools = buildOpenAITools(getAvailableTools(config))
+    if (tools.length > 0) body.tools = tools
+    return body
   }
 
   /**
@@ -53,13 +256,16 @@ export function useApi() {
       request.system = systemMessage.content
     }
 
+    const tools = buildAnthropicTools(getAvailableTools(config))
+    if (tools.length > 0) request.tools = tools
+
     return request
   }
 
   /**
    * Build Gemini-compatible request body
    */
-  const buildGeminiRequest = (messages) => {
+  const buildGeminiRequest = (messages, config) => {
     // Convert messages to Gemini's contents format
     // Filter out system messages as Gemini handles them differently
     const contents = messages
@@ -82,6 +288,8 @@ export function useApi() {
         parts: [{ text: systemMessage.content }]
       }
     }
+
+    attachGeminiTools(request, config)
 
     return request
   }
@@ -124,7 +332,7 @@ export function useApi() {
       request.generationConfig = generationConfig
       return request
     } else {
-      // OpenAI DALL-E format (default)
+      // OpenAI format (default)
       const requestBody = {
         prompt: prompt,
         model: config.imageModel || 'dall-e-3',
@@ -210,26 +418,97 @@ export function useApi() {
   }
 
   /**
-   * Parse standard response
+   * Parse a response JSON into {toolCalls, text}.
+   * toolCalls is null when the LLM returned plain text.
    */
-  const handleStandardResponse = async (response, provider = 'openai') => {
-    const data = await response.json()
-
+  const parseResponse = (data, provider) => {
     logger.log('[Chat API Response]', JSON.stringify(data, null, 2))
 
     if (provider === 'openai') {
-      return data.choices?.[0]?.message?.content || ''
+      const toolCalls = parseOpenAIToolCalls(data)
+      if (toolCalls) return { toolCalls, rawData: data, text: null }
+      return { toolCalls: null, rawData: data, text: data.choices?.[0]?.message?.content || '' }
     } else if (provider === 'anthropic') {
-      return data.content?.[0]?.text || ''
+      const toolCalls = parseAnthropicToolCalls(data)
+      if (toolCalls) return { toolCalls, rawData: data, text: null }
+      return { toolCalls: null, rawData: data, text: data.content?.find(b => b.type === 'text')?.text || '' }
     } else if (provider === 'gemini') {
-      return data.candidates?.[0]?.content?.parts?.[0]?.text || ''
+      const toolCalls = parseGeminiToolCalls(data)
+      if (toolCalls) return { toolCalls, rawData: data, text: null }
+      return { toolCalls: null, rawData: data, text: data.candidates?.[0]?.content?.parts?.[0]?.text || '' }
     }
 
-    return ''
+    return { toolCalls: null, rawData: data, text: '' }
   }
 
   /**
-   * Send chat message to API
+   * One raw HTTP call to the chat endpoint.
+   * Returns parsed {toolCalls, rawData, text, sentMessages}.
+   * sentMessages: the provider-native message array that was sent (used to continue tool loops).
+   */
+  const chatRequest = async (messages, config, signal) => {
+    const provider = config.provider || 'openai'
+
+    let chatPath = config.chatPath || '/chat/completions'
+    if (chatPath.includes('{model}')) {
+      chatPath = chatPath.replace('{model}', config.model)
+    }
+    const endpoint = `${config.endpoint}${chatPath}`
+    const token = (config.token || '').trim()
+
+    let requestBody
+    // sentMessages tracks the provider-format messages array actually sent
+    let sentMessages = messages
+
+    // Detect if messages are already in Gemini-native format (have .parts, not .content)
+    const isGeminiNativeFormat = provider === 'gemini' && messages.length > 0 && messages[0].parts !== undefined
+
+    if (config.chatPath?.includes('/chat/completions')) {
+      requestBody = buildOpenAIRequest(messages, config)
+    } else if (provider === 'anthropic') {
+      requestBody = buildAnthropicRequest(messages, config)
+      // For Anthropic, sentMessages excludes the system message (it's in request.system)
+      sentMessages = messages.filter(m => m.role !== 'system')
+    } else if (provider === 'gemini') {
+      if (isGeminiNativeFormat) {
+        // Already Gemini-native (e.g. from continueWithToolResults) — use as-is
+        requestBody = { contents: messages }
+        attachGeminiTools(requestBody, config)
+      } else {
+        requestBody = buildGeminiRequest(messages, config)
+        sentMessages = requestBody.contents
+      }
+    } else {
+      requestBody = buildOpenAIRequest(messages, config)
+    }
+
+    const headers = buildHeaders(provider, token, config.chatPath || '')
+
+    logger.log('[chatRequest] Making request to:', endpoint)
+    logger.log('[chatRequest] Request body:', JSON.stringify(requestBody, null, 2))
+
+    const response = await fetch(endpoint, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(requestBody),
+      signal
+    })
+
+    logger.log('[chatRequest] Response status:', response.status, response.statusText)
+
+    if (!response.ok) {
+      await handleApiError(response)
+    }
+
+    const data = await response.json()
+    const parsed = parseResponse(data, provider)
+    return { ...parsed, sentMessages }
+  }
+
+  /**
+   * Send chat message to API.
+   * Returns {text, toolCalls} — callers handle the tool execution loop.
+   * When tools are enabled and the LLM wants to call one, toolCalls is set.
    */
   const sendChatMessage = async (messages, config) => {
     logger.log('[sendChatMessage] Called with', messages.length, 'messages')
@@ -243,17 +522,14 @@ export function useApi() {
     const signal = currentAbortController.signal
 
     return await withRetry(async () => {
-      // Use provider from config
       const provider = config.provider || 'openai'
       logger.log('[sendChatMessage] Using provider:', provider)
 
       // Add system prompt if configured
       let messagesWithSystem = [...messages]
       if (config.systemPrompt && config.systemPrompt.trim()) {
-        // Check if there's already a system message
         const hasSystemMessage = messages.some(m => m.role === 'system')
         if (!hasSystemMessage) {
-          // Add system prompt as first message
           messagesWithSystem = [
             { role: 'system', content: config.systemPrompt.trim() },
             ...messages
@@ -261,48 +537,35 @@ export function useApi() {
         }
       }
 
-      // Build endpoint - replace {model} placeholder for Gemini
-      let chatPath = config.chatPath || '/chat/completions'
-      if (chatPath.includes('{model}')) {
-        chatPath = chatPath.replace('{model}', config.model)
-      }
-      const endpoint = `${config.endpoint}${chatPath}`
+      return await chatRequest(messagesWithSystem, config, signal)
+    })
+  }
 
-      // Validate and clean token
-      const token = (config.token || '').trim()
+  /**
+   * Append tool results to the conversation and continue.
+   * sentMessages: the provider-native sentMessages returned by the previous chatRequest
+   * rawData: the raw API response JSON from the previous call
+   * results: [{id, name, result}]
+   */
+  const continueWithToolResults = async (sentMessages, config, rawData, results) => {
+    cancelRequest()
+    currentAbortController = new AbortController()
+    const signal = currentAbortController.signal
 
-      // Build request body based on provider and endpoint
-      let requestBody
-      // If using OpenAI-compatible endpoint (like LiteLLM proxy), always use OpenAI format
-      if (config.chatPath?.includes('/chat/completions')) {
-        requestBody = buildOpenAIRequest(messagesWithSystem, config)
-      } else if (provider === 'anthropic') {
-        requestBody = buildAnthropicRequest(messagesWithSystem, config)
+    return await withRetry(async () => {
+      const provider = config.provider || 'openai'
+
+      let updatedMessages
+      if (provider === 'anthropic') {
+        updatedMessages = appendAnthropicToolResults(sentMessages, rawData, results)
       } else if (provider === 'gemini') {
-        requestBody = buildGeminiRequest(messagesWithSystem)
+        updatedMessages = appendGeminiToolResults(sentMessages, rawData, results)
       } else {
-        requestBody = buildOpenAIRequest(messagesWithSystem, config)
+        updatedMessages = appendOpenAIToolResults(sentMessages, rawData, results)
       }
 
-      const headers = buildHeaders(provider, token, config.chatPath || '')
-
-      logger.log('[sendChatMessage] Making request to:', endpoint)
-      logger.log('[sendChatMessage] Request body:', JSON.stringify(requestBody, null, 2))
-
-      const response = await fetch(endpoint, {
-        method: 'POST',
-        headers,
-        body: JSON.stringify(requestBody),
-        signal // Add abort signal
-      })
-
-      logger.log('[sendChatMessage] Response status:', response.status, response.statusText)
-
-      if (!response.ok) {
-        await handleApiError(response)
-      }
-
-      return await handleStandardResponse(response, provider)
+      logger.log('[continueWithToolResults] Continuing conversation, provider:', provider)
+      return await chatRequest(updatedMessages, config, signal)
     })
   }
 
@@ -374,7 +637,7 @@ export function useApi() {
 
         return images
       } else {
-        // OpenAI DALL-E format
+        // OpenAI format
         const images = data.data || []
         const result = images.map(img => {
           if (img.b64_json) {
@@ -410,6 +673,7 @@ export function useApi() {
 
   return {
     sendChatMessage,
+    continueWithToolResults,
     generateImage,
     testConnection,
     cancelRequest

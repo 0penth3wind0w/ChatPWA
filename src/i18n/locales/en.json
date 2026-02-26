@@ -70,8 +70,13 @@
       "tooLong": "Message is too long ({current}/{max} characters)"
     },
     "typing": "AI Assistant is typing",
-    "fetching": "Fetching content from {count} URL(s)...",
-    "assistant": "AI Assistant",
+    "cancel": "Stop",
+    "tools": {
+      "searching": "Searching for \"{query}\"...",
+      "fetching": "Reading {url}...",
+      "generatingImage": "Generating image..."
+    },
+"assistant": "AI Assistant",
     "you": "You",
     "model": "Model",
     "copy": "Copy",

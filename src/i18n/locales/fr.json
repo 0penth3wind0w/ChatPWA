@@ -67,8 +67,13 @@
       }
     },
     "typing": "L'Assistant IA écrit",
-    "fetching": "Récupération du contenu de {count} URL...",
-    "assistant": "Assistant IA",
+    "cancel": "Stop",
+    "tools": {
+      "searching": "Recherche de \"{query}\"...",
+      "fetching": "Lecture de {url}...",
+      "generatingImage": "Génération de l'image..."
+    },
+"assistant": "Assistant IA",
     "you": "Vous",
     "model": "Modèle",
     "copy": "Copier",
