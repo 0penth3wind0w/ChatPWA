@@ -128,8 +128,8 @@ const handleKeydown = (event) => {
     }
   }
 
-  // Enter without Shift sends the message
-  if (event.key === 'Enter' && !event.shiftKey) {
+  // Enter without Shift sends the message (skip during IME composition)
+  if (event.key === 'Enter' && !event.shiftKey && !event.isComposing) {
     event.preventDefault()
     handleSend()
   }
