@@ -1,7 +1,7 @@
 <script setup>
-import { ref, computed, watch, nextTick, onMounted, onUnmounted } from 'vue'
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useStorage } from '../composables/useStorage.js'
+import { useStorage, DEFAULT_PATHS } from '../composables/useStorage.js'
 
 const emit = defineEmits(['test'])
 const { t } = useI18n()
@@ -9,29 +9,8 @@ const { t } = useI18n()
 const { config, saveConfig } = useStorage()
 const systemPromptTextarea = ref(null)
 
-// Helper to get default paths based on provider
-const getDefaultPaths = (providerType) => {
-  if (providerType === 'openai') {
-    return {
-      chatPath: '/chat/completions',
-      imagePath: '/images/generations'
-    }
-  } else if (providerType === 'anthropic') {
-    return {
-      chatPath: '/messages',
-      imagePath: '/images/generations'
-    }
-  } else if (providerType === 'gemini') {
-    return {
-      chatPath: '/models/{model}:generateContent',
-      imagePath: '/models/{model}:generateContent'
-    }
-  }
-  return {
-    chatPath: '/chat/completions',
-    imagePath: '/images/generations'
-  }
-}
+// Helper to get default paths based on provider — uses shared DEFAULT_PATHS from useStorage
+const getDefaultPaths = (providerType) => DEFAULT_PATHS[providerType] || DEFAULT_PATHS.openai
 
 // Use the shared config directly instead of props
 const endpoint = ref(config.value.endpoint || '')
@@ -60,34 +39,33 @@ const testing = ref(false)
 const AUTO_SAVE_DEBOUNCE_MS = 500 // Balance between responsiveness and save frequency
 const TEST_TIMEOUT_MS = 3000 // Time to show test status message
 
+// Build the current config object from local refs — single source of truth
+const buildCurrentConfig = () => ({
+  endpoint: endpoint.value.trim(),
+  model: model.value.trim(),
+  token: token.value.trim(),
+  provider: provider.value,
+  chatPath: chatPath.value,
+  imagePath: imagePath.value,
+  systemPrompt: systemPrompt.value,
+  imageModel: imageModel.value,
+  imageSize: imageSize.value,
+  imageQuality: imageQuality.value,
+  imageAspectRatio: imageAspectRatio.value,
+  imageResolution: imageResolution.value,
+  maxHistoryMessages: maxHistoryMessages.value,
+  searchProvider: searchProvider.value,
+  searchApiKey: searchApiKey.value
+})
+
 // Debounce helper
 let saveTimeout = null
 const debouncedAutoSave = () => {
   clearTimeout(saveTimeout)
   saveTimeout = setTimeout(() => {
     // Only auto-save if basic fields are filled
-    const endpointVal = endpoint.value || ''
-    const modelVal = model.value || ''
-    const tokenVal = token.value || ''
-
-    if (endpointVal.trim() && modelVal.trim() && tokenVal.trim()) {
-      saveConfig({
-        endpoint: endpointVal.trim(),
-        model: modelVal.trim(),
-        token: tokenVal.trim(),
-        provider: provider.value,
-        chatPath: chatPath.value,
-        imagePath: imagePath.value,
-        systemPrompt: systemPrompt.value,
-        imageModel: imageModel.value,
-        imageSize: imageSize.value,
-        imageQuality: imageQuality.value,
-        imageAspectRatio: imageAspectRatio.value,
-        imageResolution: imageResolution.value,
-        maxHistoryMessages: maxHistoryMessages.value,
-        searchProvider: searchProvider.value,
-        searchApiKey: searchApiKey.value
-      })
+    if (endpoint.value.trim() && model.value.trim() && token.value.trim()) {
+      saveConfig(buildCurrentConfig())
     }
   }, AUTO_SAVE_DEBOUNCE_MS)
 }
@@ -99,13 +77,12 @@ watch(provider, (newProvider) => {
   imagePath.value = paths.imagePath
 })
 
-// Clear search API key when search provider changes
+// searchProvider change also clears searchApiKey before saving
 watch(searchProvider, () => {
   searchApiKey.value = ''
+  debouncedAutoSave()
 })
-
-// Watch all fields for changes with debounce
-watch([endpoint, model, token, provider, chatPath, imagePath, systemPrompt, imageModel, imageSize, imageQuality, imageAspectRatio, imageResolution, maxHistoryMessages, searchProvider, searchApiKey], debouncedAutoSave)
+watch([endpoint, model, token, provider, chatPath, imagePath, systemPrompt, imageModel, imageSize, imageQuality, imageAspectRatio, imageResolution, maxHistoryMessages, searchApiKey], debouncedAutoSave)
 
 const isValid = computed(() => {
   return !!(endpoint.value || '').trim() && !!(model.value || '').trim() && !!(token.value || '').trim()
@@ -170,19 +147,7 @@ const handleTest = async () => {
 
   if (endpointValid && modelValid && tokenValid) {
     testing.value = true
-    emit('test', {
-      endpoint: endpoint.value.trim(),
-      model: model.value.trim(),
-      token: token.value.trim(),
-      provider: provider.value,
-      chatPath: chatPath.value,
-      imagePath: imagePath.value,
-      imageModel: imageModel.value,
-      imageSize: imageSize.value,
-      imageQuality: imageQuality.value,
-      imageAspectRatio: imageAspectRatio.value,
-      imageResolution: imageResolution.value
-    })
+    emit('test', buildCurrentConfig())
     // Reset testing state after configured timeout
     setTimeout(() => {
       testing.value = false
@@ -206,19 +171,10 @@ const resizeTextarea = () => {
   })
 }
 
-// Resize textarea when systemPrompt content changes
-watch(systemPrompt, async () => {
-  await nextTick()
-  resizeTextarea()
-})
+watch(systemPrompt, resizeTextarea)
 
-// Initial resize when textarea mounts
-onMounted(async () => {
-  await nextTick()
-  resizeTextarea()
-})
+onMounted(resizeTextarea)
 
-// Cleanup timeout and animation frame on unmount
 onUnmounted(() => {
   if (saveTimeout) {
     clearTimeout(saveTimeout)

@@ -41,33 +41,51 @@ const showError = (message) => {
   }, 5000)
 }
 
-// Handle scroll to bottom on resize/orientation change
+/**
+ * Build image markdown string from a list of generated image objects.
+ */
+const buildImageMarkdown = (images, prompt) =>
+  images.map(img =>
+    `![${prompt}](${img.url})\n\n*${t('chat.image.generatedCaption', { prompt })}*`
+  ).join('\n\n')
+
+/**
+ * Shared error handler for slash-command catch blocks.
+ * On AbortError: removes the pending user message.
+ * Otherwise: shows error as assistant message + toast.
+ */
+const handleCommandError = async (err, errorKey, model = config.value.model) => {
+  isTyping.value = false
+  if (err.name === 'AbortError') {
+    await removeLastMessage()
+  } else {
+    const errorMsg = t(errorKey, { message: err.message })
+    addAssistantMessage(errorMsg, model)
+    showError(errorMsg)
+  }
+}
+
+let resizeTimer = null
 const handleResize = () => {
-  // Scroll to bottom after resize/rotation to maintain chat context
-  setTimeout(() => {
+  clearTimeout(resizeTimer)
+  resizeTimer = setTimeout(() => {
     scrollToBottom(messagesContainer)
   }, 100)
 }
 
 onMounted(() => {
-  // Listen for resize events (includes orientation change)
   window.addEventListener('resize', handleResize)
   window.addEventListener('orientationchange', handleResize)
-
-  // Initial scroll to bottom on mount
   scrollToBottom(messagesContainer)
 })
 
 onUnmounted(() => {
   window.removeEventListener('resize', handleResize)
   window.removeEventListener('orientationchange', handleResize)
+  clearTimeout(resizeTimer)
   clearTimeout(errorTimer)
 })
 
-
-const handleSettings = () => {
-  emit('navigate', 'settings')
-}
 
 /**
  * Execute the LLM + tool loop.
@@ -89,7 +107,6 @@ const runToolLoop = async (apiMessages) => {
     }
 
     if (!result.toolCalls) {
-      // Plain text response — display and stop
       isTyping.value = false
       toolStatus.value = ''
       addAssistantMessage(result.text, config.value.model)
@@ -117,19 +134,14 @@ const runToolLoop = async (apiMessages) => {
         } else if (call.name === 'generate_image') {
           toolStatus.value = t('chat.tools.generatingImage')
           const images = await generateImage(call.args.prompt, config.value)
+          toolStatus.value = ''
           if (images && images.length > 0) {
-            const prompt = call.args.prompt
-            const imageMarkdown = images.map(img =>
-              `![${prompt}](${img.url})\n\n*${t('chat.image.generatedCaption', { prompt })}*`
-            ).join('\n\n')
             // Show image immediately in chat
-            toolStatus.value = ''
             isTyping.value = false
-            addAssistantMessage(imageMarkdown, config.value.imageModel)
+            addAssistantMessage(buildImageMarkdown(images, call.args.prompt), config.value.imageModel)
             isTyping.value = true
             toolResult = 'Image generated and displayed to the user.'
           } else {
-            toolStatus.value = ''
             toolResult = t('chat.image.noImagesReturned')
           }
         }
@@ -153,16 +165,15 @@ const runToolLoop = async (apiMessages) => {
 const handleSendMessage = async (content) => {
   logger.log('[handleSendMessage] Starting with content:', content)
 
-  // Add user message
+  // Auto-title the conversation from the first user message (check before adding)
+  const isFirstMessage = !messages.value.some(m => m.role === 'user')
+
   addUserMessage(content)
 
-  // Auto-title the conversation from the first user message
-  const isFirstMessage = messages.value.filter(m => m.role === 'user').length === 1
   if (isFirstMessage) {
     setConversationTitle(currentConversationId.value, content.trim().slice(0, 40))
   }
 
-  // Scroll to bottom after user message
   scrollToBottom(messagesContainer)
 
   try {
@@ -179,20 +190,9 @@ const handleSendMessage = async (content) => {
       try {
         const searchResults = await searchWeb(query, config.value)
         isTyping.value = false
-
-        // Add search results as assistant message (watcher handles scroll)
         addAssistantMessage(searchResults, config.value.model)
       } catch (err) {
-        isTyping.value = false
-        // Don't show error if request was cancelled by user
-        if (err.name !== 'AbortError') {
-          const errorMsg = t('chat.errors.searchFailed', { message: err.message })
-          addAssistantMessage(errorMsg, config.value.model)
-          showError(errorMsg)
-        } else {
-          // Remove user message on cancellation
-          await removeLastMessage()
-        }
+        await handleCommandError(err, 'chat.errors.searchFailed')
       }
     } else if (fetchCommandMatch) {
       // Handle web fetch
@@ -202,20 +202,9 @@ const handleSendMessage = async (content) => {
       try {
         const webContent = await fetchWebContent(url)
         isTyping.value = false
-
-        // Add fetched content as assistant message (watcher handles scroll)
         addAssistantMessage(webContent, config.value.model)
       } catch (err) {
-        isTyping.value = false
-        // Don't show error if request was cancelled by user
-        if (err.name !== 'AbortError') {
-          const errorMsg = t('chat.errors.fetchFailed', { message: err.message })
-          addAssistantMessage(errorMsg, config.value.model)
-          showError(errorMsg)
-        } else {
-          // Remove user message on cancellation
-          await removeLastMessage()
-        }
+        await handleCommandError(err, 'chat.errors.fetchFailed')
       }
     } else if (imageCommandMatch) {
       // Handle image generation
@@ -227,29 +216,14 @@ const handleSendMessage = async (content) => {
         isTyping.value = false
 
         if (images && images.length > 0) {
-          // Create markdown with image
-          const imageMarkdown = images.map(img =>
-            `![${prompt}](${img.url})\n\n*${t('chat.image.generatedCaption', { prompt })}*`
-          ).join('\n\n')
-
-          addAssistantMessage(imageMarkdown, config.value.imageModel)
+          addAssistantMessage(buildImageMarkdown(images, prompt), config.value.imageModel)
         } else {
           addAssistantMessage(t('chat.image.noImagesReturned'), config.value.imageModel)
         }
       } catch (err) {
-        isTyping.value = false
-        // Don't show error if request was cancelled by user
-        if (err.name !== 'AbortError') {
-          const errorMsg = t('chat.errors.imageFailed', { message: err.message })
-          addAssistantMessage(errorMsg, config.value.imageModel)
-          showError(errorMsg)
-        } else {
-          // Remove user message on cancellation
-          await removeLastMessage()
-        }
+        await handleCommandError(err, 'chat.errors.imageFailed', config.value.imageModel)
       }
     } else {
-      // Handle regular chat message
       // Prepare messages for API
       const allMessages = messages.value.slice(0, -1)
       const historyLimit = config.value.maxHistoryMessages || 0
@@ -276,8 +250,7 @@ const handleSendMessage = async (content) => {
     logger.error('[handleSendMessage] Error name:', err.name)
     logger.error('[handleSendMessage] Error message:', err.message)
     logger.error('[handleSendMessage] Stack:', err.stack)
-    isTyping.value = false
-    toolStatus.value = ''
+    handleCancelRequest()
     // Don't show error if request was cancelled by user
     if (err.name !== 'AbortError') {
       const errorMsg = t('chat.errors.sendFailed', { message: err.message || t('chat.errors.defaultError') })
@@ -294,7 +267,6 @@ const handleSendMessage = async (content) => {
 // Track message count to avoid deep-watching large message objects
 const messageCount = computed(() => messages.value.length)
 
-// Auto-scroll when a new message is added or typing indicator changes
 watch([messageCount, isTyping], () => {
   scrollToBottom(messagesContainer)
 }, { flush: 'post' })
@@ -325,7 +297,7 @@ watch([messageCount, isTyping], () => {
 
         <!-- Settings button -->
         <button
-          @click="handleSettings"
+          @click="emit('navigate', 'settings')"
           aria-label="Open settings"
           class="w-11 h-11 bg-bg-surface rounded-full shadow-elevated flex items-center justify-center hover:bg-bg-elevated transition-colors"
         >

@@ -1,5 +1,5 @@
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, ref, onUnmounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { marked } from '../utils/markdown.js'
 import DOMPurify from 'dompurify'
@@ -18,10 +18,10 @@ const props = defineProps({
 })
 
 const isUser = computed(() => props.message.role === 'user')
-const isAssistant = computed(() => !isUser.value)
 
 const copied = ref(false)
 const contentEl = ref(null)
+let copiedTimer = null
 
 const copyToClipboard = async () => {
   try {
@@ -34,32 +34,59 @@ const copyToClipboard = async () => {
       })
     ])
     copied.value = true
-    setTimeout(() => { copied.value = false }, 2000)
+    clearTimeout(copiedTimer)
+    copiedTimer = setTimeout(() => { copied.value = false }, 2000)
   } catch (err) {
     logger.error('Copy failed:', err)
   }
 }
 
+onUnmounted(() => { clearTimeout(copiedTimer) })
+
+// Compute the Date object once to avoid constructing it twice
+const messageDate = computed(() =>
+  props.message.timestamp ? new Date(props.message.timestamp) : null
+)
+
 const formattedTime = computed(() => {
-  if (!props.message.timestamp) return ''
-  return new Date(props.message.timestamp).toLocaleTimeString(locale.value, { hour: '2-digit', minute: '2-digit' })
+  if (!messageDate.value) return ''
+  return messageDate.value.toLocaleTimeString(locale.value, { hour: '2-digit', minute: '2-digit' })
 })
 
 const formattedDatetime = computed(() =>
-  props.message.timestamp ? new Date(props.message.timestamp).toISOString() : ''
+  messageDate.value ? messageDate.value.toISOString() : ''
 )
 
-// Render and sanitize markdown for assistant messages
 const renderedContent = computed(() => {
-  if (isAssistant.value) {
+  if (!isUser.value) {
     try {
-      const rawHtml = marked.parse(props.message.content)
-      // Allow data URLs for images (needed for base64 image display)
-      return DOMPurify.sanitize(rawHtml, {
+      // Extract data: image URLs before sanitization (DOMPurify strips them).
+      // Replace each with a placeholder, sanitize, then restore.
+      const dataUrls = []
+      const contentWithPlaceholders = props.message.content.replace(
+        /!\[([^\]]*)\]\((data:image\/[^)]+)\)/g,
+        (_, alt, src) => {
+          const idx = dataUrls.length
+          dataUrls.push({ alt, src })
+          return `![${alt}](__DATA_IMAGE_${idx}__)`
+        }
+      )
+
+      const rawHtml = marked.parse(contentWithPlaceholders)
+      let sanitized = DOMPurify.sanitize(rawHtml, {
         ADD_TAGS: ['img'],
-        ADD_ATTR: ['src', 'alt'],
-        ALLOWED_URI_REGEXP: /^(?:(?:(?:f|ht)tps?|mailto|tel|callto|sms|cid|xmpp|data):|[^a-z]|[a-z+.\-]+(?:[^a-z+.\-:]|$))/i
+        ADD_ATTR: ['src', 'alt']
       })
+
+      // Restore data: URLs into img src attributes
+      if (dataUrls.length > 0) {
+        sanitized = sanitized.replace(
+          /src="__DATA_IMAGE_(\d+)__"/g,
+          (_, idx) => `src="${dataUrls[parseInt(idx)].src}"`
+        )
+      }
+
+      return sanitized
     } catch (error) {
       logger.error('Error rendering message:', error)
       return props.message.content
@@ -73,7 +100,7 @@ const renderedContent = computed(() => {
   <div class="w-full flex" :class="isUser ? 'justify-end' : 'justify-start'">
     <!-- AI Assistant Message -->
     <div
-      v-if="isAssistant"
+      v-if="!isUser"
       class="max-w-[88%] flex flex-col gap-1.5 animate-fade-in"
       role="article"
       :aria-label="`AI Assistant message${formattedTime ? ' from ' + formattedTime : ''}`"
@@ -123,7 +150,7 @@ const renderedContent = computed(() => {
 
     <!-- User Message -->
     <div
-      v-else-if="isUser"
+      v-else
       class="max-w-[88%] flex flex-col gap-1.5 animate-fade-in"
       role="article"
       :aria-label="`Your message${formattedTime ? ' from ' + formattedTime : ''}`"

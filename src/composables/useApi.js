@@ -6,9 +6,9 @@ const MAX_RETRIES = 3
 const RETRY_DELAY_MS = 1000
 const RETRY_BACKOFF_MULTIPLIER = 2
 
-// Tool definitions — canonical format, converted per provider below
-const TOOL_DEFINITIONS = [
-  {
+// Tool definitions — canonical format, indexed by name for O(1) lookup
+const TOOL_DEFINITIONS = new Map([
+  ['web_search', {
     name: 'web_search',
     description: 'Search the web for current information. Use this when the user asks you to search for something, or when you need up-to-date information not in your training data.',
     parameters: {
@@ -18,8 +18,8 @@ const TOOL_DEFINITIONS = [
       },
       required: ['query']
     }
-  },
-  {
+  }],
+  ['fetch_url', {
     name: 'fetch_url',
     description: 'Fetch and read the content of a web page. Use this when the user provides a URL or asks you to read a specific web page.',
     parameters: {
@@ -29,8 +29,8 @@ const TOOL_DEFINITIONS = [
       },
       required: ['url']
     }
-  },
-  {
+  }],
+  ['generate_image', {
     name: 'generate_image',
     description: 'Generate an image from a text description. Use this when the user asks you to create, draw, or generate an image.',
     parameters: {
@@ -40,8 +40,8 @@ const TOOL_DEFINITIONS = [
       },
       required: ['prompt']
     }
-  }
-]
+  }]
+])
 
 /**
  * Return the subset of tool definitions available given the current config.
@@ -50,16 +50,20 @@ const getAvailableTools = (config) => {
   const tools = []
   // web_search: requires a search provider and a non-empty API key
   if (config.searchProvider && config.searchApiKey && config.searchApiKey.trim()) {
-    tools.push(TOOL_DEFINITIONS.find(t => t.name === 'web_search'))
+    tools.push(TOOL_DEFINITIONS.get('web_search'))
   }
   // fetch_url: always available (uses Jina, no key needed)
-  tools.push(TOOL_DEFINITIONS.find(t => t.name === 'fetch_url'))
+  tools.push(TOOL_DEFINITIONS.get('fetch_url'))
   // generate_image: requires an imageModel to be set
   if (config.imageModel && config.imageModel.trim()) {
-    tools.push(TOOL_DEFINITIONS.find(t => t.name === 'generate_image'))
+    tools.push(TOOL_DEFINITIONS.get('generate_image'))
   }
   return tools
 }
+
+// Module-level singleton abort controller — shared across all useApi() callers
+// so that cancelRequest() from any component cancels the active request.
+let currentAbortController = null
 
 /**
  * Convert canonical tool definitions to OpenAI format
@@ -222,289 +226,294 @@ const buildHeaders = (provider, token, path = '') => {
   return headers
 }
 
-export function useApi() {
-  // Abort controller for canceling requests
-  let currentAbortController = null
-  /**
-   * Build OpenAI-compatible request body
-   */
-  const buildOpenAIRequest = (messages, config) => {
-    const body = {
-      model: config.model,
-      messages: messages
-    }
-    const tools = buildOpenAITools(getAvailableTools(config))
-    if (tools.length > 0) body.tools = tools
-    return body
+/**
+ * Build OpenAI-compatible request body
+ */
+const buildOpenAIRequest = (messages, config) => {
+  const body = {
+    model: config.model,
+    messages: messages
+  }
+  const tools = buildOpenAITools(getAvailableTools(config))
+  if (tools.length > 0) body.tools = tools
+  return body
+}
+
+/**
+ * Build Anthropic-compatible request body
+ */
+const buildAnthropicRequest = (messages, config) => {
+  // Separate system message if present
+  const systemMessage = messages.find(m => m.role === 'system')
+  const conversationMessages = messages.filter(m => m.role !== 'system')
+
+  const request = {
+    model: config.model,
+    max_tokens: 2000,
+    messages: conversationMessages
   }
 
-  /**
-   * Build Anthropic-compatible request body
-   */
-  const buildAnthropicRequest = (messages, config) => {
-    // Separate system message if present
-    const systemMessage = messages.find(m => m.role === 'system')
-    const conversationMessages = messages.filter(m => m.role !== 'system')
+  if (systemMessage) {
+    request.system = systemMessage.content
+  }
 
+  const tools = buildAnthropicTools(getAvailableTools(config))
+  if (tools.length > 0) request.tools = tools
+
+  return request
+}
+
+/**
+ * Build Gemini-compatible request body
+ */
+const buildGeminiRequest = (messages, config) => {
+  // Convert messages to Gemini's contents format
+  // Filter out system messages as Gemini handles them differently
+  const contents = messages
+    .filter(m => m.role !== 'system')
+    .map(msg => ({
+      role: msg.role === 'assistant' ? 'model' : 'user',
+      parts: [{ text: msg.content }]
+    }))
+
+  // Build system instruction from system message if present
+  const systemMessage = messages.find(m => m.role === 'system')
+
+  const request = {
+    contents: contents
+  }
+
+  // Add system instruction if present
+  if (systemMessage) {
+    request.systemInstruction = {
+      parts: [{ text: systemMessage.content }]
+    }
+  }
+
+  attachGeminiTools(request, config)
+
+  return request
+}
+
+/**
+ * Build image generation request body
+ */
+const buildImageRequest = (prompt, config, provider) => {
+  if (provider === 'gemini') {
+    // Gemini image generation format
     const request = {
-      model: config.model,
-      max_tokens: 2000,
-      messages: conversationMessages
-    }
-
-    if (systemMessage) {
-      request.system = systemMessage.content
-    }
-
-    const tools = buildAnthropicTools(getAvailableTools(config))
-    if (tools.length > 0) request.tools = tools
-
-    return request
-  }
-
-  /**
-   * Build Gemini-compatible request body
-   */
-  const buildGeminiRequest = (messages, config) => {
-    // Convert messages to Gemini's contents format
-    // Filter out system messages as Gemini handles them differently
-    const contents = messages
-      .filter(m => m.role !== 'system')
-      .map(msg => ({
-        role: msg.role === 'assistant' ? 'model' : 'user',
-        parts: [{ text: msg.content }]
-      }))
-
-    // Build system instruction from system message if present
-    const systemMessage = messages.find(m => m.role === 'system')
-
-    const request = {
-      contents: contents
-    }
-
-    // Add system instruction if present
-    if (systemMessage) {
-      request.systemInstruction = {
-        parts: [{ text: systemMessage.content }]
-      }
-    }
-
-    attachGeminiTools(request, config)
-
-    return request
-  }
-
-  /**
-   * Build image generation request body
-   */
-  const buildImageRequest = (prompt, config, provider) => {
-    if (provider === 'gemini') {
-      // Gemini image generation format
-      const request = {
-        contents: [{
-          role: "user",
-          parts: [{
-            text: prompt
-          }]
+      contents: [{
+        role: "user",
+        parts: [{
+          text: prompt
         }]
+      }]
+    }
+
+    // Add generation config for image generation
+    const generationConfig = {
+      responseModalities: ["IMAGE"]
+    }
+
+    // Use Gemini-specific aspect ratio and resolution settings
+    const imageConfig = {}
+
+    if (config.imageAspectRatio) {
+      imageConfig.aspectRatio = config.imageAspectRatio
+    }
+
+    if (config.imageResolution) {
+      imageConfig.imageSize = config.imageResolution
+    }
+
+    if (Object.keys(imageConfig).length > 0) {
+      generationConfig.imageConfig = imageConfig
+    }
+
+    request.generationConfig = generationConfig
+    return request
+  } else {
+    // OpenAI format (default)
+    return {
+      prompt: prompt,
+      model: config.imageModel || 'dall-e-3',
+      size: config.imageSize || '1024x1024',
+      quality: config.imageQuality || 'standard',
+      response_format: 'b64_json'
+    }
+  }
+}
+
+/**
+ * Cancel the current API request if one is in progress
+ */
+const cancelRequest = () => {
+  if (currentAbortController) {
+    currentAbortController.abort()
+    currentAbortController = null
+  }
+}
+
+/**
+ * Cancel any in-flight request and create a fresh AbortSignal for the next one.
+ */
+const resetAbortController = () => {
+  cancelRequest()
+  currentAbortController = new AbortController()
+  return currentAbortController.signal
+}
+
+/**
+ * Check if error is retryable (network errors, 5xx errors, rate limits)
+ */
+const isRetryableError = (response) => {
+  // Network errors (no response) — fail fast, don't retry
+  if (!response) return false
+
+  // Server errors (5xx)
+  if (response.status >= 500) return true
+
+  // Rate limit (429)
+  if (response.status === 429) return true
+
+  return false
+}
+
+/**
+ * Retry a function with exponential backoff
+ */
+const withRetry = async (fn, retries = MAX_RETRIES) => {
+  let lastError
+
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    try {
+      return await fn()
+    } catch (error) {
+      lastError = error
+
+      // Don't retry if abort was called
+      if (error.name === 'AbortError') {
+        // Preserve AbortError so it can be handled gracefully
+        throw error
       }
 
-      // Add generation config for image generation
-      const generationConfig = {
-        responseModalities: ["IMAGE"]
-      }
+      // Don't retry on last attempt
+      if (attempt === retries) break
 
-      // Use Gemini-specific aspect ratio and resolution settings
-      const imageConfig = {}
+      // Check if error is retryable
+      if (!isRetryableError(error.response)) break
 
-      if (config.imageAspectRatio) {
-        imageConfig.aspectRatio = config.imageAspectRatio
-      }
+      // Wait with exponential backoff before retrying
+      const delay = RETRY_DELAY_MS * Math.pow(RETRY_BACKOFF_MULTIPLIER, attempt)
+      logger.warn(`Request failed, retrying in ${delay}ms... (attempt ${attempt + 1}/${retries})`)
+      await new Promise(resolve => setTimeout(resolve, delay))
+    }
+  }
 
-      if (config.imageResolution) {
-        imageConfig.imageSize = config.imageResolution
-      }
+  throw lastError
+}
 
-      if (Object.keys(imageConfig).length > 0) {
-        generationConfig.imageConfig = imageConfig
-      }
+/**
+ * Handle API errors consistently
+ */
+const handleApiError = async (response) => {
+  const { t } = i18n.global
+  const errorData = await response.json().catch(() => ({ error: { message: t('api.errors.unknown') } }))
+  const message = errorData.error?.message || errorData.message || t('api.errors.apiError', { status: response.status, statusText: response.statusText })
+  const error = new Error(message)
+  error.response = response // Attach response for retry logic
+  throw error
+}
 
-      request.generationConfig = generationConfig
-      return request
+/**
+ * Parse a response JSON into {toolCalls, text}.
+ * toolCalls is null when the LLM returned plain text.
+ */
+const parseResponse = (data, provider) => {
+  logger.log('[Chat API Response]', JSON.stringify(data, null, 2))
+
+  if (provider === 'openai') {
+    const toolCalls = parseOpenAIToolCalls(data)
+    if (toolCalls) return { toolCalls, rawData: data, text: null }
+    return { toolCalls: null, rawData: data, text: data.choices?.[0]?.message?.content || '' }
+  } else if (provider === 'anthropic') {
+    const toolCalls = parseAnthropicToolCalls(data)
+    if (toolCalls) return { toolCalls, rawData: data, text: null }
+    return { toolCalls: null, rawData: data, text: data.content?.find(b => b.type === 'text')?.text || '' }
+  } else if (provider === 'gemini') {
+    const toolCalls = parseGeminiToolCalls(data)
+    if (toolCalls) return { toolCalls, rawData: data, text: null }
+    return { toolCalls: null, rawData: data, text: data.candidates?.[0]?.content?.parts?.[0]?.text || '' }
+  }
+
+  return { toolCalls: null, rawData: data, text: '' }
+}
+
+/**
+ * One raw HTTP call to the chat endpoint.
+ * Returns parsed {toolCalls, rawData, text, sentMessages}.
+ * sentMessages: the provider-native message array that was sent (used to continue tool loops).
+ */
+const chatRequest = async (messages, config, signal) => {
+  const provider = config.provider || 'openai'
+
+  let chatPath = config.chatPath || '/chat/completions'
+  if (chatPath.includes('{model}')) {
+    chatPath = chatPath.replace('{model}', config.model)
+  }
+  const endpoint = `${config.endpoint}${chatPath}`
+  const token = (config.token || '').trim()
+
+  let requestBody
+  // sentMessages tracks the provider-format messages array actually sent
+  let sentMessages = messages
+
+  // Detect if messages are already in Gemini-native format (have .parts, not .content)
+  const isGeminiNativeFormat = provider === 'gemini' && messages.length > 0 && messages[0].parts !== undefined
+
+  if (config.chatPath?.includes('/chat/completions')) {
+    requestBody = buildOpenAIRequest(messages, config)
+  } else if (provider === 'anthropic') {
+    requestBody = buildAnthropicRequest(messages, config)
+    // For Anthropic, sentMessages excludes the system message (it's in request.system)
+    sentMessages = messages.filter(m => m.role !== 'system')
+  } else if (provider === 'gemini') {
+    if (isGeminiNativeFormat) {
+      // Already Gemini-native (e.g. from continueWithToolResults) — use as-is
+      requestBody = { contents: messages }
+      attachGeminiTools(requestBody, config)
     } else {
-      // OpenAI format (default)
-      const requestBody = {
-        prompt: prompt,
-        model: config.imageModel || 'dall-e-3',
-        size: config.imageSize || '1024x1024',
-        quality: config.imageQuality || 'standard',
-        response_format: 'b64_json'
-      }
-
-      return requestBody
+      requestBody = buildGeminiRequest(messages, config)
+      sentMessages = requestBody.contents
     }
+  } else {
+    requestBody = buildOpenAIRequest(messages, config)
   }
 
-  /**
-   * Cancel the current API request if one is in progress
-   */
-  const cancelRequest = () => {
-    if (currentAbortController) {
-      currentAbortController.abort()
-      currentAbortController = null
-    }
+  const headers = buildHeaders(provider, token, config.chatPath || '')
+
+  logger.log('[chatRequest] Making request to:', endpoint)
+  logger.log('[chatRequest] Request body:', JSON.stringify(requestBody, null, 2))
+
+  const response = await fetch(endpoint, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify(requestBody),
+    signal
+  })
+
+  logger.log('[chatRequest] Response status:', response.status, response.statusText)
+
+  if (!response.ok) {
+    await handleApiError(response)
   }
 
-  /**
-   * Check if error is retryable (network errors, 5xx errors, rate limits)
-   */
-  const isRetryableError = (response) => {
-    // Network errors (no response)
-    if (!response) return true
+  const data = await response.json()
+  const parsed = parseResponse(data, provider)
+  return { ...parsed, sentMessages }
+}
 
-    // Server errors (5xx)
-    if (response.status >= 500) return true
-
-    // Rate limit (429)
-    if (response.status === 429) return true
-
-    return false
-  }
-
-  /**
-   * Retry a function with exponential backoff
-   */
-  const withRetry = async (fn, retries = MAX_RETRIES) => {
-    let lastError
-
-    for (let attempt = 0; attempt <= retries; attempt++) {
-      try {
-        return await fn()
-      } catch (error) {
-        lastError = error
-
-        // Don't retry if abort was called
-        if (error.name === 'AbortError') {
-          // Preserve AbortError so it can be handled gracefully
-          throw error
-        }
-
-        // Don't retry on last attempt
-        if (attempt === retries) break
-
-        // Check if error is retryable
-        if (!isRetryableError(error.response)) break
-
-        // Wait with exponential backoff before retrying
-        const delay = RETRY_DELAY_MS * Math.pow(RETRY_BACKOFF_MULTIPLIER, attempt)
-        logger.warn(`Request failed, retrying in ${delay}ms... (attempt ${attempt + 1}/${retries})`)
-        await new Promise(resolve => setTimeout(resolve, delay))
-      }
-    }
-
-    throw lastError
-  }
-
-  /**
-   * Handle API errors consistently
-   */
-  const handleApiError = async (response) => {
-    const { t } = i18n.global
-    const errorData = await response.json().catch(() => ({ error: { message: t('api.errors.unknown') } }))
-    const message = errorData.error?.message || errorData.message || t('api.errors.apiError', { status: response.status, statusText: response.statusText })
-    const error = new Error(message)
-    error.response = response // Attach response for retry logic
-    throw error
-  }
-
-  /**
-   * Parse a response JSON into {toolCalls, text}.
-   * toolCalls is null when the LLM returned plain text.
-   */
-  const parseResponse = (data, provider) => {
-    logger.log('[Chat API Response]', JSON.stringify(data, null, 2))
-
-    if (provider === 'openai') {
-      const toolCalls = parseOpenAIToolCalls(data)
-      if (toolCalls) return { toolCalls, rawData: data, text: null }
-      return { toolCalls: null, rawData: data, text: data.choices?.[0]?.message?.content || '' }
-    } else if (provider === 'anthropic') {
-      const toolCalls = parseAnthropicToolCalls(data)
-      if (toolCalls) return { toolCalls, rawData: data, text: null }
-      return { toolCalls: null, rawData: data, text: data.content?.find(b => b.type === 'text')?.text || '' }
-    } else if (provider === 'gemini') {
-      const toolCalls = parseGeminiToolCalls(data)
-      if (toolCalls) return { toolCalls, rawData: data, text: null }
-      return { toolCalls: null, rawData: data, text: data.candidates?.[0]?.content?.parts?.[0]?.text || '' }
-    }
-
-    return { toolCalls: null, rawData: data, text: '' }
-  }
-
-  /**
-   * One raw HTTP call to the chat endpoint.
-   * Returns parsed {toolCalls, rawData, text, sentMessages}.
-   * sentMessages: the provider-native message array that was sent (used to continue tool loops).
-   */
-  const chatRequest = async (messages, config, signal) => {
-    const provider = config.provider || 'openai'
-
-    let chatPath = config.chatPath || '/chat/completions'
-    if (chatPath.includes('{model}')) {
-      chatPath = chatPath.replace('{model}', config.model)
-    }
-    const endpoint = `${config.endpoint}${chatPath}`
-    const token = (config.token || '').trim()
-
-    let requestBody
-    // sentMessages tracks the provider-format messages array actually sent
-    let sentMessages = messages
-
-    // Detect if messages are already in Gemini-native format (have .parts, not .content)
-    const isGeminiNativeFormat = provider === 'gemini' && messages.length > 0 && messages[0].parts !== undefined
-
-    if (config.chatPath?.includes('/chat/completions')) {
-      requestBody = buildOpenAIRequest(messages, config)
-    } else if (provider === 'anthropic') {
-      requestBody = buildAnthropicRequest(messages, config)
-      // For Anthropic, sentMessages excludes the system message (it's in request.system)
-      sentMessages = messages.filter(m => m.role !== 'system')
-    } else if (provider === 'gemini') {
-      if (isGeminiNativeFormat) {
-        // Already Gemini-native (e.g. from continueWithToolResults) — use as-is
-        requestBody = { contents: messages }
-        attachGeminiTools(requestBody, config)
-      } else {
-        requestBody = buildGeminiRequest(messages, config)
-        sentMessages = requestBody.contents
-      }
-    } else {
-      requestBody = buildOpenAIRequest(messages, config)
-    }
-
-    const headers = buildHeaders(provider, token, config.chatPath || '')
-
-    logger.log('[chatRequest] Making request to:', endpoint)
-    logger.log('[chatRequest] Request body:', JSON.stringify(requestBody, null, 2))
-
-    const response = await fetch(endpoint, {
-      method: 'POST',
-      headers,
-      body: JSON.stringify(requestBody),
-      signal
-    })
-
-    logger.log('[chatRequest] Response status:', response.status, response.statusText)
-
-    if (!response.ok) {
-      await handleApiError(response)
-    }
-
-    const data = await response.json()
-    const parsed = parseResponse(data, provider)
-    return { ...parsed, sentMessages }
-  }
-
+export function useApi() {
   /**
    * Send chat message to API.
    * Returns {text, toolCalls} — callers handle the tool execution loop.
@@ -514,15 +523,10 @@ export function useApi() {
     logger.log('[sendChatMessage] Called with', messages.length, 'messages')
     logger.log('[sendChatMessage] Config:', sanitizeConfig(config))
 
-    // Cancel any previous request
-    cancelRequest()
-
-    // Create new abort controller for this request
-    currentAbortController = new AbortController()
-    const signal = currentAbortController.signal
+    const signal = resetAbortController()
+    const provider = config.provider || 'openai'
 
     return await withRetry(async () => {
-      const provider = config.provider || 'openai'
       logger.log('[sendChatMessage] Using provider:', provider)
 
       // Add system prompt if configured
@@ -548,13 +552,10 @@ export function useApi() {
    * results: [{id, name, result}]
    */
   const continueWithToolResults = async (sentMessages, config, rawData, results) => {
-    cancelRequest()
-    currentAbortController = new AbortController()
-    const signal = currentAbortController.signal
+    const signal = resetAbortController()
+    const provider = config.provider || 'openai'
 
     return await withRetry(async () => {
-      const provider = config.provider || 'openai'
-
       let updatedMessages
       if (provider === 'anthropic') {
         updatedMessages = appendAnthropicToolResults(sentMessages, rawData, results)
@@ -573,12 +574,8 @@ export function useApi() {
    * Generate image from prompt
    */
   const generateImage = async (prompt, config) => {
-    // Cancel any previous request
-    cancelRequest()
-
-    // Create new abort controller for this request
-    currentAbortController = new AbortController()
-    const signal = currentAbortController.signal
+    const signal = resetAbortController()
+    const provider = config.provider || 'openai'
 
     return await withRetry(async () => {
       logger.log('[Image API Request]', { prompt, config: sanitizeConfig(config) })
@@ -589,9 +586,6 @@ export function useApi() {
         imagePath = imagePath.replace('{model}', config.imageModel || config.model)
       }
       const endpoint = `${config.endpoint}${imagePath}`
-
-      // Determine provider from imagePath or config
-      const provider = config.provider || 'openai'
 
       const requestBody = buildImageRequest(prompt, config, provider)
 
@@ -604,7 +598,7 @@ export function useApi() {
         method: 'POST',
         headers,
         body: JSON.stringify(requestBody),
-        signal // Add abort signal
+        signal
       })
 
       if (!response.ok) {

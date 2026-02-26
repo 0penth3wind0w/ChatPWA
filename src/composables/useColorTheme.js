@@ -4,6 +4,23 @@ import { useStorage } from './useStorage.js'
 
 const { config, saveConfig } = useStorage()
 
+const currentTheme = ref(config.value.colorTheme || 'green')
+
+// Flag set when currentTheme is updated from external config, so the currentTheme
+// watcher knows not to write it back to storage (it just came from there).
+let syncingFromConfig = false
+
+// Keep currentTheme in sync if colorTheme changes externally (e.g. storage reload).
+// Narrow source to avoid reacting to every unrelated config save.
+watch(() => config.value.colorTheme, (theme) => {
+  const resolved = theme || 'green'
+  if (resolved !== currentTheme.value) {
+    syncingFromConfig = true
+    currentTheme.value = resolved
+    // applyTheme is called by the currentTheme watcher below
+  }
+})
+
 // Color theme definitions (colors only)
 const COLOR_THEME_COLORS = {
   green: {
@@ -23,10 +40,6 @@ const COLOR_THEME_COLORS = {
   }
 }
 
-// Current theme
-const currentTheme = ref(config.value.colorTheme || 'green')
-
-// Apply theme colors to CSS variables
 const applyTheme = (theme) => {
   const colors = COLOR_THEME_COLORS[theme] || COLOR_THEME_COLORS.green
 
@@ -35,17 +48,21 @@ const applyTheme = (theme) => {
   document.documentElement.style.setProperty('--color-light-green', colors.light)
 }
 
-// Watch for theme changes and save to storage
-watch(currentTheme, (newTheme) => {
+// Watch for theme changes, apply CSS vars, and save to storage.
+// immediate: true replaces the manual applyTheme() call below, so theme
+// is applied once on module init and again on every subsequent change.
+watch(currentTheme, (newTheme, oldTheme) => {
   applyTheme(newTheme)
-  saveConfig({
-    ...config.value,
-    colorTheme: newTheme
-  })
-})
-
-// Initialize theme on module load
-applyTheme(currentTheme.value)
+  // Skip persisting on the very first (init) run, or when syncing from external config
+  // (the value already came from storage — no need to write it back)
+  if (oldTheme !== undefined && !syncingFromConfig) {
+    saveConfig({
+      ...config.value,
+      colorTheme: newTheme
+    })
+  }
+  syncingFromConfig = false
+}, { immediate: true })
 
 export function useColorTheme() {
   const { t } = useI18n()

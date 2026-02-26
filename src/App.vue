@@ -14,28 +14,20 @@ const SettingsView = defineAsyncComponent(() => import('./views/SettingsView.vue
 const currentView = ref('welcome')
 const { isConfigured } = useStorage()
 
-// Initialize dark mode and color theme
 useDarkMode()
 useColorTheme()
 
-// Handle viewport height for iOS Safari URL bar
 const setViewportHeight = () => {
   const vh = window.innerHeight * 0.01
   document.documentElement.style.setProperty('--vh', `${vh}px`)
 }
 
 onMounted(() => {
-  // Config is already loaded on module init
-  // If already configured, go directly to chat
-  // Commented out to show welcome page
   if (isConfigured()) {
     currentView.value = 'chat'
   }
 
-  // Set initial viewport height
   setViewportHeight()
-
-  // Update on resize and orientation change
   window.addEventListener('resize', setViewportHeight)
   window.addEventListener('orientationchange', setViewportHeight)
 })
@@ -47,8 +39,7 @@ onUnmounted(() => {
 
 const handleNavigate = (view) => {
   currentView.value = view
-
-  // Set focus to main content after navigation for accessibility
+  // Focus main content after navigation for accessibility
   nextTick(() => {
     const mainContent = document.getElementById('main-content')
     if (mainContent) {
@@ -73,7 +64,6 @@ const handleNavigate = (view) => {
       @navigate="handleNavigate"
     />
 
-    <!-- PWA Update Prompt -->
     <UpdatePrompt />
   </ErrorBoundary>
 </template>

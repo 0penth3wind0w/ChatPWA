@@ -1,13 +1,14 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, onUnmounted } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useRegisterSW } from 'virtual:pwa-register/vue'
 import SettingsForm from '../components/SettingsForm.vue'
+import { usePwa } from '../composables/usePwa.js'
 import { useApi } from '../composables/useApi.js'
 import { useChat } from '../composables/useChat.js'
 import { useDarkMode } from '../composables/useDarkMode.js'
 import { useColorTheme } from '../composables/useColorTheme.js'
 import { useLocale } from '../composables/useLocale.js'
+import { logger } from '../utils/logger.js'
 
 const emit = defineEmits(['navigate'])
 const { t } = useI18n()
@@ -24,8 +25,16 @@ const testMessage = ref('')
 const appVersion = __APP_VERSION__
 
 // PWA update handler
-const { needRefresh, updateServiceWorker } = useRegisterSW()
+const { needRefresh, updateServiceWorker } = usePwa()
 const updateStatus = ref(null) // null, 'updating', or 'success'
+
+let updateTimer = null
+let testTimer = null
+
+onUnmounted(() => {
+  clearTimeout(updateTimer)
+  clearTimeout(testTimer)
+})
 
 const handleUpdate = async () => {
   updateStatus.value = 'updating'
@@ -33,16 +42,17 @@ const handleUpdate = async () => {
     await updateServiceWorker(true)
     updateStatus.value = 'success'
     // Reload the page after successful update
-    setTimeout(() => {
+    updateTimer = setTimeout(() => {
       window.location.reload()
     }, 1000)
   } catch (err) {
     updateStatus.value = null
-    console.error('Failed to update:', err)
+    logger.error('Failed to update:', err)
   }
 }
 
 const handleTest = async (testConfig) => {
+  clearTimeout(testTimer)
   testStatus.value = null
   testMessage.value = t('settings.connectionTest.testing')
 
@@ -51,8 +61,7 @@ const handleTest = async (testConfig) => {
     testStatus.value = 'success'
     testMessage.value = t('settings.connectionTest.success')
 
-    // Clear success message after 3 seconds
-    setTimeout(() => {
+    testTimer = setTimeout(() => {
       testStatus.value = null
       testMessage.value = ''
     }, 3000)
@@ -60,8 +69,7 @@ const handleTest = async (testConfig) => {
     testStatus.value = 'error'
     testMessage.value = err.message || t('settings.connectionTest.failed')
 
-    // Clear error message after 5 seconds
-    setTimeout(() => {
+    testTimer = setTimeout(() => {
       testStatus.value = null
       testMessage.value = ''
     }, 5000)
@@ -81,6 +89,10 @@ const handleClearAllConversations = async () => {
       await deleteConversation(id)
     }
   }
+}
+
+const copyAppVersion = () => {
+  navigator.clipboard.writeText(appVersion)
 }
 
 const handleBack = () => {
@@ -361,7 +373,7 @@ const handleBack = () => {
               </p>
             </div>
             <button
-              @click="() => { navigator.clipboard.writeText(appVersion) }"
+              @click="copyAppVersion"
               class="h-10 px-5 bg-bg-elevated text-text-secondary text-sm font-semibold rounded-md hover:bg-border-subtle transition-colors border border-border-subtle"
               :aria-label="t('settings.version.copy')"
             >

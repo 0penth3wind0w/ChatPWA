@@ -5,6 +5,13 @@ const STORAGE_KEYS = {
   API_CONFIG: 'chatpwa_api_config'
 }
 
+// Default paths per provider — exported so SettingsForm can reuse them
+export const DEFAULT_PATHS = {
+  openai: { chatPath: '/chat/completions', imagePath: '/images/generations' },
+  anthropic: { chatPath: '/messages', imagePath: '/images/generations' },
+  gemini: { chatPath: '/models/{model}:generateContent', imagePath: '/models/{model}:generateContent' }
+}
+
 // Default configuration template
 const DEFAULT_CONFIG = {
   endpoint: '',
@@ -48,7 +55,6 @@ const initConfig = () => {
   }
 }
 
-// Initialize config immediately when module loads
 initConfig()
 
 export function useStorage() {

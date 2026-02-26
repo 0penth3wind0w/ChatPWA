@@ -43,4 +43,4 @@ marked.use({
   }
 })
 
-export { marked, hljs }
+export { marked }

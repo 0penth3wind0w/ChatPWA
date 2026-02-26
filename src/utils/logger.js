@@ -26,27 +26,16 @@ export const sanitizeConfig = (config) => {
   return sanitized
 }
 
+const noop = () => {}
+
 /**
  * Development-only logger
  * All methods are no-op in production
  */
-export const logger = {
-  log: (...args) => {
-    if (isDevelopment) {
-      console.log(...args)
+export const logger = isDevelopment
+  ? {
+      log: console.log.bind(console),
+      warn: console.warn.bind(console),
+      error: console.error.bind(console)
     }
-  },
-
-  warn: (...args) => {
-    if (isDevelopment) {
-      console.warn(...args)
-    }
-  },
-
-  error: (...args) => {
-    if (isDevelopment) {
-      console.error(...args)
-    }
-  },
-
-}
+  : { log: noop, warn: noop, error: console.error.bind(console) }

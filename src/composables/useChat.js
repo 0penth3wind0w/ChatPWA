@@ -2,7 +2,6 @@ import { shallowRef, computed, nextTick } from 'vue'
 import Dexie from 'dexie'
 import { logger } from '../utils/logger.js'
 
-// Initialize Dexie database
 const db = new Dexie('ChatPWA')
 db.version(1).stores({
   messages: 'id, timestamp, role, content, model'
@@ -43,6 +42,8 @@ let pendingDbOperations = Promise.resolve()
 const queueDb = (fn) => {
   pendingDbOperations = pendingDbOperations.then(fn).catch(err => {
     logger.error('DB operation failed:', err)
+  }).finally(() => {
+    pendingDbOperations = Promise.resolve()
   })
   return pendingDbOperations
 }
@@ -92,10 +93,8 @@ const initConversations = async () => {
   }
 }
 
-// Initialize immediately
 initConversations()
 
-// Helper to save a single message to IndexedDB or localStorage
 const saveMessageToDb = (message) => {
   const plainMessage = {
     id: message.id,
@@ -147,6 +146,21 @@ const touchConversation = (convId) => {
     conversations.value = updated
   }, 1000)
   touchTimers.set(convId, timer)
+}
+
+/**
+ * Scroll a container to its bottom (used by ChatView)
+ */
+const scrollToBottom = async (containerRef) => {
+  await nextTick()
+  requestAnimationFrame(() => {
+    if (containerRef && containerRef.value) {
+      containerRef.value.scrollTo({
+        top: containerRef.value.scrollHeight,
+        behavior: 'smooth'
+      })
+    }
+  })
 }
 
 export function useChat() {
@@ -262,7 +276,7 @@ export function useChat() {
     }
 
     const message = {
-      id: Date.now().toString() + Math.random().toString(36).substring(2, 11),
+      id: crypto.randomUUID(),
       role,
       content,
       timestamp: Date.now(),
@@ -275,19 +289,9 @@ export function useChat() {
     return message
   }
 
-  /**
-   * Add user message
-   */
-  const addUserMessage = (content) => {
-    return addMessage('user', content, null)
-  }
+  const addUserMessage = (content) => addMessage('user', content)
 
-  /**
-   * Add assistant message
-   */
-  const addAssistantMessage = (content, model = null) => {
-    return addMessage('assistant', content, model)
-  }
+  const addAssistantMessage = (content, model = null) => addMessage('assistant', content, model)
 
   /**
    * Remove the last message (for cancellation scenarios)
@@ -354,21 +358,6 @@ export function useChat() {
     })
 
     return pendingDbOperations
-  }
-
-  /**
-   * Scroll to bottom of messages
-   */
-  const scrollToBottom = async (containerRef) => {
-    await nextTick()
-    requestAnimationFrame(() => {
-      if (containerRef && containerRef.value) {
-        containerRef.value.scrollTo({
-          top: containerRef.value.scrollHeight,
-          behavior: 'smooth'
-        })
-      }
-    })
   }
 
   return {

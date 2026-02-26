@@ -5,7 +5,6 @@ const STORAGE_KEY = 'chatpwa_theme'
 // Shared dark mode state (singleton)
 const isDark = ref(false)
 
-// Apply theme class to document
 const applyTheme = () => {
   if (isDark.value) {
     document.documentElement.classList.add('dark')
@@ -26,11 +25,9 @@ const initTheme = () => {
     isDark.value = window.matchMedia('(prefers-color-scheme: dark)').matches
   }
 
-  // Apply theme to document
   applyTheme()
 }
 
-// Auto-save theme preference and apply
 watch(isDark, (newValue) => {
   localStorage.setItem(STORAGE_KEY, newValue ? 'dark' : 'light')
   applyTheme()
@@ -45,13 +42,9 @@ mediaQuery.addEventListener('change', (e) => {
   }
 })
 
-// Initialize theme immediately when module loads
 initTheme()
 
 export function useDarkMode() {
-  /**
-   * Toggle dark mode
-   */
   const toggleDarkMode = () => {
     isDark.value = !isDark.value
   }

@@ -1,53 +1,9 @@
 <script setup>
-import { onUnmounted } from 'vue'
-import { useRegisterSW } from 'virtual:pwa-register/vue'
 import { useI18n } from 'vue-i18n'
+import { usePwa } from '../composables/usePwa.js'
 
 const { t } = useI18n()
-
-let visibilityHandler = null
-
-const { needRefresh, updateServiceWorker } = useRegisterSW({
-  onRegisteredSW(swUrl, r) {
-    // Check for updates only on app launch/focus
-    if (r) {
-      const checkForUpdate = async () => {
-        if (!(!r.installing && navigator)) return
-        if ('connection' in navigator && !navigator.onLine) return
-
-        const resp = await fetch(swUrl, {
-          cache: 'no-store',
-          headers: {
-            'cache': 'no-store',
-            'cache-control': 'no-cache',
-          }
-        })
-
-        if (resp?.status === 200) {
-          await r.update()
-        }
-      }
-
-      // Check immediately on registration (app launch)
-      checkForUpdate()
-
-      // Check when app becomes visible again (user returns to PWA)
-      visibilityHandler = () => {
-        if (!document.hidden) {
-          checkForUpdate()
-        }
-      }
-      document.addEventListener('visibilitychange', visibilityHandler)
-    }
-  }
-})
-
-// Cleanup event listener to prevent memory leak
-onUnmounted(() => {
-  if (visibilityHandler) {
-    document.removeEventListener('visibilitychange', visibilityHandler)
-  }
-})
+const { needRefresh, updateServiceWorker } = usePwa()
 
 const close = () => {
   needRefresh.value = false
