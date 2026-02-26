@@ -2,6 +2,18 @@
   "common": {
     "settings": "Settings"
   },
+  "sidebar": {
+    "title": "Chats",
+    "conversations": "Conversations",
+    "newChat": "New Chat",
+    "untitled": "New Chat",
+    "deleteConversation": "Delete conversation: {title}",
+    "deleteConfirm": "Delete this conversation? This cannot be undone.",
+    "timeJustNow": "Just now",
+    "timeMinutesAgo": "{n}m ago",
+    "timeHoursAgo": "{n}h ago",
+    "timeDaysAgo": "{n}d ago"
+  },
   "welcome": {
     "title": "ChatPWA",
     "description": "Connect to any AI provider and chat with powerful language models. Configure your own API endpoints for complete control and privacy.",
@@ -78,10 +90,10 @@
   },
   "settings": {
     "clearHistory": {
-      "title": "Clear Chat History",
-      "description": "Remove all conversation messages",
+      "title": "Clear Current Chat",
+      "description": "Remove all messages in the current conversation",
       "button": "Clear",
-      "confirm": "Are you sure you want to clear all chat history? This cannot be undone."
+      "confirm": "Are you sure you want to clear the current conversation? This cannot be undone."
     },
     "aiSettings": {
       "title": "AI Settings"

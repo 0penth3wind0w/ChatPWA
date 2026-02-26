@@ -2,6 +2,18 @@
   "common": {
     "settings": "Paramètres"
   },
+  "sidebar": {
+    "title": "Discussions",
+    "conversations": "Conversations",
+    "newChat": "Nouvelle discussion",
+    "untitled": "Nouvelle discussion",
+    "deleteConversation": "Supprimer la conversation : {title}",
+    "deleteConfirm": "Supprimer cette conversation ? Cette action est irréversible.",
+    "timeJustNow": "À l'instant",
+    "timeMinutesAgo": "Il y a {n} min",
+    "timeHoursAgo": "Il y a {n} h",
+    "timeDaysAgo": "Il y a {n} j"
+  },
   "welcome": {
     "title": "ChatPWA",
     "description": "Connectez-vous à n'importe quel fournisseur d'IA et discutez avec de puissants modèles de langage. Configurez vos propres points de terminaison API pour un contrôle et une confidentialité complets.",
@@ -78,10 +90,10 @@
   },
   "settings": {
     "clearHistory": {
-      "title": "Effacer l'historique des conversations",
-      "description": "Supprimer tous les messages de conversation",
+      "title": "Effacer la conversation actuelle",
+      "description": "Supprimer tous les messages de la conversation actuelle",
       "button": "Effacer",
-      "confirm": "Êtes-vous sûr de vouloir effacer tout l'historique des conversations ? Cette action est irréversible."
+      "confirm": "Êtes-vous sûr de vouloir effacer la conversation actuelle ? Cette action est irréversible."
     },
     "aiSettings": {
       "title": "Paramètres IA"

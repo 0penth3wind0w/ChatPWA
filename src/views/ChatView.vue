@@ -5,6 +5,7 @@ import ChatMessage from '../components/ChatMessage.vue'
 import MessageInput from '../components/MessageInput.vue'
 import EmptyState from '../components/EmptyState.vue'
 import TypingIndicator from '../components/TypingIndicator.vue'
+import ConversationSidebar from '../components/ConversationSidebar.vue'
 import { useChat } from '../composables/useChat.js'
 import { useStorage } from '../composables/useStorage.js'
 import { useApi } from '../composables/useApi.js'
@@ -17,7 +18,9 @@ const { t } = useI18n()
 // Compiled once at setup scope, not per-call
 const URL_REGEX = /(https?:\/\/[^\s]+)/gi
 
-const { messages, hasMessages, addUserMessage, addAssistantMessage, removeLastMessage, scrollToBottom } = useChat()
+const { messages, hasMessages, currentConversationId, addUserMessage, addAssistantMessage, removeLastMessage, scrollToBottom, setConversationTitle } = useChat()
+
+const isSidebarOpen = ref(false)
 const { config } = useStorage()
 const { sendChatMessage, generateImage, cancelRequest } = useApi()
 const { searchWeb, fetchWebContent } = useWebTools()
@@ -74,6 +77,12 @@ const handleSendMessage = async (content) => {
 
   // Add user message
   addUserMessage(content)
+
+  // Auto-title the conversation from the first user message
+  const isFirstMessage = messages.value.filter(m => m.role === 'user').length === 1
+  if (isFirstMessage) {
+    setConversationTitle(currentConversationId.value, content.trim().slice(0, 40))
+  }
 
   // Scroll to bottom after user message
   scrollToBottom(messagesContainer)
@@ -266,14 +275,28 @@ watch([messageCount, isTyping], () => {
 
 <template>
   <div class="w-full flex flex-col bg-bg-primary" style="height: calc(var(--vh, 1vh) * 100)">
+    <!-- Conversation Sidebar -->
+    <ConversationSidebar :isOpen="isSidebarOpen" @close="isSidebarOpen = false" />
+
     <!-- Fixed Header -->
     <header role="banner" class="flex-shrink-0 px-6 pt-6 pb-4">
       <div class="flex items-center justify-between w-full">
-        <div class="flex flex-col gap-1">
-          <h1 class="text-2xl font-semibold text-text-primary -tracking-tight">
-            {{ t('chat.title') }}
-          </h1>
-        </div>
+        <!-- Hamburger button -->
+        <button
+          @click="isSidebarOpen = true"
+          aria-label="Open conversations"
+          class="w-11 h-11 bg-bg-surface rounded-full shadow-elevated flex items-center justify-center hover:bg-bg-elevated transition-colors"
+        >
+          <svg class="w-5 h-5 text-text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+          </svg>
+        </button>
+
+        <h1 class="text-2xl font-semibold text-text-primary -tracking-tight">
+          {{ t('chat.title') }}
+        </h1>
+
+        <!-- Settings button -->
         <button
           @click="handleSettings"
           aria-label="Open settings"

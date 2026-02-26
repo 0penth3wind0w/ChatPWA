@@ -2,6 +2,18 @@
   "common": {
     "settings": "設定"
   },
+  "sidebar": {
+    "title": "對話",
+    "conversations": "對話列表",
+    "newChat": "新對話",
+    "untitled": "新對話",
+    "deleteConversation": "刪除對話：{title}",
+    "deleteConfirm": "確定要刪除此對話嗎？此操作無法復原。",
+    "timeJustNow": "剛剛",
+    "timeMinutesAgo": "{n} 分鐘前",
+    "timeHoursAgo": "{n} 小時前",
+    "timeDaysAgo": "{n} 天前"
+  },
   "welcome": {
     "title": "ChatPWA",
     "description": "連接任何AI供應商，與強大的語言模型對話。配置自己的API端點，完全掌控和保護隱私。",
@@ -78,10 +90,10 @@
   },
   "settings": {
     "clearHistory": {
-      "title": "清除聊天記錄",
-      "description": "移除所有對話訊息",
+      "title": "清除目前對話",
+      "description": "移除目前對話中的所有訊息",
       "button": "清除",
-      "confirm": "確定要清除所有聊天記錄嗎？此操作無法復原。"
+      "confirm": "確定要清除目前對話嗎？此操作無法復原。"
     },
     "aiSettings": {
       "title": "AI 設定"

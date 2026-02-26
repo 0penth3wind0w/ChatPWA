@@ -2,6 +2,18 @@
   "common": {
     "settings": "設定"
   },
+  "sidebar": {
+    "title": "チャット",
+    "conversations": "会話一覧",
+    "newChat": "新しいチャット",
+    "untitled": "新しいチャット",
+    "deleteConversation": "会話を削除：{title}",
+    "deleteConfirm": "この会話を削除しますか？この操作は元に戻せません。",
+    "timeJustNow": "たった今",
+    "timeMinutesAgo": "{n}分前",
+    "timeHoursAgo": "{n}時間前",
+    "timeDaysAgo": "{n}日前"
+  },
   "welcome": {
     "title": "ChatPWA",
     "description": "任意のAIプロバイダーに接続し、強力な言語モデルとチャットできます。独自のAPIエンドポイントを設定して、完全な制御とプライバシーを実現します。",
@@ -78,10 +90,10 @@
   },
   "settings": {
     "clearHistory": {
-      "title": "チャット履歴をクリア",
-      "description": "すべての会話メッセージを削除",
+      "title": "現在のチャットをクリア",
+      "description": "現在の会話のすべてのメッセージを削除",
       "button": "クリア",
-      "confirm": "本当にすべてのチャット履歴をクリアしますか？この操作は元に戻せません。"
+      "confirm": "本当に現在の会話をクリアしますか？この操作は元に戻せません。"
     },
     "aiSettings": {
       "title": "AI設定"
