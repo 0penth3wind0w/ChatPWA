@@ -89,11 +89,20 @@
     }
   },
   "settings": {
+    "dataManagement": {
+      "title": "Data Management"
+    },
     "clearHistory": {
       "title": "Clear Current Chat",
       "description": "Remove all messages in the current conversation",
       "button": "Clear",
       "confirm": "Are you sure you want to clear the current conversation? This cannot be undone."
+    },
+    "clearAllConversations": {
+      "title": "Clear All Conversations",
+      "description": "Permanently delete all conversations and messages",
+      "button": "Clear All",
+      "confirm": "Are you sure you want to delete ALL conversations? This cannot be undone."
     },
     "aiSettings": {
       "title": "AI Settings"

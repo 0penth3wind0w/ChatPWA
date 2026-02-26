@@ -16,7 +16,7 @@ const { currentTheme, setTheme, themes } = useColorTheme()
 const { currentLocale, localeOptions } = useLocale()
 
 const { testConnection } = useApi()
-const { clearMessages } = useChat()
+const { clearMessages, conversations, deleteConversation } = useChat()
 const testStatus = ref(null) // null, 'success', or 'error'
 const testMessage = ref('')
 
@@ -74,6 +74,15 @@ const handleClearHistory = async () => {
   }
 }
 
+const handleClearAllConversations = async () => {
+  if (confirm(t('settings.clearAllConversations.confirm'))) {
+    const ids = conversations.value.map(c => c.id)
+    for (const id of ids) {
+      await deleteConversation(id)
+    }
+  }
+}
+
 const handleBack = () => {
   emit('navigate', 'chat')
 }
@@ -103,8 +112,21 @@ const handleBack = () => {
     <!-- Scrollable Content -->
     <main id="main-content" role="main" tabindex="-1" class="flex-1 overflow-y-auto px-6 min-h-0 focus:outline-none" aria-label="Settings configuration">
       <div class="flex flex-col gap-6 pb-24 pt-2">
-        <!-- Clear Chat History Card -->
+        <!-- Data Management Card -->
         <div class="card">
+          <!-- Section header with warning icon -->
+          <div class="flex items-center gap-2.5 mb-6">
+            <svg class="w-5 h-5 text-warm-red shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+              <line x1="12" y1="9" x2="12" y2="13" stroke-linecap="round" stroke-width="2"/>
+              <circle cx="12" cy="16.5" r="1" fill="currentColor" stroke="none"/>
+            </svg>
+            <h2 class="text-lg font-semibold text-text-primary -tracking-tight">
+              {{ t('settings.dataManagement.title') }}
+            </h2>
+          </div>
+
+          <!-- Clear Current Chat -->
           <div class="flex items-center justify-between w-full gap-4">
             <div class="flex flex-col gap-1.5">
               <p class="text-base font-semibold text-text-primary">
@@ -116,9 +138,28 @@ const handleBack = () => {
             </div>
             <button
               @click="handleClearHistory"
-              class="h-10 px-5 bg-bg-elevated text-text-secondary text-sm font-semibold rounded-lg hover:bg-border-subtle transition-colors border border-border-subtle"
+              class="h-10 px-5 bg-bg-elevated text-text-secondary text-sm font-semibold rounded-md hover:bg-border-subtle transition-colors border border-border-subtle shrink-0"
             >
               {{ t('settings.clearHistory.button') }}
+            </button>
+          </div>
+
+          <!-- Clear All Conversations -->
+          <div class="w-full h-px bg-border-subtle my-6"></div>
+          <div class="flex items-center justify-between w-full gap-4">
+            <div class="flex flex-col gap-1.5">
+              <p class="text-base font-semibold text-text-primary">
+                {{ t('settings.clearAllConversations.title') }}
+              </p>
+              <p class="text-sm text-text-tertiary leading-relaxed">
+                {{ t('settings.clearAllConversations.description') }}
+              </p>
+            </div>
+            <button
+              @click="handleClearAllConversations"
+              class="h-10 px-5 bg-bg-elevated text-warm-red text-sm font-semibold rounded-md hover:bg-border-subtle transition-colors border border-border-subtle shrink-0"
+            >
+              {{ t('settings.clearAllConversations.button') }}
             </button>
           </div>
         </div>
@@ -264,7 +305,7 @@ const handleBack = () => {
               :class="{ 'bg-forest-green border-forest-green': isDark }"
             >
               <span
-                class="absolute w-6 h-6 bg-white rounded-full top-1 transition-all shadow-sm"
+                class="absolute w-6 h-6 bg-white rounded-full top-0 bottom-0 my-auto transition-all shadow-sm"
                 :class="isDark ? 'left-7' : 'left-1'"
               >
                 <!-- Sun icon (light mode) -->
@@ -321,7 +362,7 @@ const handleBack = () => {
             </div>
             <button
               @click="() => { navigator.clipboard.writeText(appVersion) }"
-              class="h-10 px-5 bg-bg-elevated text-text-secondary text-sm font-semibold rounded-lg hover:bg-border-subtle transition-colors border border-border-subtle"
+              class="h-10 px-5 bg-bg-elevated text-text-secondary text-sm font-semibold rounded-md hover:bg-border-subtle transition-colors border border-border-subtle"
               :aria-label="t('settings.version.copy')"
             >
               {{ t('settings.version.copy') }}
@@ -343,7 +384,7 @@ const handleBack = () => {
               href="https://github.com/0penth3wind0w/ChatPWA"
               target="_blank"
               rel="noopener noreferrer"
-              class="h-10 px-5 bg-forest-green text-white text-sm font-semibold rounded-lg hover:bg-dark-green transition-colors flex items-center gap-2"
+              class="h-10 px-5 bg-forest-green text-white text-sm font-semibold rounded-md hover:bg-dark-green transition-colors flex items-center gap-2"
             >
               <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                 <path fill-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clip-rule="evenodd"/>

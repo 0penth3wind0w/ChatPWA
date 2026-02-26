@@ -89,11 +89,20 @@
     }
   },
   "settings": {
+    "dataManagement": {
+      "title": "Gestion des données"
+    },
     "clearHistory": {
       "title": "Effacer la conversation actuelle",
       "description": "Supprimer tous les messages de la conversation actuelle",
       "button": "Effacer",
       "confirm": "Êtes-vous sûr de vouloir effacer la conversation actuelle ? Cette action est irréversible."
+    },
+    "clearAllConversations": {
+      "title": "Effacer toutes les conversations",
+      "description": "Supprimer définitivement toutes les conversations et messages",
+      "button": "Tout effacer",
+      "confirm": "Êtes-vous sûr de vouloir supprimer TOUTES les conversations ? Cette action est irréversible."
     },
     "aiSettings": {
       "title": "Paramètres IA"

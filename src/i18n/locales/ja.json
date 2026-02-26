@@ -89,11 +89,20 @@
     }
   },
   "settings": {
+    "dataManagement": {
+      "title": "データ管理"
+    },
     "clearHistory": {
       "title": "現在のチャットをクリア",
       "description": "現在の会話のすべてのメッセージを削除",
       "button": "クリア",
       "confirm": "本当に現在の会話をクリアしますか？この操作は元に戻せません。"
+    },
+    "clearAllConversations": {
+      "title": "すべての会話をクリア",
+      "description": "すべての会話とメッセージを完全に削除",
+      "button": "すべてクリア",
+      "confirm": "本当にすべての会話を削除しますか？この操作は元に戻せません。"
     },
     "aiSettings": {
       "title": "AI設定"
